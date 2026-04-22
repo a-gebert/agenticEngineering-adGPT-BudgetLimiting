@@ -6,10 +6,12 @@ credentials.json
 # Claude Code session logs (large)
 *.jsonl
 
-# Plugin caches, data, and downloaded marketplaces
-plugins/cache/
-plugins/data/
-plugins/marketplaces/
+# Plugin runtime state (absolute paths, auto-generated)
+**/plugins/cache/
+**/plugins/data/
+**/plugins/marketplaces/
+**/plugins/installed_plugins.json
+**/plugins/known_marketplaces.json
 
 # Session and runtime data
 .claude.json

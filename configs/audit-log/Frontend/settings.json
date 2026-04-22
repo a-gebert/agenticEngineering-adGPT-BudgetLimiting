@@ -40,7 +40,7 @@
       "Bash(sed 's/.*namespace //')"
     ]
   },
-  "model": "sonnet[1m]",
+  "model": "sonnet-4-5-20250929[1m]",
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "nx-mcp"

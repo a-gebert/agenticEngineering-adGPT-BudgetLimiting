@@ -1,0 +1,1 @@
+../../_shared/Frontend/CLAUDE.md
