@@ -2,6 +2,22 @@
 
 EXPECTED_WORKTREE_BRANCH="feature/PBI3271_Budget_Limits"
 
+# Hook-Input (JSON) von stdin lesen und file_path extrahieren
+tool_input=$(cat)
+file_path=$(echo "$tool_input" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('file_path',''))" 2>/dev/null)
+
+# Schreiboperationen ins Engineering-Repo selbst sind immer erlaubt
+if [[ -n "$AGPT_ENGINEERING_DIR" && "$file_path" == "$AGPT_ENGINEERING_DIR"* ]]; then
+  exit 0
+fi
+
+# Kein file_path im Input (z.B. MultiEdit) → git-Kontext des CWD prüfen
+# Falls CWD im Engineering-Repo liegt, ebenfalls erlauben
+cwd_toplevel="$(git rev-parse --show-toplevel 2>/dev/null)"
+if [[ -n "$AGPT_ENGINEERING_DIR" && "$cwd_toplevel" == "$AGPT_ENGINEERING_DIR"* ]]; then
+  exit 0
+fi
+
 git_common_dir="$(git rev-parse --git-common-dir 2>/dev/null)"
 current_toplevel="$(git rev-parse --show-toplevel 2>/dev/null)"
 
