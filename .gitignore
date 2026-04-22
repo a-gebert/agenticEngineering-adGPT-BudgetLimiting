@@ -1,0 +1,39 @@
+# Credentials - NEVER commit
+.credentials.json
+credentials.json
+.env.hub
+
+# Claude Code session logs (large)
+*.jsonl
+
+# Plugin caches, data, and downloaded marketplaces
+plugins/cache/
+plugins/data/
+plugins/marketplaces/
+
+# Session and runtime data
+.claude.json
+tool-results/
+subagents/
+file-history/
+session-env/
+sessions/
+shell-snapshots/
+paste-cache/
+backups/
+telemetry/
+tasks/
+
+# Cache files
+cache/
+mcp-needs-auth-cache.json
+
+# Zone.Identifier files (Windows/WSL artifacts)
+*:Zone.Identifier
+
+# Runtime-generated symlinks (created by claude.sh ensure_symlink)
+configs/*/Backend/CLAUDE.md
+configs/*/Backend/policy-limits.json
+configs/*/Backend/skills
+configs/*/Frontend/policy-limits.json
+configs/*/Frontend/skills

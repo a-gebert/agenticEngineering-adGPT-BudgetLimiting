@@ -1,0 +1,8 @@
+- [Claude config location](feedback_config_location.md) — All Claude customizations (hooks, skills, settings) go in agenticEngineering repo, never ~/.claude
+- [English language and clean code style](feedback_language_and_style.md) — Write everything in English, only comment design decisions
+- [Audit Log Implementation](project_audit_log_implementation.md) — Full architecture, data flows, abstraction layers, immutability analysis, and file inventory for the Configuration Audit Log system (PBI3270)
+- [Audit Log Refactoring Discussion](project_audit_log_refactoring_discussion.md) — Agreed rough concept: Option B (Handler-driven Audit Context) for Chat Session Audit, compliance reqs AC-1/AC-2/AC-3, reuse analysis, 3 architectural problems, conceptual ChatSessionAuditEntry shape
+- [Chat Audit Redesign](project_chat_audit_redesign.md) — Two core problems: Interceptor-Sideband is over-engineered (fake atomicity), audit data in shared system container needs isolation
+- [Chat Audit Architecture Doc](reference_chat_audit_architecture_doc.md) — Authoritative architecture overview (mermaid diagrams, data flows, container layout, entity model) in configs/Backend/docs/
+- [ChatAuditData string field naming](feedback_audit_data_naming.md) — String ID fields in ChatAuditData use concept name only, no 'Value' suffix (AgentId not AgentIdValue)
+- [Budget Limiting Implementation](project_budget_limiting.md) — PBI3271 Tier-based budget/usage limits, concept v2 decisions, codebase integration points, etappen plan
