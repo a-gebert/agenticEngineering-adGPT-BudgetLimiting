@@ -40,7 +40,7 @@
       "Bash(sed 's/.*namespace //')"
     ]
   },
-  "model": "sonnet[1m]",
+  "model": "opus[1m]",
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "nx-mcp"
@@ -85,5 +85,7 @@
         "repo": "nrwl/nx-ai-agents-config"
       }
     }
-  }
+  },
+  "effortLevel": "medium",
+  "theme": "light"
 }

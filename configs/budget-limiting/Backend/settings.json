@@ -50,5 +50,7 @@
         "repo": "anthropics/claude-plugins-official"
       }
     }
-  }
+  },
+  "theme": "light",
+  "effortLevel": "medium"
 }

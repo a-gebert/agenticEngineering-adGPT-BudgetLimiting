@@ -8,3 +8,5 @@
 - [Chat Session Audit — Backend Architecture](project_chat_session_audit_backend.md) — MediatR command, entity shape, system container, error resilience, read API not yet implemented
 - [Skills and Hooks](reference_skills_and_hooks.md) — create-ui-component skill, kaseder-review skill, architecture-check hook (PostToolUse)
 - [Async Action Patterns](project_async_action_patterns.md) — withLoading vs. action flags, cd-button built-in spinner via async clickCallback, Blob download pattern
+- [Frontend Implementation Rules](reference_frontend_rules.md) — 9 rule files in .claude/rules/ covering architecture, signals, styling, library APIs, rule-sync
+- [Admin Budget Dashboard](project_admin_budget_dashboard.md) — CC Budget Dashboard brainstorming paused after context exploration, needs visual companion + design questions
