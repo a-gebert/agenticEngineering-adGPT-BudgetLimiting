@@ -1,0 +1,56 @@
+{
+  "model": "opus[1m]",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $AGPT_ENGINEERING_DIR/configs/voestalpine/Backend/hooks/worktree_guard.sh",
+            "timeout": 5,
+            "statusMessage": "Checking worktree..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $AGPT_ENGINEERING_DIR/configs/_shared/Backend/hooks/architecture_hook.py",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "python3 $AGPT_ENGINEERING_DIR/configs/_shared/Backend/hooks/csharpier-check/csharpier_check_hook.py",
+            "timeout": 30,
+            "statusMessage": "Checking CSharpier formatting..."
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "csharp-lsp@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
+  "theme": "light",
+  "effortLevel": "medium"
+}
