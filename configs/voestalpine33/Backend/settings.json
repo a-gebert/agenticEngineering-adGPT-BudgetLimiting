@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $AGPT_ENGINEERING_DIR/configs/voestalpine/Backend/hooks/worktree_guard.sh",
+            "command": "bash $AGPT_ENGINEERING_DIR/configs/voestalpine33/Backend/hooks/worktree_guard.sh",
             "timeout": 5,
             "statusMessage": "Checking worktree..."
           }

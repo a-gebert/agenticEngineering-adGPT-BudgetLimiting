@@ -1,0 +1,91 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "mcp__context7__get-library-docs",
+      "Bash(npm run lint:*)",
+      "Bash(npm run prettier:*)",
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "mcp__angular-cli__find_examples",
+      "mcp__angular-cli__search_documentation",
+      "mcp__angular-cli__get_best_practices",
+      "mcp__angular-cli__list_projects",
+      "Bash(npm view:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:angular.dev)",
+      "WebFetch(domain:material.angular.dev)",
+      "WebFetch(domain:angular-material.dev)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_hover",
+      "mcp__playwright__browser_run_code",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_handle_dialog",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(xargs grep:*)",
+      "Bash(xargs cat:*)",
+      "Bash(npx nx:*)",
+      "Bash(dotnet build:*)",
+      "Bash(sed 's/.*namespace //')"
+    ]
+  },
+  "model": "opus[1m]",
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "nx-mcp"
+  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $AGPT_ENGINEERING_DIR/configs/_shared/Frontend/hooks/architecture_check.py",
+            "timeout": 10,
+            "statusMessage": "Checking Angular architecture..."
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "nx@nx-claude-plugins": true,
+    "csharp-lsp@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "nx-claude-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "nrwl/nx-ai-agents-config"
+      }
+    }
+  },
+  "effortLevel": "medium",
+  "theme": "light"
+}
