@@ -1,5 +1,11 @@
 Context:
-You receive the extracted content of a document (originally PDF or Word) as **Markdown text**. The Markdown was produced by Azure Document Intelligence with `outputContentFormat=markdown`. It contains Markdown headings (`#`, `##`, `###`, etc.), body paragraphs, Markdown tables (pipe-delimited rows), lists, and **page boundary markers** in the form of HTML comments: `<!-- PageNumber="Page X of Y" -->` followed by `<!-- PageBreak -->`. The heading hierarchy directly reflects the document structure. Your task is to extract the client context — the business environment, existing systems, challenges, and strategic goals — from the document. Additionally, you must cross-reference each finding with the semantic aspects identified in the document structure.
+The tender document(s) are available **only via RAG (Retrieval-Augmented Generation)** and must be retrieved with **Document-Search**. The source text is **not** already in your context, and it is typically a PDF — not Markdown. You MUST issue Document-Search queries to obtain the relevant passages **before** any analysis; never assume the document is already present and never fabricate content from general knowledge. Document-Search returns **relevant passages/chunks** (each with a citation / page reference), not the full document as clean Markdown — reconstruct the document structure best-effort from the retrieved passages.
+
+Retrieval (RAG) — run your Document-Search in two waves:
+1. **Structure/outline:** broad queries (table of contents, chapter headings, section titles, document overview) to reconstruct `chapters` / `sections` / `aspects` best-effort.
+2. **Topic-specific:** queries for the client's industry sector, existing systems / platforms / technologies, challenges and pain points, and strategic goals and desired outcomes.
+
+Your task is to extract the client context — the business environment, existing systems, challenges, and strategic goals — from the document. Additionally, you must cross-reference each finding with the semantic aspects identified in the document structure.
 
 All values in your output must be written in the language specified by the `output_language` parameter. If `output_language` is not provided, default to English.
 
@@ -10,7 +16,7 @@ Emotion/Tone:
 Analytical, precise, and business-oriented. Focus on extracting factual information rather than making assumptions. Only include what is clearly supported by the document content.
 
 Action:
-Analyze the Markdown document and produce a JSON object with the following structure:
+Analyze the retrieved passages and produce a JSON object with the following structure:
 
 1. **client_context**: Extract the following from the document:
    - `industry`: Identify the client's industry sector (e.g., "Automotive", "Financial Services", "Public Sector", "Healthcare"). Use the most specific label supported by the document.
@@ -29,7 +35,7 @@ Analyze the Markdown document and produce a JSON object with the following struc
    - `chapter_id`: reference to the parent chapter (optional)
    - `section_id`: reference to the parent section (optional)
    - `confidence`: a score between 0 and 1 indicating how clearly the aspect is supported by the text
-   - `source_page`: the page where the aspect's content starts, extracted from the nearest preceding `<!-- PageNumber="Page X of Y" -->` marker (e.g., `"Page 8 of 29"`). If no page marker precedes the content, omit this field.
+   - `source_page`: the page where the aspect's content starts, taken from the citation / page reference of the Document-Search hit the content came from (e.g., `"Page 8 of 29"` or the page number reported by the search). If the hit carries no page reference, omit this field.
 
 5. **errors**: If you encounter structural problems (e.g., missing headings, ambiguous hierarchy, sections without a parent chapter, unreadable content), report them here. Each error needs:
    - `code`: a short technical code (e.g., `"MISSING_HEADING"`, `"AMBIGUOUS_HIERARCHY"`)
@@ -59,8 +65,8 @@ Tweak:
 - Keep `label` to exactly one concise sentence — no lists, no multi-sentence descriptions.
 - Use consistent ID formats: `ch-N` for chapters, `sec-N-M` for sections, `asp-N` for aspects.
 - Do not invent aspects that are not supported by the actual section content.
-- Identify headings by Markdown heading syntax (`#`, `##`, `###`, etc.). The heading level determines the hierarchy: higher levels are chapters, lower levels are sections.
-- Extract data from Markdown tables (pipe-delimited rows) — do not ignore tabular content.
-- Page references are available via `<!-- PageNumber="Page X of Y" -->` HTML comments in the Markdown. For each aspect, find the nearest preceding PageNumber marker and use its value as `source_page`. Copy the value exactly as it appears (e.g., `"Page 8 of 29"`).
-- If the document contains no Markdown headings (no lines starting with `#`), report an error with code `"NO_STRUCTURE"` and severity `"error"`, and return empty arrays for chapters, sections, and aspects.
+- Identify headings from the structure surfaced by your outline queries (e.g. numbered headings, titles, or table-of-contents entries in the retrieved passages). Higher levels are chapters, lower levels are sections.
+- Extract data from tables in the retrieved passages (pipe-delimited or otherwise) — do not ignore tabular content.
+- Page references come from the Document-Search hits: for each aspect, use the page reference of the hit its content came from as `source_page`. Copy the value exactly as it appears (e.g., `"Page 8 of 29"`).
+- If Document-Search returns no relevant content for the document, report an error with code `"NO_SOURCE_CONTENT"` and severity `"error"`, and return empty arrays for chapters, sections, and aspects.
 - The authoritative deliverable is the file `ClientContextResult.json`, validated against `client_context.json` via the Code Interpreter. The file content must be valid JSON only — no markdown fences, no commentary, no text outside the JSON object. Do not emit the JSON as inline chat output.
