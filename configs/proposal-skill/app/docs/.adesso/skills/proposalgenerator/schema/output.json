@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Proposalgenerator Output",
+  "description": "Output structure returned by the proposalgenerator skill",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["success", "failure"],
+      "description": "Execution result status"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief summary of what was generated"
+    },
+    "output_path": {
+      "type": "string",
+      "description": "Path to the generated README.md file"
+    },
+    "sections_generated": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of sections included in the README"
+    },
+    "tech_stack_detected": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Technologies and frameworks detected in the project"
+    },
+    "project_type": {
+      "type": "string",
+      "enum": ["library", "cli", "web-app", "iac", "api", "monorepo", "unknown"],
+      "description": "Detected project type"
+    }
+  },
+  "required": ["status", "summary", "output_path"],
+  "additionalProperties": false
+}

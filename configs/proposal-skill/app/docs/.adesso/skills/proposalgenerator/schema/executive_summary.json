@@ -1,0 +1,175 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.org/schemas/executive-summary.schema.json",
+    "title": "ExecutiveSummary",
+    "type": "object",
+    "additionalProperties": false,
+    "$defs": {
+        "chapterId": {
+            "type": "string",
+            "description": "Unique ID of a chapter."
+        },
+        "sectionId": {
+            "type": "string",
+            "description": "Unique ID of a section."
+        }
+    },
+    "properties": {
+        "document_id": {
+            "type": "string",
+            "description": "Optional ID of the document."
+        },
+        "executive_summary": {
+            "type": "string",
+            "description": "A concise executive summary of the tender document, maximum 10 lines. Captures the core objective, scope, key requirements, and expected outcomes."
+        },
+        "key_topics": {
+            "type": "array",
+            "description": "List of the main topics or themes identified in the document (5-10 short phrases).",
+            "items": {
+                "type": "string"
+            }
+        },
+        "chapters": {
+            "type": "array",
+            "description": "Catalog of all chapters (chapter headings).",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "chapter_id": {
+                        "$ref": "#/$defs/chapterId"
+                    },
+                    "chapter_heading": {
+                        "type": "string",
+                        "description": "Heading of the chapter (Heading 1)."
+                    }
+                },
+                "required": [
+                    "chapter_id",
+                    "chapter_heading"
+                ]
+            }
+        },
+        "sections": {
+            "type": "array",
+            "description": "Catalog of all sections (section headings).",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "section_id": {
+                        "$ref": "#/$defs/sectionId"
+                    },
+                    "section_heading": {
+                        "type": "string",
+                        "description": "Heading of the section (Heading 2/3)."
+                    },
+                    "chapter_id": {
+                        "$ref": "#/$defs/chapterId",
+                        "description": "Reference to the parent chapter."
+                    }
+                },
+                "required": [
+                    "section_id",
+                    "section_heading",
+                    "chapter_id"
+                ]
+            }
+        },
+        "aspects": {
+            "type": "array",
+            "description": "Semantic aspects/topics with optional references to chapter and/or section.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "aspect_id": {
+                        "type": "string",
+                        "description": "Unique ID of the aspect."
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "Name of the aspect (e.g. topic/semantic label)."
+                    },
+                    "chapter_id": {
+                        "$ref": "#/$defs/chapterId",
+                        "description": "Optional reference to a chapter this aspect applies to."
+                    },
+                    "section_id": {
+                        "$ref": "#/$defs/sectionId",
+                        "description": "Optional reference to a section this aspect applies to."
+                    },
+                    "confidence": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Optional confidence score for the semantic assignment (0–1)."
+                    },
+                    "source_page": {
+                        "type": "string",
+                        "description": "Page reference where the aspect was found, extracted from <!-- PageNumber=\"Page X of Y\" --> markers in the source document."
+                    }
+                },
+                "required": [
+                    "aspect_id",
+                    "label"
+                ]
+            }
+        },
+        "errors": {
+            "type": "array",
+            "description": "Error block for validation or processing errors.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Technical error code."
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Human-readable error message."
+                    },
+                    "severity": {
+                        "type": "string",
+                        "enum": [
+                            "info",
+                            "warning",
+                            "error"
+                        ],
+                        "description": "Severity level of the error."
+                    },
+                    "reference": {
+                        "type": "object",
+                        "description": "Optional reference to affected elements.",
+                        "additionalProperties": false,
+                        "properties": {
+                            "chapter_id": {
+                                "$ref": "#/$defs/chapterId"
+                            },
+                            "section_id": {
+                                "$ref": "#/$defs/sectionId"
+                            },
+                            "aspect_id": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "code",
+                    "message"
+                ]
+            }
+        }
+    },
+    "required": [
+        "executive_summary",
+        "key_topics",
+        "chapters",
+        "sections",
+        "aspects"
+    ]
+}

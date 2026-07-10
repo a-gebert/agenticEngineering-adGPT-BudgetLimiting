@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Skill Input",
+  "description": "Input parameters for this skill",
+  "type": "object",
+  "properties": {
+    "param-one": {
+      "type": "string",
+      "description": "What this parameter does"
+    },
+    "param-two": {
+      "type": "string",
+      "description": "Optional configuration",
+      "default": "auto"
+    }
+  },
+  "required": ["param-one"],
+  "additionalProperties": false
+}

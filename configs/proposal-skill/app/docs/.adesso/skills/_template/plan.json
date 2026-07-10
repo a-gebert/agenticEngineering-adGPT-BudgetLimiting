@@ -1,0 +1,104 @@
+{
+  "name": "skill-name",
+  "type": "plan",
+  "version": "0.1.0",
+  "description": "Explicit thinking chain for a skill workflow",
+  "chain": [
+    {
+      "step": 1,
+      "name": "perceive",
+      "description": "Gather context, read environment state, and parse user intent",
+      "next": "reason",
+      "resources": {
+        "prompt": "prompts/prompt.md",
+        "input": "schema/input.json",
+        "output": null,
+        "scripts": [],
+        "assets": [],
+        "references": [],
+        "batch": [],
+        "artifacts": {}
+      }
+    },
+    {
+      "step": 2,
+      "name": "reason",
+      "description": "Validate inputs, check prerequisites, evaluate constraints, and select strategy",
+      "next": "plan",
+      "resources": {
+        "prompt": null,
+        "input": null,
+        "output": null,
+        "scripts": [],
+        "assets": [],
+        "references": [],
+        "batch": [],
+        "artifacts": {}
+      }
+    },
+    {
+      "step": 3,
+      "name": "plan",
+      "description": "Decompose the task into sub-actions, determine execution order and dependencies",
+      "next": "execute",
+      "resources": {
+        "prompt": null,
+        "input": null,
+        "output": null,
+        "scripts": [],
+        "assets": [],
+        "references": [],
+        "batch": [],
+        "artifacts": {}
+      }
+    },
+    {
+      "step": 4,
+      "name": "execute",
+      "description": "Run scripts, transform data, call external services, produce artifacts",
+      "next": "evaluate",
+      "resources": {
+        "prompt": null,
+        "input": null,
+        "output": null,
+        "scripts": [],
+        "assets": [],
+        "references": [],
+        "batch": [],
+        "artifacts": {}
+      }
+    },
+    {
+      "step": 5,
+      "name": "evaluate",
+      "description": "Verify results against expected output schema, check for errors, assess quality",
+      "next": "respond",
+      "resources": {
+        "prompt": null,
+        "input": null,
+        "output": "schema/output.json",
+        "scripts": [],
+        "assets": [],
+        "references": [],
+        "batch": [],
+        "artifacts": {}
+      }
+    },
+    {
+      "step": 6,
+      "name": "respond",
+      "description": "Format final output, summarize findings, and present result to the user",
+      "next": null,
+      "resources": {
+        "prompt": null,
+        "input": null,
+        "output": "schema/output.json",
+        "scripts": [],
+        "assets": [],
+        "references": [],
+        "batch": [],
+        "artifacts": {}
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "example-test-case",
+  "description": "Verify skill produces expected output for a standard input",
+  "input": {
+    "param-one": "test-value"
+  },
+  "expected_output": {
+    "status": "success",
+    "summary": "Expected summary for test-value"
+  },
+  "assertions": [
+    {
+      "field": "status",
+      "operator": "equals",
+      "value": "success"
+    },
+    {
+      "field": "summary",
+      "operator": "contains",
+      "value": "test-value"
+    }
+  ],
+  "tags": ["smoke", "happy-path"]
+}

@@ -1,0 +1,168 @@
+{
+  "name": "proposalgenerator",
+  "version": "1.0.0",
+  "type": "plan",
+  "description": "Proposal chain for aotomatic requirement anlaysis and proposal creation",
+  "chain": {
+    "PreProcessing": [
+      {
+        "step": 1,
+        "name": "ExecutiveSummary",
+        "description": "Generate a concise executive summary of the tender document",
+        "next": "ClientContext",
+        "resources": {
+          "prompt": "/prompts/executive_summary.md",
+          "output": "/schema/executive_summary.json",
+          "scripts": [],
+          "assets": [],
+          "references": [],
+          "batch": [],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 2,
+        "name": "ClientContext",
+        "description": "Extract client context (industry, systems, pain points, strategic goals) with aspect cross-references as semantic bridge for downstream steps",
+        "next": "Functional",
+        "resources": {
+          "prompt": "/prompts/client_context.md",
+          "output": "/schema/client_context.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/reference.json"
+          ],
+          "batch": [],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 3,
+        "name": "Functional",
+        "description": "Scan file for functional analysis",
+        "next": "Formal",
+        "resources": {
+          "prompt": "/prompts/functional.md",
+          "output": "/schema/functional_requirements.json",
+          "scripts": [],
+          "assets": [],
+          "references": [],
+          "batch": [],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 4,
+        "name": "Formal",
+        "description": "Extract formal proposal requirements (delivery scope, deadlines, format constraints, submission rules, eligibility criteria) and mark them as binding or optional",
+        "next": "Constraints",
+        "resources": {
+          "prompt": "/prompts/formal.md",
+          "output": "/schema/formal_requirements.json",
+          "scripts": [],
+          "assets": [],
+          "references": [],
+          "batch": [],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 5,
+        "name": "Constraints",
+        "description": "Extract project constraints (budget, timeline, technical restrictions, organisational boundaries) with aspect cross-references",
+        "next": null,
+        "resources": {
+          "prompt": "/prompts/constraints.md",
+          "output": "/schema/constraints.json",
+          "scripts": [],
+          "assets": [],
+          "references": [],
+          "batch": [],
+          "artifacts": {}
+        }
+      }
+    ],
+    "Mapping": [],
+    "Consolidation": [
+      {
+        "step": 1,
+        "name": "OpenPoints",
+        "description": "Gap analysis: identify aspects with no requirement mapped. Produces a JSON file listing uncovered aspects with severity and coverage statistics.",
+        "depends_on": "PreProcessing",
+        "next": "Report",
+        "resources": {
+          "prompt": "/prompts/open_points.md",
+          "input": "/schema/preflight_report.json",
+          "output": "/schema/open_points.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/preflight_report.json"
+          ],
+          "batch": [
+            "/preprocessing/ExecutiveSummary.json",
+            "/preprocessing/ClientContext.json",
+            "/preprocessing/Functional.json",
+            "/preprocessing/Formal.json",
+            "/preprocessing/Constraints.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 2,
+        "name": "Report",
+        "description": "Create summary report. Batch files are releted to user-files container (not adesso skill set)",
+        "depends_on": "PreProcessing",
+        "next": "Proposal",
+        "resources": {
+          "prompt": "/prompts/functional_consolidation.md",
+          "input": "/schema/functional_requirements.json",
+          "output": "/schema/report_output.md",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/consolidation_report.json"
+          ],
+          "batch": [
+            "/preprocessing/ExecutiveSummary.json",
+            "/preprocessing/ClientContext.json",
+            "/preprocessing/Functional.json",
+            "/preprocessing/Formal.json",
+            "/preprocessing/Constraints.json",
+            "/consolidation/OpenPoints.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 3,
+        "name": "Proposal",
+        "description": "Generate a structured proposal draft following the adesso proposal template: 1) Initial Situation, 2) Subject Matter of the Proposal (solution, requirements, architecture, methodology, organisation, QA, operations, open points), 3) Prices, 4) Terms and Conditions (standard text placeholders), 5) Binding Period, Annex A References/Profiles, Annex B Company Profile.",
+        "depends_on": "PreProcessing",
+        "next": null,
+        "resources": {
+          "prompt": "/prompts/proposal.md",
+          "input": "/schema/functional_requirements.json",
+          "output": "/schema/proposal_output.md",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/consolidation_report.json"
+          ],
+          "batch": [
+            "/preprocessing/ExecutiveSummary.json",
+            "/preprocessing/ClientContext.json",
+            "/preprocessing/Functional.json",
+            "/preprocessing/Formal.json",
+            "/preprocessing/Constraints.json",
+            "/consolidation/OpenPoints.json"
+          ],
+          "artifacts": {}
+        }
+      }
+    ],
+    "Validation": []
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Skill Plan (Thinking Chain)",
+  "description": "Validates the plan.json thinking chain structure",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Skill name matching GENERAL.md frontmatter"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version"
+    },
+    "type": {
+      "type": "string",
+      "const": "plan",
+      "description": "Type identifier for runtime type checking"
+    },
+    "description": {
+      "type": "string",
+      "description": "Purpose of this thinking chain"
+    },
+    "chain": {
+      "type": "object",
+      "properties": {
+        "PreProcessing": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/step" },
+          "description": "Steps for initial data gathering and preparation"
+        },
+        "Mapping": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/step" },
+          "description": "Steps for mapping and transforming data"
+        },
+        "Consolidation": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/step" },
+          "description": "Steps for merging and consolidating results"
+        },
+        "Validation": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/step" },
+          "description": "Steps for validating and verifying output"
+        }
+      },
+      "required": ["PreProcessing", "Mapping", "Consolidation", "Validation"],
+      "additionalProperties": false,
+      "description": "Named step chains executed in order: PreProcessing → Mapping → Consolidation → Validation"
+    }
+  },
+  "required": ["name", "type", "version", "chain"],
+  "additionalProperties": false,
+  "definitions": {
+    "step": {
+      "type": "object",
+      "properties": {
+        "step": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Step number in the chain"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "description": "Step identifier"
+        },
+        "description": {
+          "type": "string",
+          "description": "What this step accomplishes"
+        },
+        "next": {
+          "type": ["string", "null"],
+          "description": "Name of the next step, null if terminal"
+        },
+        "depends_on": {
+          "type": "string",
+          "description": "Name of the step that must complete before this step can start. Omitted means no dependency."
+        },
+        "resources": {
+          "$ref": "#/definitions/resources"
+        }
+      },
+      "required": ["step", "name", "description", "next", "resources"],
+      "additionalProperties": false
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "prompt": {
+          "type": ["string", "null"],
+          "description": "Path to prompt file relative to skill root"
+        },
+        "input": {
+          "type": ["string", "null"],
+          "description": "Path to input schema"
+        },
+        "output": {
+          "type": ["string", "null"],
+          "description": "Path to output schema"
+        },
+        "scripts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths to scripts used in this step"
+        },
+        "assets": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths to asset files used in this step"
+        },
+        "references": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths to reference docs used in this step"
+        },
+        "batch": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths to batch processing definitions used in this step"
+        },
+        "artifacts": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Arbitrary key-value structure for artifact metadata produced or consumed in this step"
+        }
+      },
+      "required": ["prompt", "input", "output", "scripts", "assets", "references"],
+      "additionalProperties": false
+    }
+  }
+}

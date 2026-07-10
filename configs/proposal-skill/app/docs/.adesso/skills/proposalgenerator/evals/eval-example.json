@@ -1,0 +1,47 @@
+{
+  "name": "readme-for-terraform-project",
+  "description": "Generate a README for a Terraform-based IaC project with Logic App workflows",
+  "input": {
+    "target_path": ".",
+    "audience": "developer",
+    "language": "en",
+    "style": "standard"
+  },
+  "expected_output": {
+    "status": "success",
+    "project_type": "iac"
+  },
+  "assertions": [
+    {
+      "field": "status",
+      "operator": "equals",
+      "value": "success"
+    },
+    {
+      "field": "project_type",
+      "operator": "equals",
+      "value": "iac"
+    },
+    {
+      "field": "sections_generated",
+      "operator": "contains",
+      "value": "overview"
+    },
+    {
+      "field": "sections_generated",
+      "operator": "contains",
+      "value": "prerequisites"
+    },
+    {
+      "field": "sections_generated",
+      "operator": "contains",
+      "value": "architecture"
+    },
+    {
+      "field": "tech_stack_detected",
+      "operator": "contains",
+      "value": "Terraform"
+    }
+  ],
+  "tags": ["smoke", "iac"]
+}

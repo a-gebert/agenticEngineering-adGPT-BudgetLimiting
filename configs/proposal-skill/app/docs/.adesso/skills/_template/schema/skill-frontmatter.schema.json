@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GENERAL.md Frontmatter",
+  "description": "Validates the YAML frontmatter of a GENERAL.md file",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Lowercase hyphenated skill identifier"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1024,
+      "description": "What the skill does and when it should trigger"
+    }
+  },
+  "required": ["name", "description"],
+  "additionalProperties": false
+}

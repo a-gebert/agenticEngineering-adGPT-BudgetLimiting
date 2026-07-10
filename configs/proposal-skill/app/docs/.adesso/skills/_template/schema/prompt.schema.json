@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Skill Prompt Structure",
+  "description": "Defines the expected markdown structure of a prompt.md file",
+  "type": "object",
+  "properties": {
+    "required_sections": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["System Prompt", "Context", "Instructions", "Constraints", "Output"],
+      "description": "Required H2 headings in the prompt file"
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^\\{\\{[a-z_]+\\}\\}$",
+            "description": "Template variable in {{snake_case}} format"
+          },
+          "description": {
+            "type": "string",
+            "description": "What this variable resolves to at runtime"
+          },
+          "required": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": ["name", "description"],
+        "additionalProperties": false
+      },
+      "description": "Template variables used in the prompt"
+    }
+  },
+  "required": ["required_sections"],
+  "additionalProperties": false
+}

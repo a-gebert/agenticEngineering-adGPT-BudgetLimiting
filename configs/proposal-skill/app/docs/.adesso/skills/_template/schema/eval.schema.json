@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Skill Eval Test Case",
+  "description": "Validates eval test case files in the evals/ directory",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Test case identifier"
+    },
+    "description": {
+      "type": "string",
+      "description": "What this test case verifies"
+    },
+    "input": {
+      "type": "object",
+      "description": "Input parameters matching the skill's input schema"
+    },
+    "expected_output": {
+      "type": "object",
+      "description": "Expected output matching the skill's output schema"
+    },
+    "assertions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "JSON path to the field to check"
+          },
+          "operator": {
+            "type": "string",
+            "enum": ["equals", "contains", "matches", "exists", "not_empty", "greater_than", "less_than"],
+            "description": "Comparison operator"
+          },
+          "value": {
+            "description": "Expected value for comparison"
+          }
+        },
+        "required": ["field", "operator"],
+        "additionalProperties": false
+      },
+      "description": "Programmatic assertions on the output"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for filtering and grouping test cases"
+    }
+  },
+  "required": ["name", "description", "input", "assertions"],
+  "additionalProperties": false
+}

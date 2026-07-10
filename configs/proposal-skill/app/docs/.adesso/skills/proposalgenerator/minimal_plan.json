@@ -1,0 +1,44 @@
+{
+  "name": "proposalgenerator",
+  "version": "1.0.0",
+  "type": "plan",
+  "description": "Thinking chain for generating README.md from project context",
+  "chain": [
+    {
+      "step": 1,
+      "name": "Overview",
+      "description": "Scan target directory: identify file structure, package manifests, tech stack indicators, and existing documentation",
+      "next": null,
+      "resources": {
+        "prompt": "/.adesso/skills/proposalgenerator/prompts/overview.md",
+        "input": "schema/input.json",
+        "output": "schema/output.json",
+        "scripts": [],
+        "assets": [],
+        "references": [],
+        "batch": [
+          "/.adesso/skills/proposalgenerator/GENERAL.md",
+          "/CLAUDE.md",
+          "/UNSORTED.md"
+        ],
+        "artifacts": {
+          "wiki": {
+            "llm_model": "gpt-oss-120b-sovereign",
+            "identifier": "adGPT.wiki",
+            "page_name": "AI-Meta-Pipeline-Test",
+            "parent_path": "/💻 Development",
+            "force_update": false,
+            "allow_overwrite": true
+          },
+          "readme": {
+            "llm_model": "gpt-oss-120b-sovereign",
+            "file_name": "README.md",
+            "doc_path": "/",
+            "force_update": false,
+            "allow_overwrite": true
+          }
+        }
+      }
+    }
+  ]
+}

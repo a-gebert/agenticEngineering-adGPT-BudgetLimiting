@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Skill Output",
+  "description": "Output structure returned by this skill",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["success", "failure"],
+      "description": "Execution result status"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief summary of what was done"
+    },
+    "details": {
+      "type": "object",
+      "description": "Detailed results specific to this skill"
+    }
+  },
+  "required": ["status", "summary"],
+  "additionalProperties": false
+}

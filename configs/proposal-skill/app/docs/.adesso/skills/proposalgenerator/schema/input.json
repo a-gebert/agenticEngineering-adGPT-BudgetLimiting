@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Proposalgenerator Input",
+  "description": "Input parameters for proposal generation",
+  "type": "object",
+  "properties": {
+    "target_path": {
+      "type": "string",
+      "description": "Directory to document (relative to project root)",
+      "default": "."
+    },
+    "audience": {
+      "type": "string",
+      "enum": ["developer", "end-user", "ops"],
+      "description": "Target audience for the README",
+      "default": "developer"
+    },
+    "language": {
+      "type": "string",
+      "enum": ["en", "de"],
+      "description": "Output language",
+      "default": "en"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "overview",
+          "prerequisites",
+          "installation",
+          "usage",
+          "architecture",
+          "configuration",
+          "api",
+          "testing",
+          "troubleshooting",
+          "contributing",
+          "license"
+        ]
+      },
+      "description": "Specific sections to include (auto-detected if omitted)"
+    },
+    "style": {
+      "type": "string",
+      "enum": ["minimal", "standard", "comprehensive"],
+      "description": "Level of detail in the generated README",
+      "default": "standard"
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

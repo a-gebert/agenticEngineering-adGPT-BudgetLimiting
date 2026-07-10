@@ -1,5 +1,4 @@
 {
-  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -52,5 +51,6 @@
     }
   },
   "effortLevel": "medium",
+  "tui": "fullscreen",
   "theme": "light"
 }
