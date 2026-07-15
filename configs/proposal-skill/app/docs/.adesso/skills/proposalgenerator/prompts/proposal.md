@@ -8,6 +8,7 @@ You receive the artifacts produced by the preceding chain steps as input files. 
 - `ConstraintsResult.json` — project constraints (budget, timeline, technical/organisational boundaries) with aspect cross-references. Conforms to `constraints.json`.
 - `OpenPointsResult.json` — gap analysis: aspects with no requirement mapped, with severity and coverage statistics. Conforms to `open_points.json`.
 - `ProfilerMatchResult.json` — anonymised, role-based team profiles (`team[]`) and anonymised reference projects (`references[]`) matched from the adesso Profiler. Conforms to `profiler_match.json`.
+- `StaffingCatalogResult.json` — the derived role/skill catalogue (conforms to `staffing_catalog.json`). MATCHING CONTEXT ONLY: never render its `profiler_query` fields, `location`, or `availability` in the proposal. Client-facing team and reference data come exclusively from `ProfilerMatchResult.json`.
 - `SolutionCatalogResult.json` — solution blocks (needs, addressed requirements, constraints, evaluation criteria). Conforms to `solution_catalog.json`.
 - `SolutionProposalResult.md` — the researched, unambiguous solution proposal (one recommended technology per block plus a consolidated target architecture, with cited sources).
 
