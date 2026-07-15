@@ -1,0 +1,168 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.org/schemas/solution-catalog.schema.json",
+    "title": "SolutionCatalog",
+    "description": "Deterministic catalogue of solution blocks derived from functional/non-functional requirements, constraints and client context. Bridges requirements to downstream technology research.",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "document_id": {
+            "type": "string",
+            "description": "Optional ID of the source document."
+        },
+        "solution_blocks": {
+            "type": "array",
+            "description": "Thematic solution blocks, each clustering one or more requirements into a solution need.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "block_id": {
+                        "type": "string",
+                        "description": "Unique ID of the solution block (e.g. SB-01)."
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Short title of the solution block, in output_language."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "What capability/need this block covers, derived from the requirements, in output_language."
+                    },
+                    "addressed_requirements": {
+                        "type": "array",
+                        "description": "FR/NFR IDs this block addresses (e.g. FR-001, NFR-002).",
+                        "items": { "type": "string" },
+                        "minItems": 1
+                    },
+                    "aspect_ids": {
+                        "type": "array",
+                        "description": "Optional aspect IDs from the source analysis this block relates to.",
+                        "items": { "type": "string" }
+                    },
+                    "solution_type": {
+                        "type": "string",
+                        "description": "Category of solution needed (e.g. Integration, Datenplattform, Frontend, Security, Cloud-Infra)."
+                    },
+                    "priority": {
+                        "type": "string",
+                        "enum": ["must", "should", "nice-to-have"],
+                        "description": "Highest MoSCoW priority among the addressed requirements."
+                    },
+                    "constraints": {
+                        "type": "array",
+                        "description": "Relevant technical/budget/organisational constraints bounding this block, taken from ConstraintsResult.",
+                        "items": { "type": "string" }
+                    },
+                    "evaluation_criteria": {
+                        "type": "array",
+                        "description": "Criteria to evaluate candidate technologies for this block.",
+                        "items": { "type": "string" },
+                        "minItems": 1
+                    },
+                    "candidate_directions": {
+                        "type": "array",
+                        "description": "Plausible technology directions (families, not concrete products) considered for this block.",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "label": { "type": "string", "description": "Name of the technology direction." },
+                                "rationale": { "type": "string", "description": "Why this direction is plausible." }
+                            },
+                            "required": ["label", "rationale"]
+                        }
+                    },
+                    "research_questions": {
+                        "type": "array",
+                        "description": "Concrete research questions handed to the DeepResearch step.",
+                        "items": { "type": "string" },
+                        "minItems": 1
+                    },
+                    "needs_clarification": {
+                        "type": "boolean",
+                        "description": "True if user clarification is required before research (multiple directions, low confidence, or insufficient constraints)."
+                    },
+                    "clarification_reason": {
+                        "type": "string",
+                        "enum": ["multiple_directions", "low_confidence", "insufficient_constraints"],
+                        "description": "Why clarification is needed. Present only when needs_clarification is true."
+                    },
+                    "clarification_question": {
+                        "type": "string",
+                        "description": "Question to ask the user, in output_language. Present only when needs_clarification is true."
+                    },
+                    "confidence": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Confidence that the block is well-scoped for research (0-1)."
+                    }
+                },
+                "required": [
+                    "block_id",
+                    "title",
+                    "description",
+                    "addressed_requirements",
+                    "solution_type",
+                    "priority",
+                    "evaluation_criteria",
+                    "research_questions",
+                    "needs_clarification",
+                    "confidence"
+                ]
+            }
+        },
+        "coverage": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Coverage statistics of requirements across all solution blocks.",
+            "properties": {
+                "total_requirements": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Total number of FR+NFR in the input."
+                },
+                "covered_requirements": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Number of requirements addressed by at least one block."
+                },
+                "uncovered_requirement_ids": {
+                    "type": "array",
+                    "description": "IDs of requirements not addressed by any block.",
+                    "items": { "type": "string" }
+                }
+            },
+            "required": ["total_requirements", "covered_requirements", "uncovered_requirement_ids"]
+        },
+        "errors": {
+            "type": "array",
+            "description": "Error block for validation or processing errors.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "code": { "type": "string", "description": "Technical error code." },
+                    "message": { "type": "string", "description": "Human-readable error message." },
+                    "severity": {
+                        "type": "string",
+                        "enum": ["info", "warning", "error"],
+                        "description": "Severity level of the error."
+                    },
+                    "reference": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "Optional reference to affected elements.",
+                        "properties": {
+                            "block_id": { "type": "string" },
+                            "aspect_id": { "type": "string" }
+                        }
+                    }
+                },
+                "required": ["code", "message"]
+            }
+        }
+    },
+    "required": ["solution_blocks", "coverage"]
+}
