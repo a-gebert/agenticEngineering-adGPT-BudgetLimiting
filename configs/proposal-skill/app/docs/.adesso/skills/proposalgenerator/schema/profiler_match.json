@@ -1,0 +1,83 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.org/schemas/profiler-match.schema.json",
+    "title": "ProfilerMatch",
+    "description": "Anonymised, role-based team profiles and anonymised reference projects matched from the adesso Profiler MCP against the staffing catalogue. Feeds proposal chapters 2.5 and Annex A. No client-facing person names, no client names on references.",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "document_id": { "type": "string", "description": "Optional ID of the source document." },
+        "team": {
+            "type": "array",
+            "description": "One entry per role from the staffing catalogue, filled from real Profiler hits (anonymised) or flagged as unmatched.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "role_id": { "type": "string", "description": "Role ID from the staffing catalogue (e.g. R-01)." },
+                    "role_title": { "type": "string", "description": "Role title, in output_language." },
+                    "seniority": { "type": "string", "enum": ["junior", "regular", "senior", "lead"] },
+                    "skills": { "type": "array", "items": { "type": "string" }, "description": "Anonymised skills of the matched profile.", "minItems": 1 },
+                    "certifications": { "type": "array", "items": { "type": "string" }, "description": "Relevant certifications (may be empty)." },
+                    "years_experience": { "type": "integer", "minimum": 0, "description": "Years of relevant experience; 0 when unmatched." },
+                    "allocation_pct": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Optional planned allocation in percent." },
+                    "matched": { "type": "boolean", "description": "True if a real profile was matched; false means placeholder." },
+                    "note": { "type": "string", "description": "Optional note; for unmatched entries the placeholder/hint text, in output_language." }
+                },
+                "required": ["role_id", "role_title", "seniority", "skills", "matched"]
+            }
+        },
+        "references": {
+            "type": "array",
+            "description": "Anonymised reference projects derived from colleagues' project experience. No client names.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "reference_id": { "type": "string", "description": "Reference ID, carried over from the brief (e.g. REF-01)." },
+                    "industry": { "type": "string", "description": "Industry/sector of the reference, in output_language." },
+                    "scope": { "type": "string", "description": "Anonymised scope description, in output_language." },
+                    "duration": { "type": "string", "description": "Approximate duration (e.g. '8 Monate')." },
+                    "relevance": { "type": "string", "description": "Why comparable to this bid, in output_language." },
+                    "matched": { "type": "boolean", "description": "True if backed by real project experience; false means placeholder." }
+                },
+                "required": ["reference_id", "industry", "scope", "relevance", "matched"]
+            }
+        },
+        "coverage": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Match statistics.",
+            "properties": {
+                "roles_total": { "type": "integer", "minimum": 0 },
+                "roles_matched": { "type": "integer", "minimum": 0 },
+                "references_total": { "type": "integer", "minimum": 0 },
+                "references_matched": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["roles_total", "roles_matched", "references_total", "references_matched"]
+        },
+        "errors": {
+            "type": "array",
+            "description": "Error block for validation or processing errors.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "code": { "type": "string" },
+                    "message": { "type": "string" },
+                    "severity": { "type": "string", "enum": ["info", "warning", "error"] },
+                    "reference": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "role_id": { "type": "string" },
+                            "reference_id": { "type": "string" }
+                        }
+                    }
+                },
+                "required": ["code", "message"]
+            }
+        }
+    },
+    "required": ["team", "references", "coverage"]
+}

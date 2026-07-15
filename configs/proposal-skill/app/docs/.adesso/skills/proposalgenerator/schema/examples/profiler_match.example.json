@@ -1,0 +1,44 @@
+{
+  "document_id": "TENDER-2025-POS",
+  "team": [
+    {
+      "role_id": "R-01",
+      "role_title": "Integrationsarchitekt:in",
+      "seniority": "senior",
+      "skills": ["Azure Integration Services", "Event-Driven Architecture", "REST/OpenAPI"],
+      "certifications": ["Azure Solutions Architect Expert"],
+      "years_experience": 12,
+      "allocation_pct": 60,
+      "matched": true,
+      "note": ""
+    },
+    {
+      "role_id": "R-02",
+      "role_title": "Projektleiter:in",
+      "seniority": "lead",
+      "skills": ["Projektleitung", "Hybrides Vorgehen"],
+      "certifications": [],
+      "years_experience": 0,
+      "allocation_pct": 40,
+      "matched": false,
+      "note": "Kein passendes Profil im Profiler gefunden — bitte im Profiler recherchieren."
+    }
+  ],
+  "references": [
+    {
+      "reference_id": "REF-01",
+      "industry": "Handel",
+      "scope": "Modernisierung einer Kassenlösung mit Offline-Fähigkeit und Cloud-Anbindung.",
+      "duration": "8 Monate",
+      "relevance": "Vergleichbare POS-Modernisierung mit denselben Integrationsherausforderungen.",
+      "matched": true
+    }
+  ],
+  "coverage": {
+    "roles_total": 2,
+    "roles_matched": 1,
+    "references_total": 1,
+    "references_matched": 1
+  },
+  "errors": []
+}
