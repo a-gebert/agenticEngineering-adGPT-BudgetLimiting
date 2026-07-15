@@ -46,6 +46,8 @@ They may only be passed to the bound skills so those skills can retrieve the con
 
 External research via the DeepResearch tool is permitted **only** in the `proposal-solution-proposal` step, and only for technology and best-practice research — never for analysing the tender document. All tender content remains RAG-only.
 
+The Profiler MCP is permitted **only** in the `proposal-profiler-match` step, and only to match colleagues/skills and comparable project experience — never for analysing the tender document. All Profiler output is anonymised (no person names, no client names).
+
 # Mandatory Pre-Execution Gate
 
 Before producing any tender-related content, you must internally verify all of the following:
@@ -89,15 +91,17 @@ Phase 1 — PreProcessing
 Phase 2 — Solution
 6. SolutionCatalog → skill `proposal-solution-catalog` → `SolutionCatalogResult.json`
 7. SolutionProposal → skill `proposal-solution-proposal` → `SolutionProposalResult.md`
+8. StaffingCatalog → skill `proposal-staffing-catalog` → `StaffingCatalogResult.json`
+9. ProfilerMatch → skill `proposal-profiler-match` → `ProfilerMatchResult.json`
 
 Phase 3 — Consolidation
-8. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`
-9. Report → skill `proposal-report` → `ReportResult.md`
-10. Proposal → skill `proposal-proposal` → `ProposalResult.md`
+10. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`
+11. Report → skill `proposal-report` → `ReportResult.md`
+12. Proposal → skill `proposal-proposal` → `ProposalResult.md`
 
 Export
-11. Convert `ProposalResult.md` to `Proposal.docx`
-12. Convert `ReportResult.md` to `Report.pdf`
+13. Convert `ProposalResult.md` to `Proposal.docx`
+14. Convert `ReportResult.md` to `Report.pdf`
 
 Final deliverables
 - `ProposalResult.md`
@@ -129,7 +133,9 @@ Consolidation steps require all PreProcessing artifacts to exist first.
 Solution steps run after PreProcessing and before Consolidation:
 - `proposal-solution-catalog` may only run after `FunctionalResult.json`, `ConstraintsResult.json`, and `ClientContextResult.json` exist.
 - `proposal-solution-proposal` may only run after `SolutionCatalogResult.json` exists.
-- `proposal-proposal` additionally consumes `SolutionCatalogResult.json` and `SolutionProposalResult.md`.
+- `proposal-staffing-catalog` may only run after `SolutionProposalResult.md`, `FunctionalResult.json`, and `ConstraintsResult.json` exist.
+- `proposal-profiler-match` may only run after `StaffingCatalogResult.json` exists.
+- `proposal-proposal` additionally consumes `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, and `ProfilerMatchResult.json`.
 
 Specifically:
 - `proposal-open-points` may only run after:
@@ -141,7 +147,7 @@ Specifically:
 - `proposal-report` may only run after:
   - all files above plus `OpenPointsResult.json`
 - `proposal-proposal` may only run after:
-  - all files above plus `OpenPointsResult.json`, `SolutionCatalogResult.json`, and `SolutionProposalResult.md`
+  - all files above plus `OpenPointsResult.json`, `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, and `ProfilerMatchResult.json`
 
 If a dependency is missing, stop and continue with the missing prerequisite step instead.
 
@@ -191,6 +197,8 @@ Do not ask whether you should use the workflow.
 You must use the workflow.
 
 Exception — mandatory clarification gate: in the `proposal-solution-proposal` step, when the solution catalogue flags blocks with `needs_clarification: true`, you MUST ask the user which technology directions to research (and offer to scope the research) BEFORE invoking the DeepResearch tool, and wait for the answer. This is the one point where asking is required rather than discouraged.
+
+The same applies to the `proposal-profiler-match` step: when Profiler matching is ambiguous (over-broad query, conflicting location/availability, ambiguous reference domain), you MUST ask the user before querying the Profiler and wait for the answer.
 
 Convergence rule: the final solution proposal must present exactly one recommended technology per solution block and one consolidated target architecture — never leave an open technology choice for the client.
 
