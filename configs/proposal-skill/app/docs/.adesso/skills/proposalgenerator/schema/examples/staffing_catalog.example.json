@@ -1,0 +1,39 @@
+{
+  "document_id": "TENDER-2025-POS",
+  "roles": [
+    {
+      "role_id": "R-01",
+      "title": "Integrationsarchitekt:in",
+      "seniority": "senior",
+      "required_skills": ["Azure Integration Services", "Event-Driven Architecture", "REST/OpenAPI"],
+      "rationale": "Leitet sich aus den Integrationsanforderungen FR-001/FR-004 und dem Lösungsbaustein Systemintegration ab.",
+      "addressed_requirements": ["FR-001", "FR-004", "NFR-002"],
+      "profiler_query": {
+        "skills": ["Azure Integration Services", "Event-Driven Architecture"],
+        "location": "DACH",
+        "availability": "ab Q4 2025"
+      }
+    },
+    {
+      "role_id": "R-02",
+      "title": "Projektleiter:in",
+      "seniority": "lead",
+      "required_skills": ["Projektleitung", "Hybrides Vorgehen"],
+      "rationale": "Erforderlich für Steuerung und Governance gemäß organisatorischen Rahmenbedingungen.",
+      "addressed_requirements": ["FR-001"],
+      "profiler_query": {
+        "skills": ["Projektleitung"]
+      }
+    }
+  ],
+  "reference_briefs": [
+    {
+      "brief_id": "REF-01",
+      "domain": "Retail / POS-Modernisierung",
+      "technologies": ["Cloud-Migration", "Offline-Sync"],
+      "search_skills": ["POS", "Offline-First", "Cloud-Migration"],
+      "relevance_rationale": "Vergleichbare POS-Modernisierung im Handel mit Offline-Fähigkeit."
+    }
+  ],
+  "errors": []
+}

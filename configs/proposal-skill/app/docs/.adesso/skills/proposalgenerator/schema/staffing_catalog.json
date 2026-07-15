@@ -1,0 +1,98 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.org/schemas/staffing-catalog.schema.json",
+    "title": "StaffingCatalog",
+    "description": "Deterministic catalogue of the roles/skills a proposal needs plus reference-search briefs, derived from the solution proposal, requirements and constraints. Bridges requirements to the Profiler match step. No external knowledge, no Profiler calls.",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "document_id": { "type": "string", "description": "Optional ID of the source document." },
+        "roles": {
+            "type": "array",
+            "description": "Roles required to staff the proposed solution.",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "role_id": { "type": "string", "description": "Unique role ID (e.g. R-01)." },
+                    "title": { "type": "string", "description": "Role title, in output_language." },
+                    "seniority": {
+                        "type": "string",
+                        "enum": ["junior", "regular", "senior", "lead"],
+                        "description": "Required seniority level."
+                    },
+                    "required_skills": {
+                        "type": "array",
+                        "description": "Skills the role must cover.",
+                        "items": { "type": "string" },
+                        "minItems": 1
+                    },
+                    "rationale": { "type": "string", "description": "Why this role is needed, traced to requirements/solution, in output_language." },
+                    "addressed_requirements": {
+                        "type": "array",
+                        "description": "FR/NFR IDs this role helps deliver.",
+                        "items": { "type": "string" },
+                        "minItems": 1
+                    },
+                    "profiler_query": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "Search brief for the Profiler MCP (used only for matching, never rendered in the proposal).",
+                        "properties": {
+                            "skills": { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Skills to search for." },
+                            "location": { "type": "string", "description": "Optional location filter (from constraints.organisational)." },
+                            "availability": { "type": "string", "description": "Optional availability filter (from constraints.timeline)." }
+                        },
+                        "required": ["skills"]
+                    }
+                },
+                "required": ["role_id", "title", "seniority", "required_skills", "addressed_requirements", "profiler_query"]
+            }
+        },
+        "reference_briefs": {
+            "type": "array",
+            "description": "Search briefs to surface comparable past projects via colleagues' project experience (double purpose). May be empty if no relevant domain is derivable.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "brief_id": { "type": "string", "description": "Unique brief ID (e.g. REF-01)." },
+                    "domain": { "type": "string", "description": "Domain/industry to search comparable projects in, in output_language." },
+                    "technologies": { "type": "array", "items": { "type": "string" }, "description": "Relevant technologies for comparability." },
+                    "search_skills": {
+                        "type": "array",
+                        "description": "Skills through which comparable project experience is found in profiles.",
+                        "items": { "type": "string" },
+                        "minItems": 1
+                    },
+                    "relevance_rationale": { "type": "string", "description": "Why such a reference is relevant, in output_language." }
+                },
+                "required": ["brief_id", "domain", "search_skills", "relevance_rationale"]
+            }
+        },
+        "errors": {
+            "type": "array",
+            "description": "Error block for validation or processing errors.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "code": { "type": "string" },
+                    "message": { "type": "string" },
+                    "severity": { "type": "string", "enum": ["info", "warning", "error"] },
+                    "reference": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "role_id": { "type": "string" },
+                            "brief_id": { "type": "string" }
+                        }
+                    }
+                },
+                "required": ["code", "message"]
+            }
+        }
+    },
+    "required": ["roles", "reference_briefs"]
+}
