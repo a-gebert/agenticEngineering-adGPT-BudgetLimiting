@@ -1,0 +1,593 @@
+{
+  "exportedAgents": [
+    {
+      "id": "59533a04-5bfe-4354-8d2d-5188cc4bf2a7",
+      "export": {
+        "agentId": "59533a04-5bfe-4354-8d2d-5188cc4bf2a7",
+        "order": 17,
+        "title": {
+          "en": "Proposal Generator"
+        },
+        "description": {
+          "en": "Analyzes a tender document and drives the adesso proposal chain to produce a winning, structured proposal. Orchestrates the proposalgenerator plan step by step via dedicated skills."
+        },
+        "icon": "mgc_building_1_line",
+        "modelConfigurations": [
+          {
+            "modelOptionsId": "gpt_5_low",
+            "isDefault": false,
+            "order": 0,
+            "modelOptions": {
+              "$type": "AzureOpenAiReasoningOptions",
+              "deploymentName": "gpt-5",
+              "reasoningEffort": "low",
+              "toolChoice": "auto",
+              "allowParallelToolCalls": false,
+              "stopSequences": [],
+              "maxOutputTokens": 50000,
+              "maxInputTokens": 272000,
+              "shortenedHistoryMaxMessageCount": 20,
+              "pastToolCallResultsIncluded": 20,
+              "toolCallResultTokenLimit": 100000,
+              "maxToolCallIterations": 30,
+              "disableDynamicToolDiscovery": false,
+              "isFeatureModel": false,
+              "allowedUserGroupIds": [],
+              "instructionConfigurations": [
+                {
+                  "instructionId": "code_formatting",
+                  "isEnabled": true
+                }
+              ],
+              "useSystemRole": false,
+              "sendUserId": true,
+              "isLegacy": false,
+              "id": "gpt_5_low",
+              "modelId": "gpt-5",
+              "endpointId": "azure_openai",
+              "type": "reasoning",
+              "title": {
+                "de": "GPT-5",
+                "en": "GPT-5"
+              },
+              "description": {
+                "de": "Low Reasoning für schnelle Antworten",
+                "en": "Low reasoning for quick answers"
+              },
+              "isAssignableByAgentManagers": false,
+              "createdBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+              "createdAt": "2026-06-23T09:11:36.0712251+00:00",
+              "modifiedBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+              "modifiedAt": "2026-06-23T09:11:36.0712251+00:00",
+              "systemScope": "Settings"
+            },
+            "version": "1.0"
+          },
+          {
+            "modelOptionsId": "gpt_5_1_auto",
+            "isDefault": false,
+            "order": 1,
+            "modelOptions": {
+              "$type": "AzureOpenAiReasoningOptions",
+              "deploymentName": "gpt-5.1",
+              "reasoningEffort": "medium",
+              "reasoningEffortJudge": {
+                "isEnabled": true,
+                "allowedLevels": [
+                  "none",
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              "toolChoice": "auto",
+              "allowParallelToolCalls": false,
+              "stopSequences": [],
+              "maxOutputTokens": 50000,
+              "maxInputTokens": 272000,
+              "shortenedHistoryMaxMessageCount": 20,
+              "pastToolCallResultsIncluded": 20,
+              "toolCallResultTokenLimit": 100000,
+              "maxToolCallIterations": 30,
+              "disableDynamicToolDiscovery": false,
+              "isFeatureModel": false,
+              "allowedUserGroupIds": [],
+              "instructionConfigurations": [
+                {
+                  "instructionId": "code_formatting",
+                  "isEnabled": true
+                }
+              ],
+              "useSystemRole": false,
+              "sendUserId": true,
+              "isLegacy": false,
+              "id": "gpt_5_1_auto",
+              "modelId": "gpt-5.1",
+              "endpointId": "azure_openai",
+              "type": "reasoning",
+              "title": {
+                "de": "GPT-5.1 Auto",
+                "en": "GPT-5.1 Auto"
+              },
+              "description": {
+                "de": "Automatischer Reasoning-Aufwand basierend auf Abfragekomplexität",
+                "en": "Automatic reasoning effort based on query complexity"
+              },
+              "isAssignableByAgentManagers": false,
+              "createdBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+              "createdAt": "2026-06-23T09:11:34.3911236+00:00",
+              "modifiedBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+              "modifiedAt": "2026-06-23T09:11:34.3911236+00:00",
+              "systemScope": "Settings"
+            },
+            "version": "1.0"
+          },
+          {
+            "modelOptionsId": "gpt_5_4_auto_1m",
+            "isDefault": true,
+            "order": 2,
+            "modelOptions": {
+              "$type": "AzureOpenAiResponsesOptions",
+              "deploymentName": "gpt-5.4",
+              "toolChoice": "auto",
+              "allowParallelToolCalls": true,
+              "reasoningEffort": "medium",
+              "reasoningExtractorType": "openAiResponsesSummary",
+              "reasoningEffortJudge": {
+                "isEnabled": true,
+                "allowedLevels": [
+                  "none",
+                  "low",
+                  "medium",
+                  "high",
+                  "xHigh"
+                ]
+              },
+              "reasoningSummaryVerbosity": "auto",
+              "maxOutputTokens": 50000,
+              "maxInputTokens": 922000,
+              "shortenedHistoryMaxMessageCount": 20,
+              "pastToolCallResultsIncluded": 30,
+              "toolCallResultTokenLimit": 100000,
+              "maxToolCallIterations": 55,
+              "disableDynamicToolDiscovery": false,
+              "isFeatureModel": false,
+              "allowedUserGroupIds": [
+                "admin-group"
+              ],
+              "instructionConfigurations": [
+                {
+                  "instructionId": "code_formatting",
+                  "isEnabled": true
+                },
+                {
+                  "instructionId": "diagram_formatting"
+                },
+                {
+                  "instructionId": "math_formatting"
+                },
+                {
+                  "instructionId": "datetime"
+                },
+                {
+                  "instructionId": "user_identity"
+                },
+                {
+                  "instructionId": "chunk_context_enrichment"
+                },
+                {
+                  "instructionId": "image_generation"
+                },
+                {
+                  "instructionId": "language_hint"
+                },
+                {
+                  "instructionId": "data_source_priority"
+                },
+                {
+                  "instructionId": "tool_usage_hint"
+                },
+                {
+                  "instructionId": "image_analysis"
+                },
+                {
+                  "instructionId": "citation_guidance"
+                },
+                {
+                  "instructionId": "user_instructions"
+                },
+                {
+                  "instructionId": "feature_instructions"
+                },
+                {
+                  "instructionId": "file_upload_context"
+                },
+                {
+                  "instructionId": "lexicon_context"
+                }
+              ],
+              "useSystemRole": false,
+              "sendUserId": true,
+              "isLegacy": false,
+              "id": "gpt_5_4_auto_1m",
+              "modelId": "gpt-5.4",
+              "endpointId": "azure_openai",
+              "type": "reasoning",
+              "title": {
+                "de": "GPT-5.4 Auto (1M)",
+                "en": "GPT-5.4 Auto (1M)"
+              },
+              "description": {
+                "de": "Passt den Reasoning-Aufwand automatisch an die Komplexität jeder Anfrage an. Erweitertes 1M-Token-Kontextfenster für sehr große Eingaben.",
+                "en": "Automatically adjusts how hard it thinks to match the complexity of each request. Extended 1M-token context window for very large inputs."
+              },
+              "isAssignableByAgentManagers": false,
+              "createdBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+              "createdAt": "2026-06-23T09:11:35.0035438+00:00",
+              "modifiedBy": "1d840b51-a3d9-4477-8344-ffacdefa97e5",
+              "modifiedAt": "2026-07-10T12:40:48.5940756+00:00",
+              "systemScope": "Settings"
+            },
+            "version": "1.0"
+          },
+          {
+            "modelOptionsId": "gpt_4_1",
+            "isDefault": false,
+            "order": 3,
+            "modelOptions": {
+              "$type": "AzureOpenAiChatOptions",
+              "deploymentName": "gpt-4.1",
+              "toolChoice": "auto",
+              "allowParallelToolCalls": true,
+              "topP": 1,
+              "stopSequences": [],
+              "maxOutputTokens": 15000,
+              "maxInputTokens": 1047576,
+              "temperature": 0,
+              "shortenedHistoryMaxMessageCount": 20,
+              "pastToolCallResultsIncluded": 20,
+              "maxToolCallIterations": 30,
+              "disableDynamicToolDiscovery": false,
+              "isFeatureModel": false,
+              "allowedUserGroupIds": [],
+              "instructionConfigurations": [],
+              "useSystemRole": false,
+              "sendUserId": true,
+              "isLegacy": true,
+              "id": "gpt_4_1",
+              "modelId": "gpt-4.1",
+              "endpointId": "azure_openai",
+              "type": "chat",
+              "title": {
+                "de": "GPT-4.1",
+                "en": "GPT-4.1"
+              },
+              "description": {
+                "de": "Großer Kontext für Dokumente",
+                "en": "Large context for documents"
+              },
+              "isAssignableByAgentManagers": false,
+              "createdBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+              "createdAt": "2026-06-23T09:11:34.0943977+00:00",
+              "modifiedBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+              "modifiedAt": "2026-06-23T09:11:34.0943977+00:00",
+              "systemScope": "Settings"
+            },
+            "version": "1.0"
+          },
+          {
+            "modelOptionsId": "gpt_5_5_auto_1m",
+            "isDefault": false,
+            "order": 4,
+            "modelOptions": {
+              "$type": "AzureOpenAiResponsesOptions",
+              "deploymentName": "gpt-5.5",
+              "toolChoice": "auto",
+              "allowParallelToolCalls": false,
+              "reasoningEffort": "medium",
+              "reasoningExtractorType": "openAiResponsesSummary",
+              "reasoningEffortJudge": {
+                "isEnabled": true,
+                "allowedLevels": [
+                  "none",
+                  "low",
+                  "medium",
+                  "high",
+                  "xHigh"
+                ]
+              },
+              "reasoningSummaryVerbosity": "auto",
+              "maxOutputTokens": 50000,
+              "maxInputTokens": 922000,
+              "shortenedHistoryMaxMessageCount": 20,
+              "pastToolCallResultsIncluded": 20,
+              "toolCallResultTokenLimit": 100000,
+              "maxToolCallIterations": 30,
+              "disableDynamicToolDiscovery": false,
+              "isFeatureModel": false,
+              "allowedUserGroupIds": [
+                "admin-group"
+              ],
+              "instructionConfigurations": [
+                {
+                  "instructionId": "code_formatting",
+                  "isEnabled": true
+                }
+              ],
+              "useSystemRole": false,
+              "sendUserId": true,
+              "isLegacy": false,
+              "id": "gpt_5_5_auto_1m",
+              "modelId": "gpt-5.5",
+              "endpointId": "azure_openai",
+              "type": "reasoning",
+              "title": {
+                "de": "GPT-5.5 Auto (1M)",
+                "en": "GPT-5.5 Auto (1M)"
+              },
+              "description": {
+                "de": "Passt den Reasoning-Aufwand automatisch an die Komplexität jeder Anfrage an. Erweitertes 1M-Token-Kontextfenster für sehr große Eingaben.",
+                "en": "Automatically adjusts how hard it thinks to match the complexity of each request. Extended 1M-token context window for very large inputs."
+              },
+              "isAssignableByAgentManagers": false,
+              "createdBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+              "createdAt": "2026-06-23T09:11:35.5869469+00:00",
+              "modifiedBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+              "modifiedAt": "2026-06-23T09:11:35.5869469+00:00",
+              "systemScope": "Settings"
+            },
+            "version": "1.0"
+          }
+        ],
+        "dataSourceConfigurations": [],
+        "fileUploadDataSourceOptionsId": {
+          "dataSourceOptionsId": "index-gptsearch-userfiles",
+          "order": 0,
+          "dataSourceOptions": {
+            "$type": "AzureSearchDataSourceOptions",
+            "contentFields": [
+              "name",
+              "chunk"
+            ],
+            "documentCount": 10,
+            "indexName": "index-gptsearch-userfiles",
+            "queryType": "full",
+            "vectorFields": [
+              "chunkVector"
+            ],
+            "fileOrderField": "chunk_idx",
+            "nameField": "name",
+            "urlField": "url",
+            "titleField": "title",
+            "pageNumberField": "pageNumber",
+            "boundingPolygonsField": "boundingPolygons",
+            "chunkIdField": "chunk_id",
+            "id": "index-gptsearch-userfiles",
+            "endpointId": "azure_search",
+            "title": {
+              "de": "Index für hochgeladene Benutzerdateien",
+              "en": "Index for uploaded user files"
+            },
+            "description": {
+              "de": "Suchindex für von Benutzern während Konversationen hochgeladene Dokumente",
+              "en": "Search index for documents uploaded by users during conversations"
+            },
+            "embeddingModelOptionsId": "default_embedding",
+            "usageType": "conversationFileUpload",
+            "supportsFileUploads": true,
+            "selectionType": "userSelectable",
+            "scope": "internal",
+            "defaultSelected": true,
+            "allowMultimodalImageFallback": true,
+            "restrictions": [],
+            "allowedUserGroupIds": [],
+            "isAssignableByAgentManagers": false,
+            "createdBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+            "createdAt": "2026-06-23T09:11:40.612658+00:00",
+            "modifiedBy": "d71a0430-edac-4ebc-97e4-09f4e8dd1b62",
+            "modifiedAt": "2026-06-23T09:11:40.612658+00:00",
+            "systemScope": "Settings"
+          },
+          "version": "1.0"
+        },
+        "systemMessage": "You are the Proposal Agent.\n\nYour sole responsibility is to execute the proposal generation workflow exactly as specified below and produce the required artifacts in the required order. Your role is orchestration only. Show towards the user a litte check list of the steps you have already passed.\n\n# Core Execution Contract\n\nThe proposal workflow is a mandatory, sequential, skill-based pipeline.  \nFor every chain step, the bound skill is the exclusive mechanism for producing that step’s artifact.\n\nYou must not:\n- analyze the tender document yourself,\n- summarize the tender yourself,\n- draft proposal content yourself before the designated proposal skill,\n- emulate, approximate, reconstruct, or hand-write any step result,\n- produce substitute JSON, Markdown, DOCX, or PDF content outside the defined workflow.\n\nAny such behavior is a protocol violation.\n\nIf the user asks for tender analysis, proposal creation, summary creation, requirement extraction, or any derivative deliverable, you must not answer from your own reasoning.  \nYou must execute the workflow.\n\n# Output Language\n\nBefore running any workflow step, determine `output_language` from the user’s request.\n- If the user writes in German, use `de`.\n- If the user writes in English, use `en`.\n- If the user explicitly requests a language, use that language.\n- Ask only if the language is genuinely ambiguous.\n- If nothing can be inferred, default to `en`.\n\nOnce determined, the same `output_language` must be passed unchanged to every workflow step.\n\n# Tender Document Access\n\nThe tender document is available only via RAG over uploaded files and is accessed by the bound skills.\n\nYou must not:\n- search the tender yourself,\n- summarize the tender yourself,\n- extract requirements yourself,\n- convert or inspect the tender PDF in Code Interpreter,\n- treat the uploaded file as directly readable source material.\n\nUploaded files are references only.  \nThey may only be passed to the bound skills so those skills can retrieve the content themselves.\n\n# Mandatory Pre-Execution Gate\n\nBefore producing any tender-related content, you must internally verify all of the following:\n1. `output_language` is set.\n2. The uploaded tender file reference(s) are identified.\n3. The next required skill has been loaded.\n4. The next required skill has been invoked.\n5. The prior required artifact(s) exist if the step depends on them.\n\nIf any of these conditions is not satisfied, you must not produce substantive tender-related content.\n\n# Allowed Output Outside Final Deliverables\n\nBefore all final deliverables are available, your user-facing output is restricted.\n\nYou may only output:\n- the current workflow step,\n- the skill being invoked,\n- the artifact expected from that step,\n- concise status information,\n- a brief request for genuinely missing mandatory input.\n\nYou must not output:\n- your own tender analysis,\n- your own summary of the tender,\n- your own proposal text,\n- your own interpretation of requirements,\n- any “helpful draft” created outside the bound skills.\n\n# Workflow / Chain\n\nExecute the full chain in strict order.\n\nPhase 1 — PreProcessing\n1. ExecutiveSummary → skill `proposal-executive-summary` → `ExecutiveSummaryResult.json`\n2. ClientContext → skill `proposal-client-context` → `ClientContextResult.json`\n3. Functional → skill `proposal-functional` → `FunctionalResult.json`\n4. Formal → skill `proposal-formal` → `FormalResult.json`\n5. Constraints → skill `proposal-constraints` → `ConstraintsResult.json`\n\nPhase 2 — Consolidation\n6. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`\n7. Report → skill `proposal-report` → `ReportResult.md`\n8. Proposal → skill `proposal-proposal` → `ProposalResult.md`\n\nExport\n9. Convert `ProposalResult.md` to `Proposal.docx`\n10. Convert `ReportResult.md` to `Report.pdf`\n\nFinal deliverables\n- `ProposalResult.md`\n- `Proposal.docx`\n- `ReportResult.md`\n- `Report.pdf`\n\n# Sequential Execution Rule\n\nExecution is strictly sequential.\n\nFor each step, you must:\n1. load the bound skill,\n2. invoke the bound skill,\n3. confirm the produced artifact filename,\n4. move to the next step.\n\nYou must not:\n- skip steps,\n- merge steps,\n- batch-generate steps,\n- paraphrase a missing step result,\n- continue if a required dependency artifact is missing.\n\n# Dependency Rule\n\nConsolidation steps require all PreProcessing artifacts to exist first.\n\nSpecifically:\n- `proposal-open-points` may only run after:\n  - `ExecutiveSummaryResult.json`\n  - `ClientContextResult.json`\n  - `FunctionalResult.json`\n  - `FormalResult.json`\n  - `ConstraintsResult.json`\n- `proposal-report` may only run after:\n  - all files above plus `OpenPointsResult.json`\n- `proposal-proposal` may only run after:\n  - all files above plus `OpenPointsResult.json`\n\nIf a dependency is missing, stop and continue with the missing prerequisite step instead.\n\n# Artifact Integrity Rule\n\nEvery workflow artifact must originate from its bound skill.  \nNo artifact may be self-authored by the agent as a substitute.\n\nThe final proposal content must originate from `ProposalResult.md` only.  \nThe final report content must originate from `ReportResult.md` only.\n\nYou must not return any self-authored proposal or report text as a substitute for those files.\n\n# Code Interpreter Restriction\n\nCode Interpreter may only be used for:\n- validation performed within the skills,\n- export of `ProposalResult.md` to `Proposal.docx`,\n- export of `ReportResult.md` to `Report.pdf`.\n\nCode Interpreter must not be used to:\n- read the input tender PDF,\n- extract tender text,\n- convert the tender PDF for your own analysis,\n- derive requirements from uploaded tender documents.\n\n# Recovery Rule for Violations\n\nIf you detect that you have produced tender-related analysis, summary, proposal text, or any workflow artifact without the required skill execution, you must:\n1. explicitly state that the workflow was not followed,\n2. discard that content as non-compliant,\n3. resume from the first missing required workflow step,\n4. continue the official chain.\n\nDo not defend, reuse, or build on non-compliant intermediate content.\n\n# User Interaction Rule\n\nAsk the user only when mandatory information is missing and cannot be inferred from:\n- the user request,\n- the uploaded file references,\n- the workflow state.\n\nDo not ask for confirmation if the next workflow step is already determined.\n\nDo not ask whether you should use the workflow.  \nYou must use the workflow.\n\n# Determinism Rule\n\nPrioritize determinism, reproducibility, and schema conformity over helpfulness, speed, or narrative fluency.\n\nIf there is a conflict between:\n- being helpful by improvising, and\n- following the workflow strictly,\n\nyou must follow the workflow strictly.\n\n# Final Compliance Check\n\nBefore the final response, internally verify that you can account for:\n- every invoked skill,\n- every produced intermediate artifact,\n- `ProposalResult.md`,\n- `Proposal.docx`,\n- `ReportResult.md`,\n- `Report.pdf`.\n\nIf any required artifact is missing, the run is incomplete and you must continue the workflow instead of producing a substitute answer.\n\n# Forbidden Behaviors\n\nThe following are explicitly forbidden:\n- direct tender analysis by the agent,\n- direct proposal drafting before `proposal-proposal`,\n- self-authored replacement JSON,\n- self-authored replacement Markdown deliverables,\n- answering “helpfully” instead of executing the workflow,\n- using uploaded tender PDFs as directly readable input,\n- using Code Interpreter to inspect or convert tender PDFs for analysis,\n- summarizing likely tender content from context,\n- inventing facts, requirements, constraints, or formal rules.\n\n# Operating Principle\n\nYou are not the author of the proposal contents.  \nYou are the orchestrator of a controlled proposal-generation pipeline.\n\nIf a skill is available and assigned to a step, you must use it.  \nIf a step has not been executed, you must not simulate it.",
+        "starterMessages": [
+          {
+            "prompt": {
+              "en": "Analyse the tender documents and create a proposal",
+              "de": "Analysiere die Ausschreibungsunterlagen und erstelle ein Angebot"
+            },
+            "displayContent": {
+              "en": "Create a proposal",
+              "de": "Erstelle ein Angebot"
+            },
+            "requiredFeatures": []
+          }
+        ],
+        "quickActions": [],
+        "supportedFeatureIds": [
+          {
+            "id": "code_interpreter",
+            "title": {
+              "de": "Code Interpreter",
+              "en": "Code Interpreter"
+            },
+            "description": {
+              "de": "Code Interpreter ermöglicht das Generieren und Bearbeiten von PowerPoint-, Word- und weiteren Office-Dateien direkt aus Prompts.",
+              "en": "Code Interpreter enables generating and editing PowerPoint, Word, and other Office files directly from prompts."
+            },
+            "icon": "mgc_code_line",
+            "initialProgressMessage": {
+              "en": "Calling MCP-Server 'Code Interpreter'…",
+              "de": "Rufe MCP-Server \"Code Interpreter\" auf...",
+              "fr": "Appel du serveur MCP « Code Interpreter »…",
+              "it": "Chiamata al server MCP 'Code Interpreter'…"
+            },
+            "conflictingFeatureIds": [],
+            "requiredFeatureIds": [],
+            "type": "agentCore",
+            "dataSource": "none",
+            "requiresConversationFileUpload": false,
+            "showInAgentSelectionFeatureList": false,
+            "persistToolCallResult": "none"
+          },
+          {
+            "id": "search_uploaded_documents",
+            "title": {
+              "en": "Uploaded Document Search",
+              "de": "Hochgeladene Dokumentensuche",
+              "fr": "Recherche dans les documents téléchargés",
+              "it": "Ricerca nei documenti caricati"
+            },
+            "description": {
+              "en": "Search your uploaded documents to locate information within them.",
+              "de": "Durchsucht die hochgeladenen Dokumente nach gesuchten Informationen.",
+              "fr": "Recherchez dans vos documents téléchargés pour localiser les informations qu'ils contiennent.",
+              "it": "Cerca nei tuoi documenti caricati per individuare le informazioni al loro interno."
+            },
+            "icon": "mgc_search_ai_line",
+            "conflictingFeatureIds": [],
+            "requiredFeatureIds": [],
+            "type": "agentCore",
+            "dataSource": "internal",
+            "requiresConversationFileUpload": true,
+            "showInAgentSelectionFeatureList": true,
+            "persistToolCallResult": "none"
+          },
+          {
+            "id": "ask_user",
+            "title": {
+              "en": "Ask the user",
+              "de": "Benutzer fragen"
+            },
+            "description": {
+              "en": "Lets the assistant pause mid-answer to ask the user a multiple-choice question (single or multi-select, optionally with a recommended option) and continue using the chosen answer.",
+              "de": "Erlaubt dem Assistenten, mitten in einer Antwort eine Multiple-Choice-Frage zu stellen (Einfach- oder Mehrfachauswahl, optional mit Empfehlung) und mit der gewählten Antwort fortzufahren."
+            },
+            "icon": "mgc_chat_3_line",
+            "conflictingFeatureIds": [],
+            "requiredFeatureIds": [],
+            "type": "agentCore",
+            "dataSource": "none",
+            "requiresConversationFileUpload": false,
+            "showInAgentSelectionFeatureList": true,
+            "persistToolCallResult": "none"
+          },
+          {
+            "id": "image_analysis",
+            "title": {
+              "en": "Image Analysis",
+              "de": "Bildanalyse",
+              "fr": "Analyse d'images",
+              "it": "Analisi delle immagini"
+            },
+            "description": {
+              "en": "Analyze uploaded images to identify and extract relevant information.",
+              "de": "Analysiert hochgeladene Bilder, um relevante Informationen zu identifizieren und zu extrahieren.",
+              "fr": "Analysez les images téléchargées pour identifier et extraire les informations pertinentes.",
+              "it": "Analizza le immagini caricate per identificare ed estrarre le informazioni rilevanti."
+            },
+            "icon": "mgc_pic_ai_line",
+            "conflictingFeatureIds": [],
+            "requiredFeatureIds": [],
+            "type": "agentCore",
+            "dataSource": "internal",
+            "requiresConversationFileUpload": true,
+            "showInAgentSelectionFeatureList": false,
+            "persistToolCallResult": "none"
+          },
+          {
+            "id": "fetch_url",
+            "title": {
+              "en": "Fetch URL",
+              "de": "URL abrufen",
+              "fr": "Récupérer l'URL",
+              "it": "Recupera URL"
+            },
+            "description": {
+              "en": "Retrieve the content of web pages from links you provide in the chat.",
+              "de": "Ruft den Inhalt von Webseiten ab, deren Links du im Chat angibst.",
+              "fr": "Récupère le contenu des pages web à partir des liens que vous fournissez dans le chat.",
+              "it": "Recupera il contenuto delle pagine web dai link che fornisci nella chat."
+            },
+            "icon": "mgc_link_line",
+            "conflictingFeatureIds": [],
+            "requiredFeatureIds": [],
+            "type": "agentCore",
+            "dataSource": "none",
+            "requiresConversationFileUpload": false,
+            "showInAgentSelectionFeatureList": false,
+            "persistToolCallResult": "none"
+          }
+        ],
+        "introduction": {
+          "en": " Analyzes a tender document and drives the adesso proposal chain to produce a winning, structured proposal. Orchestrates the proposalgenerator plan step by step via dedicated skills."
+        },
+        "runtimeType": "agentFramework",
+        "allowedUserGroups": [],
+        "instructionConfiguration": [
+          {
+            "instructionId": "diagram_formatting"
+          },
+          {
+            "instructionId": "math_formatting"
+          },
+          {
+            "instructionId": "code_formatting"
+          },
+          {
+            "instructionId": "datetime"
+          },
+          {
+            "instructionId": "user_identity"
+          },
+          {
+            "instructionId": "language_hint"
+          },
+          {
+            "instructionId": "data_source_priority"
+          },
+          {
+            "instructionId": "citation_guidance"
+          },
+          {
+            "instructionId": "tool_usage_hint"
+          },
+          {
+            "instructionId": "user_instructions"
+          },
+          {
+            "instructionId": "feature_instructions"
+          },
+          {
+            "instructionId": "file_upload_context"
+          },
+          {
+            "instructionId": "lexicon_context"
+          }
+        ],
+        "categories": [
+          {
+            "id": "agent-category-sales",
+            "order": 3,
+            "title": {
+              "de": "Sales",
+              "en": "Sales"
+            }
+          }
+        ],
+        "supportsPromptEditing": false,
+        "supportsUserCustomization": true,
+        "supportsPromptRegenerate": false,
+        "supportsMessageFeedback": true,
+        "isInternalAgent": false,
+        "isDefault": false,
+        "conversationAutoDeleteSettings": {
+          "mode": "disabled"
+        },
+        "lexiconConfigurations": [],
+        "version": "1.0"
+      }
+    }
+  ]
+}
