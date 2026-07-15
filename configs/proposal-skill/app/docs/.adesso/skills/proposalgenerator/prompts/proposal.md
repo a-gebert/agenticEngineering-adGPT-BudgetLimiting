@@ -7,6 +7,7 @@ You receive the artifacts produced by the preceding chain steps as input files. 
 - `FormalResult.json` — formal proposal requirements (delivery scope, deadlines, format, submission rules, eligibility) marked binding/optional. Conforms to `formal_requirements.json`.
 - `ConstraintsResult.json` — project constraints (budget, timeline, technical/organisational boundaries) with aspect cross-references. Conforms to `constraints.json`.
 - `OpenPointsResult.json` — gap analysis: aspects with no requirement mapped, with severity and coverage statistics. Conforms to `open_points.json`.
+- `ProfilerMatchResult.json` — anonymised, role-based team profiles (`team[]`) and anonymised reference projects (`references[]`) matched from the adesso Profiler. Conforms to `profiler_match.json`.
 - `SolutionCatalogResult.json` — solution blocks (needs, addressed requirements, constraints, evaluation criteria). Conforms to `solution_catalog.json`.
 - `SolutionProposalResult.md` — the researched, unambiguous solution proposal (one recommended technology per block plus a consolidated target architecture, with cited sources).
 
@@ -118,7 +119,7 @@ Write approximately 1 page:
 
 2.5 **Project Organisation** (`### 2.5 ...`)
 Write approximately 1 page:
-- Describe adesso's proposed project team composition — list each role with a brief profile (seniority, key competence, allocation in %)
+- Populate the project team from `ProfilerMatchResult.json` `team[]` (anonymised, role-based) — one row per entry with role, seniority, key skills, and allocation. Do NOT invent team members. For entries with `matched: false`, insert the row as a placeholder and add its `note` (e.g. "im Profiler recherchieren"). Never output person names, locations, or availability.
 - Present team structure as a table:
   ```
   | Role | Responsibility | Allocation |
@@ -241,14 +242,15 @@ Then add a client acceptance block with placeholders for location, date, stamp, 
 
 Write approximately 1 page:
 - Open with a paragraph highlighting adesso's relevant industry experience (based on `client_context.industry`) — be specific about years of experience and number of comparable projects
-- Present 2–3 reference projects in a structured format (if derivable from formal eligibility requirements):
+- Present the reference projects from `ProfilerMatchResult.json` `references[]` — anonymised, one block per entry. Never output a client name:
   ```
-  **Reference Project: [Title]**
-  Client: [Industry/anonymised] | Duration: [X months] | Team Size: [N]
-  Scope: [Brief description]
-  Relevance: [Why this project is comparable]
+  **Referenzprojekt: [industry]**
+  Branche: [industry] | Dauer: [duration]
+  Umfang: [scope]
+  Relevanz: [relevance]
   ```
-- Describe the proposed team's key qualifications — list each key role with seniority, relevant experience, and certifications
+  For entries with `matched: false`, mark the reference as a placeholder ("Referenz im Fachbereich zu bestätigen"). If `references[]` is empty, write one placeholder line and do NOT invent references.
+- Describe the proposed team's key qualifications from `ProfilerMatchResult.json` `team[]` — per role: seniority, key skills, certifications, years of experience (anonymised, no names). For `matched: false` roles, note that the profile must be sourced from the Profiler.
 - Reference relevant certifications if mentioned in formal requirements (ISO 27001, ITIL, etc.)
 - Close with: *Detailed CVs to be provided as separate attachment.*
 
@@ -277,3 +279,4 @@ Tweak:
 - If data is missing for a section, acknowledge this explicitly and suggest it as a topic for the scoping workshop.
 - Formal requirements marked as binding must be explicitly addressed — show how the proposal complies with each.
 - Address high-severity open points proactively — frame them as "topics for joint clarification" rather than gaps.
+- Team members (Kap. 2.5), key profiles and reference projects (Annex A) come EXCLUSIVELY from `ProfilerMatchResult.json` — never invent persons, CVs, client names, or reference projects. Unmatched needs (`matched: false`) become placeholders with a Profiler/Fachbereich hint.
