@@ -111,7 +111,7 @@
         "name": "SolutionProposal",
         "description": "Research technologies and best practices per solution block via the DeepResearch tool (with a mandatory user clarification gate for flagged blocks) and condense them into one unambiguous solution proposal.",
         "depends_on": "Solution",
-        "next": null,
+        "next": "StaffingCatalog",
         "resources": {
           "prompt": "/prompts/solution_proposal.md",
           "output": "/schema/solution_proposal_output.md",
@@ -122,6 +122,48 @@
           ],
           "batch": [
             "/solution/SolutionCatalog.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 3,
+        "name": "StaffingCatalog",
+        "description": "Derive the roles/skills the proposed solution needs (each with a Profiler search brief) plus reference-search briefs. Deterministic, no external knowledge, no Profiler calls.",
+        "depends_on": "Solution",
+        "next": "ProfilerMatch",
+        "resources": {
+          "prompt": "/prompts/staffing_catalog.md",
+          "output": "/schema/staffing_catalog.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/staffing_catalog.json"
+          ],
+          "batch": [
+            "/solution/SolutionProposal.md",
+            "/preprocessing/Functional.json",
+            "/preprocessing/Constraints.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 4,
+        "name": "ProfilerMatch",
+        "description": "Match real adesso colleagues and comparable projects via the Profiler MCP against the staffing catalogue; produce anonymised, role-based team entries and anonymised references. Mandatory clarification gate when matching is ambiguous.",
+        "depends_on": "Solution",
+        "next": null,
+        "resources": {
+          "prompt": "/prompts/profiler_match.md",
+          "output": "/schema/profiler_match.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/profiler_match.json"
+          ],
+          "batch": [
+            "/solution/StaffingCatalog.json"
           ],
           "artifacts": {}
         }
@@ -203,7 +245,9 @@
             "/preprocessing/Constraints.json",
             "/consolidation/OpenPoints.json",
             "/solution/SolutionCatalog.json",
-            "/solution/SolutionProposal.md"
+            "/solution/SolutionProposal.md",
+            "/solution/StaffingCatalog.json",
+            "/solution/ProfilerMatch.json"
           ],
           "artifacts": {}
         }
