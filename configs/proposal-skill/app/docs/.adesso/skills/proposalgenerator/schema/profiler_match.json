@@ -39,7 +39,8 @@
                     "scope": { "type": "string", "description": "Anonymised scope description, in output_language." },
                     "duration": { "type": "string", "description": "Approximate duration (e.g. '8 Monate')." },
                     "relevance": { "type": "string", "description": "Why comparable to this bid, in output_language." },
-                    "matched": { "type": "boolean", "description": "True if backed by real project experience; false means placeholder." }
+                    "matched": { "type": "boolean", "description": "True if backed by real project experience; false means placeholder." },
+                    "note": { "type": "string", "description": "Optional note; for unmatched entries the placeholder/hint text, in output_language." }
                 },
                 "required": ["reference_id", "industry", "scope", "relevance", "matched"]
             }

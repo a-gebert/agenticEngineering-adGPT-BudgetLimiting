@@ -32,12 +32,21 @@
       "duration": "8 Monate",
       "relevance": "Vergleichbare POS-Modernisierung mit denselben Integrationsherausforderungen.",
       "matched": true
+    },
+    {
+      "reference_id": "REF-02",
+      "industry": "Logistik",
+      "scope": "Projekt mit Fokus auf Lagerverwaltungssysteme und Sensorik-Integration.",
+      "duration": "unbekannt",
+      "relevance": "Vergleichbare Anforderungen an Echtzeit-Tracking und Systemintegration in der Logistikbranche.",
+      "matched": false,
+      "note": "Unmatched — noch manuell zu bestätigen."
     }
   ],
   "coverage": {
     "roles_total": 2,
     "roles_matched": 1,
-    "references_total": 1,
+    "references_total": 2,
     "references_matched": 1
   },
   "errors": []

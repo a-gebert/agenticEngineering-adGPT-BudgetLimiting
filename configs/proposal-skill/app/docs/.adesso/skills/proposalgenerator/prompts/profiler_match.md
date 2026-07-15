@@ -26,7 +26,7 @@ Action — follow these steps in order:
 
 4. **Anonymise & condense.** Convert hits into role-based, anonymous entries: role title, seniority, skills, certifications, years of experience. NO person names anywhere.
 
-5. **Fallback.** If the Profiler returns nothing usable for a role, still emit a `team[]` entry with `matched: false`, `years_experience: 0`, and a `note` (in `output_language`) instructing to research the profile in the Profiler. Likewise emit an unmatched `references[]` entry with `matched: false` if a brief yields nothing. NEVER fabricate a person or a project.
+5. **Fallback.** If the Profiler returns nothing usable for a role, still emit a `team[]` entry with `matched: false`, `years_experience: 0`, `skills` set to that role's `required_skills` from the staffing catalogue (copied verbatim, NEVER invented), and a `note` (in `output_language`) instructing to research the profile in the Profiler. Likewise, if a `reference_briefs` entry yields nothing usable, still emit a `references[]` entry with `matched: false`, sourcing every field from that corresponding `reference_briefs` entry — never fabricate: `industry` from the brief's `domain`, `relevance` from the brief's `relevance_rationale`, `scope` as a short factual placeholder describing the brief's `technologies`/`search_skills` (not an invented project narrative), and `note` (in `output_language`) carrying the "unmatched — to be confirmed manually" hint. NEVER fabricate a person or a project.
 
 6. **Coverage.** Fill `coverage`: `roles_total` = number of catalogue roles, `roles_matched` = matched team entries, `references_total` = number of briefs, `references_matched` = matched references.
 
