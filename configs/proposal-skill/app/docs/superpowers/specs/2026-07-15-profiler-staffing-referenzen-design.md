@@ -155,6 +155,11 @@ Ablauf:
   Klarname; bei fehlenden Treffern Platzhalter + Verweis auf Fachbereich.
 - Die Halluzinations-Anweisungen in `proposal.md` (erfundene Referenzen/Profile/Team) werden
   entfernt bzw. auf Artefakt-Konsum umgestellt.
+- **Nachtrag (2026-07-15, User-Entscheidung):** `StaffingCatalogResult.json` wird zusätzlich als
+  Input in den `Proposal`-Schritt gereicht (Traceability der abgeleiteten Rollen). Es ist reiner
+  **Matching-Kontext** — `proposal.md` darf daraus **niemals** `location`/`availability` oder
+  `profiler_query`-Felder rendern; kundengerichtete Team-/Referenzdaten stammen ausschließlich aus
+  `ProfilerMatchResult.json`. Die Input-Liste in `proposal.md` weist diesen Hinweis explizit aus.
 - **Hinweis:** SLAs (Kap. 2.7) bleiben von diesem Schritt unberührt und weiterhin
   Platzhalter/Fachbereich (kein Profiler-Bezug) — separat unter G2 zu behandeln.
 
