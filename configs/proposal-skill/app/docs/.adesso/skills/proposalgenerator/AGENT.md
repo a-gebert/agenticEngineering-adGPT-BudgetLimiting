@@ -141,7 +141,7 @@ Specifically:
 - `proposal-report` may only run after:
   - all files above plus `OpenPointsResult.json`
 - `proposal-proposal` may only run after:
-  - all files above plus `OpenPointsResult.json`
+  - all files above plus `OpenPointsResult.json`, `SolutionCatalogResult.json`, and `SolutionProposalResult.md`
 
 If a dependency is missing, stop and continue with the missing prerequisite step instead.
 
