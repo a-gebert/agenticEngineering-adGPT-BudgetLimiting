@@ -7,6 +7,8 @@ You receive the artifacts produced by the preceding chain steps as input files. 
 - `FormalResult.json` — formal proposal requirements (delivery scope, deadlines, format, submission rules, eligibility) marked binding/optional. Conforms to `formal_requirements.json`.
 - `ConstraintsResult.json` — project constraints (budget, timeline, technical/organisational boundaries) with aspect cross-references. Conforms to `constraints.json`.
 - `OpenPointsResult.json` — gap analysis: aspects with no requirement mapped, with severity and coverage statistics. Conforms to `open_points.json`.
+- `SolutionCatalogResult.json` — solution blocks (needs, addressed requirements, constraints, evaluation criteria). Conforms to `solution_catalog.json`.
+- `SolutionProposalResult.md` — the researched, unambiguous solution proposal (one recommended technology per block plus a consolidated target architecture, with cited sources).
 
 Together these files cover the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, and the open points coverage analysis. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) using the structure carried in `ExecutiveSummaryResult.json` / `ClientContextResult.json`.
 
@@ -92,6 +94,7 @@ Write 5–7 substantial paragraphs (approximately 1.5 pages):
 
 2.3 **Technical Solution and Architecture** (`### 2.3 ...`)
 Write 1.5–2 pages covering the following aspects in depth:
+- Use `SolutionProposalResult.md` as the authoritative source for the technical architecture: adopt its consolidated target architecture and the one recommended technology per solution block. Do NOT introduce alternative technologies or re-open decisions already made there. Summarise (do not restate the full research) and reference the recommendations.
 - Propose a high-level technical architecture addressing all must-priority requirements
 - If the client specified technology preferences, align accordingly
 - Describe each key technical building block in its own paragraph: what it does, which requirements it addresses (reference FR-IDs), and how it fits into the overall architecture
