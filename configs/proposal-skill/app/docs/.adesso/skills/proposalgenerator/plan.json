@@ -83,6 +83,50 @@
         }
       }
     ],
+    "Solution": [
+      {
+        "step": 1,
+        "name": "SolutionCatalog",
+        "description": "Derive a solution catalogue: cluster functional/non-functional requirements into thematic solution blocks with research briefs and clarification flags.",
+        "depends_on": "PreProcessing",
+        "next": "SolutionProposal",
+        "resources": {
+          "prompt": "/prompts/solution_catalog.md",
+          "output": "/schema/solution_catalog.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/solution_catalog.json"
+          ],
+          "batch": [
+            "/preprocessing/Functional.json",
+            "/preprocessing/Constraints.json",
+            "/preprocessing/ClientContext.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 2,
+        "name": "SolutionProposal",
+        "description": "Research technologies and best practices per solution block via the DeepResearch tool (with a mandatory user clarification gate for flagged blocks) and condense them into one unambiguous solution proposal.",
+        "depends_on": "Solution",
+        "next": null,
+        "resources": {
+          "prompt": "/prompts/solution_proposal.md",
+          "output": "/schema/solution_proposal_output.md",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/solution_proposal_output.md"
+          ],
+          "batch": [
+            "/solution/SolutionCatalog.json"
+          ],
+          "artifacts": {}
+        }
+      }
+    ],
     "Mapping": [],
     "Consolidation": [
       {
@@ -157,7 +201,9 @@
             "/preprocessing/Functional.json",
             "/preprocessing/Formal.json",
             "/preprocessing/Constraints.json",
-            "/consolidation/OpenPoints.json"
+            "/consolidation/OpenPoints.json",
+            "/solution/SolutionCatalog.json",
+            "/solution/SolutionProposal.md"
           ],
           "artifacts": {}
         }
