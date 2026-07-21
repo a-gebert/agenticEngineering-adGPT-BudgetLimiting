@@ -11,8 +11,9 @@ You receive the artifacts produced by the preceding chain steps as input files. 
 - `StaffingCatalogResult.json` — the derived role/skill catalogue (conforms to `staffing_catalog.json`). MATCHING CONTEXT ONLY: never render its `profiler_query` fields, `location`, or `availability` in the proposal. Client-facing team and reference data come exclusively from `ProfilerMatchResult.json`.
 - `SolutionCatalogResult.json` — solution blocks (needs, addressed requirements, constraints, evaluation criteria). Conforms to `solution_catalog.json`.
 - `SolutionProposalResult.md` — the researched, unambiguous solution proposal (one recommended technology per block plus a consolidated target architecture, with cited sources).
+- `EstimationResult.json` — the deterministic effort estimation: work packages with per-role person-day ranges and an aggregated `role_summary[]` (person-day range per role) plus `total_effort`. Conforms to `estimator.json`. This is the ONLY source for the price table in chapter 3 — never re-estimate effort yourself.
 
-Together these files cover the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, the open points coverage analysis, the solution catalogue, and the researched solution proposal. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) using the structure carried in `ExecutiveSummaryResult.json` / `ClientContextResult.json`.
+Together these files cover the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, the open points coverage analysis, the solution catalogue, the researched solution proposal, and the effort estimation. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) using the structure carried in `ExecutiveSummaryResult.json` / `ClientContextResult.json`.
 
 Your task is to transform this structured analysis into a **structured proposal draft** following adesso's official proposal template (see the **Template** section below). The proposal must be a convincing, client-facing document that directly addresses the customer's requirements and positions adesso as the ideal implementation partner.
 
@@ -46,7 +47,7 @@ This rule applies to EVERY heading, table header, and label in the output withou
 Write a concise executive summary of the entire proposal (0.5–1 page). This is the first thing the decision-maker reads. Include:
 - One paragraph summarising the client's situation and project motivation
 - One paragraph summarising adesso's proposed solution and key benefits
-- One paragraph with headline figures: estimated effort range, timeline, team size
+- One paragraph with headline figures: estimated effort range (from `EstimationResult.json` `total_effort`), timeline, team size
 - Close with a confidence statement positioning adesso as the ideal partner
 
 Derive all content from the input data — do NOT use generic filler text.
@@ -174,11 +175,10 @@ Write approximately 1–1.5 pages following the official adesso pricing format:
 ```
 | Qualification / Role | Person-Days | Day Rate (EUR excl. VAT) | Price (EUR excl. VAT) |
 ```
-- List each role separately (Project Lead, Consultant, Architect, Developer, Test Manager, etc.)
-- Provide realistic effort ranges (e.g., "80–120") rather than exact numbers
-- Use "XXX" for day rates (these are confidential and filled in manually)
-- Include a **Total** row
-- Base estimates on the complexity indicated by the requirements
+- Populate this table directly from `EstimationResult.json` `role_summary[]` — one row per entry, `role_title` for "Qualification / Role" and `"{person_days_min}–{person_days_max}"` for "Person-Days". Do NOT re-estimate, round beyond the given values, or add roles not present in `role_summary[]`.
+- Use "XXX" for day rates (these are confidential and filled in manually) — "Price" stays "XXX" as well since it depends on the day rate.
+- Include a **Total** row from `EstimationResult.json` `total_effort` (`"{person_days_min}–{person_days_max}"`).
+- If `EstimationResult.json` is missing or `role_summary[]` is empty, acknowledge this explicitly and state that detailed effort estimation is pending — do NOT invent a price table.
 
 **Payment terms**: State that invoices are payable within 10 days net, and that all prices are exclusive of statutory VAT.
 

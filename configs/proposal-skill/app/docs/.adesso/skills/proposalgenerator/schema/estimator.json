@@ -1,0 +1,118 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.org/schemas/estimator.schema.json",
+    "title": "Estimator",
+    "description": "Deterministic effort estimation: work packages derived from the solution proposal, each with a per-role person-day range, aggregated into a role-based summary that feeds the proposal's price table. No external knowledge.",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "document_id": { "type": "string", "description": "Optional ID of the source document." },
+        "work_packages": {
+            "type": "array",
+            "description": "Work packages derived from the solution proposal's solution blocks, plus cross-cutting work packages not tied to a single block.",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "wp_id": { "type": "string", "description": "Unique work package ID (e.g. WP-01)." },
+                    "title": { "type": "string", "description": "Work package title, in output_language." },
+                    "solution_block_id": { "type": "string", "description": "Reference to the SB-xx solution block this work package belongs to. Omit for cross-cutting work packages (e.g. project management, QA, deployment) that are not tied to one block." },
+                    "description": { "type": "string", "description": "Short description of the work package's scope, in output_language." },
+                    "addressed_requirements": {
+                        "type": "array",
+                        "description": "FR/NFR IDs this work package helps deliver, carried over from the solution block if applicable.",
+                        "items": { "type": "string" }
+                    },
+                    "effort_by_role": {
+                        "type": "array",
+                        "description": "Per-role person-day range estimate for this work package.",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "role_id": { "type": "string", "description": "Reference to StaffingCatalogResult.json roles[].role_id." },
+                                "role_title": { "type": "string", "description": "Denormalised role title, in output_language, for readability." },
+                                "person_days_min": { "type": "number", "minimum": 0, "description": "Lower bound of the person-day estimate." },
+                                "person_days_max": { "type": "number", "minimum": 0, "description": "Upper bound of the person-day estimate." },
+                                "rationale": { "type": "string", "description": "Why this effort range for this role in this work package, in output_language." }
+                            },
+                            "required": ["role_id", "role_title", "person_days_min", "person_days_max", "rationale"]
+                        }
+                    },
+                    "assumptions": {
+                        "type": "array",
+                        "description": "Optional work-package-specific assumptions.",
+                        "items": { "type": "string" }
+                    }
+                },
+                "required": ["wp_id", "title", "description", "effort_by_role"]
+            }
+        },
+        "role_summary": {
+            "type": "array",
+            "description": "Person-day range per role, aggregated across all work_packages. Directly feeds the proposal's price table.",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "role_id": { "type": "string", "description": "Reference to StaffingCatalogResult.json roles[].role_id." },
+                    "role_title": { "type": "string", "description": "Role title, in output_language." },
+                    "seniority": {
+                        "type": "string",
+                        "enum": ["junior", "regular", "senior", "lead"],
+                        "description": "Seniority level, carried over from StaffingCatalogResult.json."
+                    },
+                    "person_days_min": { "type": "number", "minimum": 0, "description": "Aggregated lower bound across all work packages for this role." },
+                    "person_days_max": { "type": "number", "minimum": 0, "description": "Aggregated upper bound across all work packages for this role." }
+                },
+                "required": ["role_id", "role_title", "seniority", "person_days_min", "person_days_max"]
+            }
+        },
+        "total_effort": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Aggregated person-day range across all roles.",
+            "properties": {
+                "person_days_min": { "type": "number", "minimum": 0 },
+                "person_days_max": { "type": "number", "minimum": 0 }
+            },
+            "required": ["person_days_min", "person_days_max"]
+        },
+        "assumptions": {
+            "type": "array",
+            "description": "Global assumptions underlying the estimate (e.g. travel costs, client-provided test data).",
+            "items": { "type": "string" }
+        },
+        "confidence": {
+            "type": "string",
+            "enum": ["low", "medium", "high"],
+            "description": "Overall confidence in the estimate, informed by the open research questions/risks in SolutionProposalResult.md."
+        },
+        "errors": {
+            "type": "array",
+            "description": "Error block for validation or processing errors.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "code": { "type": "string" },
+                    "message": { "type": "string" },
+                    "severity": { "type": "string", "enum": ["info", "warning", "error"] },
+                    "reference": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "wp_id": { "type": "string" },
+                            "role_id": { "type": "string" }
+                        }
+                    }
+                },
+                "required": ["code", "message"]
+            }
+        }
+    },
+    "required": ["work_packages", "role_summary", "total_effort", "confidence"]
+}
