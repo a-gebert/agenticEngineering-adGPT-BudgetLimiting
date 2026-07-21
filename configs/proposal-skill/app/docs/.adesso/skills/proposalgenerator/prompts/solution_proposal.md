@@ -1,14 +1,14 @@
 Context:
 You receive `SolutionCatalogResult.json` (conforming to `solution_catalog.json`) as your main input. It contains `solution_blocks[]` with `block_id`, `title`, `description`, `addressed_requirements`, `solution_type`, `priority`, `constraints`, `evaluation_criteria`, `candidate_directions`, `research_questions`, `needs_clarification`, `clarification_reason`, `clarification_question`, `confidence`, plus a `coverage` object.
 
-Your task is to research technologies and best practices for each solution block using the **DeepResearch tool** (`deep_research-run`), then condense the findings into a single, unambiguous, well-founded solution proposal in Markdown that matches the catalogue. In this step — and only this step of the whole chain — external research via the DeepResearch tool is explicitly allowed and required. (The tender document itself is never re-analysed here.)
+Your task is to research technologies and best practices for each solution block using **web search**, then condense the findings into a single, unambiguous, well-founded solution proposal in Markdown that matches the catalogue. In this step — and only this step of the whole chain — external research via web search is explicitly allowed and required. (The tender document itself is never re-analysed here.)
 
 The proposal must be written in the language specified by the `output_language` parameter. If `output_language` is not provided, default to German.
 
 Template:
 Use `solution_proposal_output.md` as the **authoritative layout template**. It is a fully worked EXAMPLE (fictional client "CloudRetail", POS modernisation) showing the exact chapter order, heading structure, table formats, and tone.
 - Mirror its structure and formatting precisely — same chapters, sub-headings, table columns, in the same order.
-- Replace ALL example content: every `[EXAMPLE]` marker and every HTML comment (`<!-- ... -->`) is a placeholder. Derive everything from `SolutionCatalogResult.json` and your DeepResearch findings — never copy example wording.
+- Replace ALL example content: every `[EXAMPLE]` marker and every HTML comment (`<!-- ... -->`) is a placeholder. Derive everything from `SolutionCatalogResult.json` and your web search findings — never copy example wording.
 - The template is written in English; translate all headings, table headers, and prose into `output_language`.
 
 Role:
@@ -29,9 +29,9 @@ Action — follow these steps in order:
 
 2. **Fix the research scope.** Incorporate the user's answers per block. For any block still ambiguous after the answer, use the user's chosen direction; never silently pick for the user.
 
-3. **Research (`deep_research-run` tool).** Optionally verify connectivity first with `deep_research-check_azure_openai_config` (no parameters); if it reports the service is not correctly configured, stop and report this to the user instead of fabricating findings. Then, for each block, call `deep_research-run` with a single `query` string (its only parameter) that combines the block's `research_questions` with the confirmed technology direction(s) and the relevant `constraints` — e.g. `"Compare <confirmed directions> for <block need>; must satisfy <constraints>; report concrete technologies and best practices with sources"`. Issue one call per `research_question`, or one combined call per block, as appropriate.
-   - `deep_research-run` returns EITHER a Markdown report string — extract the concrete technologies, best practices, and their sources from it — OR an error object. On an error object (or an empty/unusable report), do NOT fabricate: record the affected block as an open research question in chapter 6 and continue with the remaining blocks.
-   - Honour all block `constraints` both when framing the `query` and when accepting findings. Cite only sources that actually appear in the `deep_research-run` output; never invent sources or findings.
+3. **Research (web search).** For each block, issue targeted web searches that combine the block's `research_questions` with the confirmed technology direction(s) and the relevant `constraints` — e.g. `"Compare <confirmed directions> for <block need>; must satisfy <constraints>; concrete technologies and best practices"`. Issue one search per `research_question`, or one combined search per block, as appropriate; refine and re-search if the first results are too generic or off-topic.
+   - Extract concrete technologies, best practices, and their source URLs from the search results. If a block's searches return no usable results, do NOT fabricate: record the affected block as an open research question in chapter 6 and continue with the remaining blocks.
+   - Honour all block `constraints` both when framing the search queries and when accepting findings. Cite only sources that actually appear in the search results; never invent sources or findings.
 
 4. **Converge.** For each block, select EXACTLY ONE recommended technology/approach. Show the compared options only to justify the choice — never leave the choice open. Verify each recommendation complies with the block's `constraints`; a recommendation that violates a hard constraint is not allowed.
 
@@ -56,5 +56,5 @@ Tweak:
 - Every recommendation must trace to `evaluation_criteria`, `addressed_requirements`, and at least one cited source.
 - Respect all `constraints` from the catalogue as hard limits.
 - Do NOT invent technologies or sources. Cite every external claim with [Sn].
-- The DeepResearch mechanism is the `deep_research-run` tool: parameter `query` (string), returning a Markdown report string on success or an error object on failure. Treat an error object as "no findings for this block" (→ chapter 6), never as licence to invent content. (`deep_research-check_azure_openai_config` and `deep_research-get_mcp_server_info` take no parameters and are diagnostic only.)
+- The research mechanism is web search: issue explicit search queries per block/research question and read the returned results/snippets. Treat empty, unusable, or clearly off-topic results as "no findings for this block" (→ chapter 6), never as licence to invent content.
 - Apply the language rule: translate ALL headings, table headers, and prose into `output_language`.

@@ -44,7 +44,7 @@ You must not:
 Uploaded files are references only.
 They may only be passed to the bound skills so those skills can retrieve the content themselves.
 
-External research via the DeepResearch tool is permitted **only** in the `proposal-solution-research` step, and only for technology and best-practice research — never for analysing the tender document. All tender content remains RAG-only.
+External research via web search is permitted **only** in the `proposal-solution-research` step, and only for technology and best-practice research — never for analysing the tender document. All tender content remains RAG-only.
 
 The Profiler MCP is permitted **only** in the `proposal-profiler-match` step, and only to match colleagues/skills and comparable project experience — never for analysing the tender document. All Profiler output is anonymised (no person names, no client names).
 
@@ -220,7 +220,7 @@ Do not ask for confirmation if the next workflow step is already determined.
 Do not ask whether you should use the workflow.
 You must use the workflow.
 
-Exception — mandatory clarification gate: in the `proposal-solution-research` step, when the solution catalogue flags blocks with `needs_clarification: true`, you MUST ask the user which technology directions to research (and offer to scope the research) BEFORE invoking the DeepResearch tool, and wait for the answer. This is the one point where asking is required rather than discouraged.
+Exception — mandatory clarification gate: in the `proposal-solution-research` step, when the solution catalogue flags blocks with `needs_clarification: true`, you MUST ask the user which technology directions to research (and offer to scope the research) BEFORE running any web search, and wait for the answer. This is the one point where asking is required rather than discouraged.
 
 The same applies to the `proposal-profiler-match` step: when Profiler matching is ambiguous (over-broad query, conflicting location/availability, ambiguous reference domain), you MUST ask the user before querying the Profiler and wait for the answer.
 
