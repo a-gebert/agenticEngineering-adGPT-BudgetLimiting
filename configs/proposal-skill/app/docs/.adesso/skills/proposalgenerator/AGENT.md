@@ -82,21 +82,21 @@ You must not output:
 Execute the full chain in strict order.
 
 Phase 1 — PreProcessing
-1. ExecutiveSummary → skill `proposal-executive-summary` → `ExecutiveSummaryResult.json`
-2. ClientContext → skill `proposal-client-context` → `ClientContextResult.json`
-3. Functional → skill `proposal-functional` → `FunctionalResult.json`
-4. Formal → skill `proposal-formal` → `FormalResult.json`
-5. Constraints → skill `proposal-constraints` → `ConstraintsResult.json`
+1. ClientContext → skill `proposal-client-context` → `ClientContextResult.json`
+2. Functional → skill `proposal-functional` → `FunctionalResult.json`
+3. Formal → skill `proposal-formal` → `FormalResult.json`
+4. Constraints → skill `proposal-constraints` → `ConstraintsResult.json`
 
 Phase 2 — Solution
-6. SolutionCatalog → skill `proposal-solution-catalog` → `SolutionCatalogResult.json`
-7. SolutionProposal → skill `proposal-solution-research` → `SolutionProposalResult.md`
-8. StaffingCatalog → skill `proposal-staffing-catalog` → `StaffingCatalogResult.json`
-9. ProfilerMatch → skill `proposal-profiler-match` → `ProfilerMatchResult.json`
+5. SolutionCatalog → skill `proposal-solution-catalog` → `SolutionCatalogResult.json`
+6. SolutionProposal → skill `proposal-solution-research` → `SolutionProposalResult.md`
+7. StaffingCatalog → skill `proposal-staffing-catalog` → `StaffingCatalogResult.json`
+8. ProfilerMatch → skill `proposal-profiler-match` → `ProfilerMatchResult.json`
 
 Phase 3 — Consolidation
-10. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`
-11. Report → skill `proposal-report` → `ReportResult.md`
+9. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`
+10. Report → skill `proposal-report` → `ReportResult.md`
+11. ExecutiveSummary → skill `proposal-executive-summary` → `ExecutiveSummaryResult.json` (runs here so the summary can incorporate the proposed solution)
 12. Proposal → skill `proposal-proposal` → `ProposalResult.md`
 
 Export
@@ -135,19 +135,21 @@ Solution steps run after PreProcessing and before Consolidation:
 - `proposal-solution-research` may only run after `SolutionCatalogResult.json` exists.
 - `proposal-staffing-catalog` may only run after `SolutionProposalResult.md`, `FunctionalResult.json`, and `ConstraintsResult.json` exist.
 - `proposal-profiler-match` may only run after `StaffingCatalogResult.json` exists.
-- `proposal-proposal` additionally consumes `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, and `ProfilerMatchResult.json`.
+- `proposal-executive-summary` may only run after `SolutionProposalResult.md` exists — it runs late in the chain specifically so the summary can incorporate the proposed solution, not just the tender ask.
+- `proposal-proposal` additionally consumes `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, and `ExecutiveSummaryResult.json`.
 
 Specifically:
 - `proposal-open-points` may only run after:
-  - `ExecutiveSummaryResult.json`
   - `ClientContextResult.json`
   - `FunctionalResult.json`
   - `FormalResult.json`
   - `ConstraintsResult.json`
 - `proposal-report` may only run after:
   - all files above plus `OpenPointsResult.json`
+- `proposal-executive-summary` may only run after:
+  - all files above plus `SolutionProposalResult.md` (see Solution steps above)
 - `proposal-proposal` may only run after:
-  - all files above plus `OpenPointsResult.json`, `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, and `ProfilerMatchResult.json`
+  - all files above plus `SolutionCatalogResult.json`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, and `ExecutiveSummaryResult.json`
 
 If a dependency is missing, stop and continue with the missing prerequisite step instead.
 

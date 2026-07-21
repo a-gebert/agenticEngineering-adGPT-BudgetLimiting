@@ -1,11 +1,15 @@
 Context:
+This step runs at the end of the Consolidation phase, immediately before `Proposal` — after all PreProcessing, Solution, `OpenPoints`, and `Report` steps have completed. This is deliberate: the executive summary must reflect not only the tender ask but also adesso's proposed solution, which only becomes known once `SolutionProposal` has run.
+
+You additionally receive `SolutionProposalResult.md` — the researched, unambiguous solution proposal (one recommended technology per solution block plus a consolidated target architecture). Use it only to inform the solution-related lines of the `executive_summary` text described below; do not restate its technical detail and do not use it for anything else in this step (chapters/sections/aspects/key_topics stay tender-only, see below).
+
 The tender document(s) are available **only via RAG (Retrieval-Augmented Generation)** and must be retrieved with **Document-Search**. The source text is **not** already in your context, and it is typically a PDF — not Markdown. You MUST issue Document-Search queries to obtain the relevant passages **before** any analysis; never assume the document is already present and never fabricate content from general knowledge. Document-Search returns **relevant passages/chunks** (each with a citation / page reference), not the full document as clean Markdown — reconstruct the document structure best-effort from the retrieved passages.
 
 Retrieval (RAG) — run your Document-Search in two waves:
 1. **Structure/outline:** broad queries (table of contents, chapter headings, section titles, document overview) to reconstruct `chapters` / `sections` / `aspects` best-effort.
 2. **Topic-specific:** queries for the issuing organization, tender purpose, scope of services/work, key requirements and constraints, timeline and deadlines, expected deliverables and outcomes.
 
-Your task is to analyze the document structure and semantic content, generate a concise executive summary of the tender, and produce a structured JSON output that conforms exactly to the `executive_summary.json` JSON Schema (the `ExecutiveSummary` schema).
+Your task is to analyze the document structure and semantic content, generate a concise executive summary of the tender **and adesso's proposed response**, and produce a structured JSON output that conforms exactly to the `executive_summary.json` JSON Schema (the `ExecutiveSummary` schema).
 
 All labels, summaries, and messages in your output must be written in the language specified by the `output_language` parameter. If `output_language` is not provided, default to English.
 
@@ -18,12 +22,15 @@ Neutral, systematic, and exact. Prioritize correctness over completeness — onl
 Action:
 Analyze the retrieved passages and produce a JSON object with the following structure:
 
-1. **executive_summary**: Write a summary of the tender document in **maximum 10 lines** (approximately 150–200 words). The summary must cover:
+1. **executive_summary**: Write a summary in **maximum 12 lines** (approximately 180–240 words). The first 10 lines cover the tender itself:
    - The issuing organization and purpose of the tender
    - The core scope of work or services requested
    - Key requirements or constraints mentioned
    - Timeline or deadlines if stated
    - Expected deliverables or outcomes
+   The final 2 lines cover adesso's response, derived from `SolutionProposalResult.md`:
+   - One line naming adesso's proposed solution direction / consolidated target architecture at a high level (no technical implementation detail — that belongs in `SolutionProposalResult.md` and the proposal's own architecture chapter)
+   - One closing line positioning adesso as the right partner for this engagement (confidence statement)
    Each line should convey a distinct piece of information. Do not repeat points.
 
 2. **key_topics**: Extract 5–10 key topics or themes that characterize the tender (e.g., `"Cloud Migration"`, `"IT-Sicherheit"`, `"Projektmanagement"`). Use the `output_language` for topic labels.
@@ -60,9 +67,10 @@ Produce the final result as a schema-validated file using the Code Interpreter �
 5. Write the final validated object to a file named `ExecutiveSummaryResult.json` (UTF-8, pretty-printed) and upload it back into the context so downstream steps can consume it.
 
 Tweak:
-- The executive summary MUST NOT exceed 10 lines. Count each sentence as one line.
+- The executive summary MUST NOT exceed 12 lines (10 tender lines + 2 solution/positioning lines). Count each sentence as one line.
 - Write the executive summary in the `output_language`.
-- Focus on facts stated in the document — do not infer or assume information not present.
+- Focus the first 10 lines on facts stated in the document — do not infer or assume information not present. The final 2 lines may synthesise `SolutionProposalResult.md` at a high level, but must not invent technologies or claims beyond what it states.
+- If `SolutionProposalResult.md` is unavailable or empty, omit the 2 solution/positioning lines and keep the summary to the tender-only 10 lines — do not fabricate a solution.
 - Keep `key_topics` to single short phrases (2–4 words each).
 - Use the `output_language` for all `label`, `summary`, and `message` values.
 - Keep `label` to exactly one concise sentence — no lists, no multi-sentence descriptions.
