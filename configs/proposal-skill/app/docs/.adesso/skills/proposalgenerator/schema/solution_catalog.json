@@ -75,7 +75,7 @@
                     },
                     "research_questions": {
                         "type": "array",
-                        "description": "Concrete research questions handed to the DeepResearch step.",
+                        "description": "Concrete research questions handed to the downstream web-search research step.",
                         "items": { "type": "string" },
                         "minItems": 1
                     },

@@ -3,7 +3,7 @@ The tender document(s) are available **only via RAG (Retrieval-Augmented Generat
 
 Retrieval (RAG) — run your Document-Search in two waves:
 1. **Structure/outline:** broad queries (table of contents, chapter headings, section titles, document overview) to reconstruct `chapters` / `sections` / `aspects` best-effort.
-2. **Topic-specific:** queries for the client's industry sector, existing systems / platforms / technologies, challenges and pain points, and strategic goals and desired outcomes.
+2. **Topic-specific:** queries for the name of the contracting organisation / client issuing the tender, the client's industry sector, existing systems / platforms / technologies, challenges and pain points, and strategic goals and desired outcomes.
 
 Your task is to extract the client context — the business environment, existing systems, challenges, and strategic goals — from the document. Additionally, you must cross-reference each finding with the semantic aspects identified in the document structure.
 
@@ -19,6 +19,7 @@ Action:
 Analyze the retrieved passages and produce a JSON object with the following structure:
 
 1. **client_context**: Extract the following from the document:
+   - `client_name`: The name of the client / contracting organisation issuing the tender (the addressee of the proposal), e.g. "CloudRetail AG". Use the exact organisation name as written in the document, including its legal form where stated. If several organisations are named, choose the one acting as the contracting authority / awarding party. If no client name can be determined from the retrieved passages, use the value "Unknown_Client" and add an `errors` entry with code `"CLIENT_NAME_NOT_FOUND"` and severity `"warning"`.
    - `industry`: Identify the client's industry sector (e.g., "Automotive", "Financial Services", "Public Sector", "Healthcare"). Use the most specific label supported by the document.
    - `current_systems`: List all existing systems, platforms, technologies, or tools mentioned in the document that the client currently uses (e.g., "SAP ERP", "Microsoft 365", "Oracle DB", "Legacy mainframe").
    - `pain_points`: Identify the key challenges, problems, or pain points the client describes or implies (e.g., "manual processes causing delays", "lack of real-time reporting", "system integration gaps").

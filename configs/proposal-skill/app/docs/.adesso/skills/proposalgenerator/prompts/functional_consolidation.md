@@ -8,7 +8,7 @@ You receive the artifacts produced by the preceding chain steps as a list of inp
 - `ConstraintsResult.json` — project constraints (budget, timeline, technical/organisational boundaries) with aspect cross-references. Conforms to `constraints.json`.
 - `OpenPointsResult.json` — gap analysis: aspects with no requirement mapped, with severity and coverage statistics. Conforms to `open_points.json`.
 
-Together these files carry the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, and the open points coverage analysis. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) using the structure carried in the input files. Any `…Result.json` file that is absent (its step has not run yet) is simply skipped — render the report from the files that exist and note the omission in the Summary and, if relevant, in the affected section.
+Together these files carry the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, and the open points coverage analysis. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) WITHIN the artifact that owns the requirement — `FunctionalResult.json` for functional/non-functional requirements, `FormalResult.json` for formal requirements, `ConstraintsResult.json` for constraint sources. Aspect IDs are NOT a shared namespace across artifacts; never resolve an `aspect_id` against another step's structure. Any `…Result.json` file that is absent (its step has not run yet) is simply skipped — render the report from the files that exist and note the omission in the Summary and, if relevant, in the affected section.
 
 Your task is to transform these structured JSON files into a human-readable Markdown summary report.
 
@@ -48,12 +48,12 @@ Transform the JSON input into a Markdown report with the following structure:
    - `ID` — the requirement's `id` field (e.g., FR-001)
    - `Description` — the requirement's `description` field
    - `Priority` — the requirement's `priority` field (must, should, nice-to-have)
-   - `Source` — **resolve via aspect chain**, NOT from `source_section` directly. Follow this lookup:
+   - `Source` — **resolve via aspect chain**, NOT from `source_section` directly. Resolve entirely within `FunctionalResult.json` (aspect IDs are not shared across artifacts). Follow this lookup:
      1. Take the requirement's `aspect_id`
-     2. Find the matching aspect in the `aspects` array
+     2. Find the matching aspect in `FunctionalResult.json`'s `aspects` array
      3. Read the aspect's `section_id`
-     4. Find the matching section in the `sections` array → get `section_heading`
-     5. Use the section's `chapter_id` to find the chapter in `chapters` → get `chapter_heading`
+     4. Find the matching section in the same artifact's `sections` array → get `section_heading`
+     5. Use the section's `chapter_id` to find the chapter in the same artifact's `chapters` → get `chapter_heading`
      6. Format: `<chapter_heading> > <section_heading> (<source_file>)`
 
    Sort by ID in ascending order. If `functional_requirements` is empty or `contains_functional_requirements` is `false`, write: *"No functional requirements identified."*
@@ -63,7 +63,7 @@ Transform the JSON input into a Markdown report with the following structure:
    - `Category` — the requirement's `category` field
    - `Description` — the requirement's `description` field
    - `Measurable Target` — the requirement's `measurable_target` field
-   - `Source` — **resolve via aspect chain** (same lookup as above): `<chapter_heading> > <section_heading> (<source_file>)`
+   - `Source` — **resolve via aspect chain** (same lookup as above, entirely within `FunctionalResult.json`): `<chapter_heading> > <section_heading> (<source_file>)`
 
    Sort by ID in ascending order. If `non_functional_requirements` is empty or `contains_non_functional_requirements` is `false`, write: *"No non-functional requirements identified."*
 
@@ -73,7 +73,7 @@ Transform the JSON input into a Markdown report with the following structure:
    - `Description` — the requirement's `description` field
    - `Binding` — render `binding` as **Yes** (mandatory) or **No** (optional/recommended)
    - `Deadline` — the requirement's `deadline` field (show `—` if `"not specified"`)
-   - `Source` — **resolve via aspect chain** (same lookup as above): `<chapter_heading> > <section_heading> (<source_file>)`
+   - `Source` — **resolve via aspect chain WITHIN `FormalResult.json`** (its own `aspects`/`sections`/`chapters`, NOT the Functional lookup — IDs are not shared): `<chapter_heading> > <section_heading> (<source_file>)`
 
    Sort by ID in ascending order. If `formal_requirements` is empty or `contains_formal_requirements` is `false`, write: *"No formal requirements identified."*
 
@@ -93,7 +93,7 @@ Transform the JSON input into a Markdown report with the following structure:
 
    **Organisational Constraints** (`### Organisational Constraints`): Render `constraints.organisational` as a bullet list. If empty, write: *"No organisational constraints identified."*
 
-   For each sub-section, resolve source references via the corresponding `aspect_ids` / `technical_aspect_ids` / `organisational_aspect_ids` arrays: look up each aspect_id in the `aspects` array, then follow the chain to section and chapter headings. Append a brief *"Sources: ..."* line listing the resolved chapter > section references.
+   For each sub-section, resolve source references via the corresponding `aspect_ids` / `technical_aspect_ids` / `organisational_aspect_ids` arrays: look up each aspect_id in `ConstraintsResult.json`'s own `aspects` array (constraint aspect IDs reference that artifact, not another step's), then follow the chain to section and chapter headings. Append a brief *"Sources: ..."* line listing the resolved chapter > section references.
 
    If the entire `constraints` object is missing, write: *"No project constraints extracted."*
 
@@ -127,7 +127,7 @@ Tweak:
 - CRITICAL: `report_output.md` contains an EXAMPLE using the fictional client "CloudRetail" and a POS modernisation scenario. Every piece of text marked with `[EXAMPLE]` and every HTML comment (`<!-- ... -->`) is a PLACEHOLDER. You MUST replace ALL example content with real data derived from the actual input files. Do NOT copy, paraphrase, or reproduce any example text — treat the example only as a structural template showing the expected format, depth, and tone.
 - The authoritative deliverable is the file `ReportResult.md`, saved (UTF-8) and uploaded back into the context so downstream steps can consume it. Output ONLY the Markdown content. No JSON wrapping, no code fences around the entire output, no explanatory text before or after. Do NOT include `[EXAMPLE]` markers or HTML comments in your output.
 - Use the `output_language` for all headings and the summary paragraph.
-- CRITICAL: Do NOT use the `source_section` field for the Source column. Always resolve the source via the aspect chain: requirement.aspect_id → aspects[].section_id → sections[].section_heading + sections[].chapter_id → chapters[].chapter_heading.
+- CRITICAL: Do NOT use the `source_section` field for the Source column. Always resolve the source via the aspect chain WITHIN the requirement's own artifact (`FunctionalResult.json` for FR/NFR, `FormalResult.json` for formal requirements, `ConstraintsResult.json` for constraints) — aspect IDs are not shared across artifacts: requirement.aspect_id → aspects[].section_id → sections[].section_heading + sections[].chapter_id → chapters[].chapter_heading.
 - If a requirement has `source_page` other than `"n/a"`, append it: `<chapter_heading> > <section_heading>, p. <source_page> (<source_file>)`.
 - Keep descriptions verbatim from the JSON — do not rephrase or shorten them.
 - If the `errors` array contains entries, list them in the Summary section with their severity and message.

@@ -1,6 +1,6 @@
 <!-- THIS IS AN EXAMPLE OUTPUT using the fictional client "CloudRetail" and a POS modernisation scenario. -->
 <!-- ALL company names, requirements, technologies, numbers, and sources below are PLACEHOLDERS. -->
-<!-- The LLM MUST replace every detail with data derived from the SolutionCatalogResult.json and the DeepResearch findings. -->
+<!-- The LLM MUST replace every detail with data derived from the SolutionCatalogResult.json and the web-search findings. -->
 <!-- Do NOT copy any content from this example. -->
 <!-- This example is written in English. The LLM MUST translate all headings, table headers, and prose into output_language. -->
 
@@ -10,7 +10,7 @@
 
 [EXAMPLE] Scope confirmed with the client: research was limited to the Microsoft Azure technology stack per the client's platform constraint.
 
-<!-- Derive from: SolutionCatalogResult.research_questions, the user's clarification answers, DeepResearch method. -->
+<!-- Derive from: SolutionCatalogResult.research_questions, the user's clarification answers, web-search method. -->
 
 ## 2 Solution Landscape Overview
 

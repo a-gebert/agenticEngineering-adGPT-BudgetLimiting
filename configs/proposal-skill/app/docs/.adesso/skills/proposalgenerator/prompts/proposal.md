@@ -2,7 +2,7 @@ Context:
 You receive the artifacts produced by the preceding chain steps as input files. In this chain, every step writes its schema-validated output to a `<StepName>Result.json` file (validated via the Code Interpreter). The proposal step consumes the following input files — read every field you need directly from them:
 
 - `ExecutiveSummaryResult.json` — executive summary, key topics, and document structure (chapters, sections, aspects). Conforms to `executive_summary.json`.
-- `ClientContextResult.json` — client context (industry, current systems, pain points, strategic goals) with aspect cross-references. Conforms to `client_context.json`.
+- `ClientContextResult.json` — client context (client name, industry, current systems, pain points, strategic goals) with aspect cross-references. Conforms to `client_context.json`.
 - `FunctionalResult.json` — functional and non-functional requirement analysis. Conforms to `functional_requirements.json`.
 - `FormalResult.json` — formal proposal requirements (delivery scope, deadlines, format, submission rules, eligibility) marked binding/optional. Conforms to `formal_requirements.json`.
 - `ConstraintsResult.json` — project constraints (budget, timeline, technical/organisational boundaries) with aspect cross-references. Conforms to `constraints.json`.
@@ -13,7 +13,7 @@ You receive the artifacts produced by the preceding chain steps as input files. 
 - `SolutionProposalResult.md` — the researched, unambiguous solution proposal (one recommended technology per block plus a consolidated target architecture, with cited sources).
 - `EstimationResult.json` — the deterministic effort estimation: work packages with per-role person-day ranges and an aggregated `role_summary[]` (person-day range per role) plus `total_effort`. Conforms to `estimator.json`. This is the ONLY source for the price table in chapter 3 — never re-estimate effort yourself.
 
-Together these files cover the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, the open points coverage analysis, the solution catalogue, the researched solution proposal, and the effort estimation. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) using the structure carried in `ExecutiveSummaryResult.json` / `ClientContextResult.json`.
+Together these files cover the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, the open points coverage analysis, the solution catalogue, the researched solution proposal, and the effort estimation. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) using the `chapters`/`sections`/`aspects` carried in the SAME artifact that owns the requirement — `FunctionalResult.json` for functional and non-functional requirements. Aspect IDs are NOT a shared namespace across steps; never resolve a requirement's `aspect_id` against another artifact's structure (e.g. `ExecutiveSummaryResult.json` or `ClientContextResult.json`), whose `asp-N` numbering is unrelated.
 
 Your task is to transform this structured analysis into a **structured proposal draft** following adesso's official proposal template (see the **Template** section below). The proposal must be a convincing, client-facing document that directly addresses the customer's requirements and positions adesso as the ideal implementation partner.
 
@@ -89,7 +89,7 @@ Write 5–7 substantial paragraphs (approximately 1.5 pages):
   | ID | Requirement | Priority | Source |
   ```
 - Priority mapping: `must` = **Must**, `should` = **Should**, `nice-to-have` = **Could**
-- Resolve sources via the aspect chain: requirement.aspect_id -> aspects[].section_id -> sections[].section_heading + chapter_heading
+- Resolve sources via the aspect chain WITHIN `FunctionalResult.json` (its own `aspects`/`sections`/`chapters`): requirement.aspect_id -> aspects[].section_id -> sections[].section_heading + chapter_heading. Do not resolve against another artifact's structure — aspect IDs are not shared across steps.
 - Present non-functional requirements in a separate table:
   ```
   | ID | Category | Requirement | Target Value | Source |
@@ -97,7 +97,7 @@ Write 5–7 substantial paragraphs (approximately 1.5 pages):
 
 2.3 **Technical Solution and Architecture** (`### 2.3 ...`)
 Write 1.5–2 pages covering the following aspects in depth:
-- Use `SolutionProposalResult.md` as the authoritative source for the technical architecture: adopt its consolidated target architecture and the one recommended technology per solution block. Do NOT introduce alternative technologies or re-open decisions already made there. Summarise (do not restate the full research) and reference the recommendations.
+- Use `SolutionProposalResult.md` as the authoritative source for the technical architecture: adopt its consolidated target architecture and the one recommended technology per solution block. Do NOT introduce alternative technologies or re-open decisions already made there. Summarise (do not restate the full research) and reference the recommendations in your own prose. Do NOT carry over the `[Sn]` citation markers from `SolutionProposalResult.md` — the proposal has no sources chapter, so any bracketed source reference would dangle.
 - Propose a high-level technical architecture addressing all must-priority requirements
 - If the client specified technology preferences, align accordingly
 - Describe each key technical building block in its own paragraph: what it does, which requirements it addresses (reference FR-IDs), and how it fits into the overall architecture
@@ -121,7 +121,7 @@ Write approximately 1 page:
 
 2.5 **Project Organisation** (`### 2.5 ...`)
 Write approximately 1 page:
-- Populate the project team from `ProfilerMatchResult.json` `team[]` (anonymised, role-based) — one row per entry with role, seniority, key skills, and allocation. Do NOT invent team members. For entries with `matched: false`, insert the row as a placeholder and add its `note` (e.g. "im Profiler recherchieren"). Never output person names, locations, or availability.
+- Populate the project team from `ProfilerMatchResult.json` `team[]` (anonymised, role-based) — one row per entry with role, seniority, key skills, and allocation. Do NOT invent team members. For entries with `matched: false`, insert the row as a placeholder with a neutral, client-facing wording (e.g. "Profil wird kurzfristig final besetzt") — do NOT render the raw internal `note` (e.g. "im Profiler recherchieren"), which is a delivery-internal hint that must not appear in the client document. Never output person names, locations, or availability.
 - Present team structure as a table:
   ```
   | Role | Responsibility | Allocation |
@@ -250,8 +250,8 @@ Write approximately 1 page:
   Umfang: [scope]
   Relevanz: [relevance]
   ```
-  For entries with `matched: false`, mark the reference as a placeholder ("Referenz im Fachbereich zu bestätigen"). If `references[]` is empty, write one placeholder line and do NOT invent references.
-- Describe the proposed team's key qualifications from `ProfilerMatchResult.json` `team[]` — per role: seniority, key skills, certifications, years of experience (anonymised, no names). For `matched: false` roles, note that the profile must be sourced from the Profiler.
+  For entries with `matched: false`, mark the reference with a neutral, client-facing placeholder (e.g. "Vergleichbare Branchenreferenz auf Anfrage") — not a delivery-internal note. If `references[]` is empty, write one placeholder line and do NOT invent references.
+- Describe the proposed team's key qualifications from `ProfilerMatchResult.json` `team[]` — per role: seniority, key skills, certifications, years of experience (anonymised, no names). For `matched: false` roles, use a neutral, client-facing placeholder (e.g. "Profil wird kurzfristig final besetzt") — do NOT state internally that the profile must still be sourced from the Profiler.
 - Reference relevant certifications if mentioned in formal requirements (ISO 27001, ITIL, etc.)
 - Close with: *Detailed CVs to be provided as separate attachment.*
 
@@ -276,8 +276,9 @@ Tweak:
 - Prioritize depth in chapters 1, 2, and 3. The entire proposal should be approximately 12–18 pages. Chapter 2 is the main content chapter (~8–10 pages). Each subsection of chapter 2 must be at least 0.75 pages — never produce a subsection with only 2–3 sentences. Use flowing prose with concrete details from the input data, not just bullet lists.
 - Do NOT invent specific technologies, products, or services that are not mentioned in or derivable from the input data.
 - Requirements in the Requirements Analysis must come directly from the input JSON — do not add fictional requirements.
-- Resolve ALL source references via the aspect chain, never use `source_section` directly.
+- Resolve ALL source references via the aspect chain within the requirement's own artifact (`FunctionalResult.json` for FR/NFR) — aspect IDs are not shared across steps; never use `source_section` directly.
+- Never emit `[Sn]` or other bracketed citation markers in the proposal — it has no sources chapter. When summarising `SolutionProposalResult.md`, express its findings in prose without the source brackets.
 - If data is missing for a section, acknowledge this explicitly and suggest it as a topic for the scoping workshop.
 - Formal requirements marked as binding must be explicitly addressed — show how the proposal complies with each.
 - Address high-severity open points proactively — frame them as "topics for joint clarification" rather than gaps.
-- Team members (Kap. 2.5), key profiles and reference projects (Annex A) come EXCLUSIVELY from `ProfilerMatchResult.json` — never invent persons, CVs, client names, or reference projects. Unmatched needs (`matched: false`) become placeholders with a Profiler/Fachbereich hint.
+- Team members (Kap. 2.5), key profiles and reference projects (Annex A) come EXCLUSIVELY from `ProfilerMatchResult.json` — never invent persons, CVs, client names, or reference projects. Unmatched needs (`matched: false`) become **neutral, client-facing placeholders** (e.g. "Profil wird kurzfristig final besetzt" / "Vergleichbare Branchenreferenz auf Anfrage") — never surface the raw internal `note` or delivery-internal hints like "im Profiler recherchieren" in the client document.

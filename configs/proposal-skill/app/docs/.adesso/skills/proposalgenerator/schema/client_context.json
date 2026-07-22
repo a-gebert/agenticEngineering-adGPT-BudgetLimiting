@@ -24,6 +24,10 @@
             "description": "Extracted client context forming the semantic bridge for downstream processing steps.",
             "additionalProperties": false,
             "properties": {
+                "client_name": {
+                    "type": "string",
+                    "description": "Name of the client / contracting organisation issuing the tender (the addressee of the proposal), e.g. 'CloudRetail AG'. Used, among other things, to name the exported Proposal.docx file."
+                },
                 "industry": {
                     "type": "string",
                     "description": "The client's industry sector (e.g., 'Automotive', 'Financial Services', 'Public Sector')."
@@ -58,6 +62,7 @@
                 }
             },
             "required": [
+                "client_name",
                 "industry",
                 "current_systems",
                 "pain_points",

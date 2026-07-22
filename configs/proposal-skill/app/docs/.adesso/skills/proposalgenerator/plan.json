@@ -7,23 +7,8 @@
     "PreProcessing": [
       {
         "step": 1,
-        "name": "ExecutiveSummary",
-        "description": "Generate a concise executive summary of the tender document",
-        "next": "ClientContext",
-        "resources": {
-          "prompt": "/prompts/executive_summary.md",
-          "output": "/schema/executive_summary.json",
-          "scripts": [],
-          "assets": [],
-          "references": [],
-          "batch": [],
-          "artifacts": {}
-        }
-      },
-      {
-        "step": 2,
         "name": "ClientContext",
-        "description": "Extract client context (industry, systems, pain points, strategic goals) with aspect cross-references as semantic bridge for downstream steps",
+        "description": "Extract client context (client name, industry, systems, pain points, strategic goals) with aspect cross-references as semantic bridge for downstream steps",
         "next": "Functional",
         "resources": {
           "prompt": "/prompts/client_context.md",
@@ -38,7 +23,7 @@
         }
       },
       {
-        "step": 3,
+        "step": 2,
         "name": "Functional",
         "description": "Scan file for functional analysis",
         "next": "Formal",
@@ -53,7 +38,7 @@
         }
       },
       {
-        "step": 4,
+        "step": 3,
         "name": "Formal",
         "description": "Extract formal proposal requirements (delivery scope, deadlines, format constraints, submission rules, eligibility criteria) and mark them as binding or optional",
         "next": "Constraints",
@@ -68,7 +53,7 @@
         }
       },
       {
-        "step": 5,
+        "step": 4,
         "name": "Constraints",
         "description": "Extract project constraints (budget, timeline, technical restrictions, organisational boundaries) with aspect cross-references",
         "next": null,
@@ -109,7 +94,7 @@
       {
         "step": 2,
         "name": "SolutionProposal",
-        "description": "Research technologies and best practices per solution block via the DeepResearch tool (with a mandatory user clarification gate for flagged blocks) and condense them into one unambiguous solution proposal.",
+        "description": "Research technologies and best practices per solution block via web search (with a mandatory user clarification gate for flagged blocks) and condense them into one unambiguous solution proposal.",
         "depends_on": "Solution",
         "next": "StaffingCatalog",
         "resources": {
@@ -153,7 +138,7 @@
         "name": "ProfilerMatch",
         "description": "Match real adesso colleagues and comparable projects via the Profiler MCP against the staffing catalogue; produce anonymised, role-based team entries and anonymised references. Mandatory clarification gate when matching is ambiguous.",
         "depends_on": "Solution",
-        "next": null,
+        "next": "Estimator",
         "resources": {
           "prompt": "/prompts/profiler_match.md",
           "output": "/schema/profiler_match.json",
@@ -167,14 +152,53 @@
           ],
           "artifacts": {}
         }
+      },
+      {
+        "step": 5,
+        "name": "Estimator",
+        "description": "Deterministic effort estimation: derive work packages from the solution proposal and estimate per-role person-days. Sole source for the proposal price table. Depends on SolutionProposal and StaffingCatalog only, never on ProfilerMatch.",
+        "depends_on": "Solution",
+        "next": null,
+        "resources": {
+          "prompt": "/prompts/estimator.md",
+          "output": "/schema/estimator.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/estimator.json"
+          ],
+          "batch": [
+            "/solution/SolutionProposal.md",
+            "/solution/StaffingCatalog.json"
+          ],
+          "artifacts": {}
+        }
       }
     ],
     "Mapping": [],
     "Consolidation": [
       {
         "step": 1,
+        "name": "ExecutiveSummary",
+        "description": "Generate a concise executive summary of the tender AND adesso's proposed solution. Runs first in Consolidation so it can incorporate the recommended solution from SolutionProposal and remain available to Report and Proposal.",
+        "depends_on": "Solution",
+        "next": "OpenPoints",
+        "resources": {
+          "prompt": "/prompts/executive_summary.md",
+          "output": "/schema/executive_summary.json",
+          "scripts": [],
+          "assets": [],
+          "references": [],
+          "batch": [
+            "/solution/SolutionProposal.md"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 2,
         "name": "OpenPoints",
-        "description": "Gap analysis: identify aspects with no requirement mapped. Produces a JSON file listing uncovered aspects with severity and coverage statistics.",
+        "description": "Gap analysis within the requirement-bearing artifacts (Functional/Formal): identify aspects with no requirement mapped, evaluated per artifact namespace. Produces a JSON file listing uncovered aspects with severity and coverage statistics.",
         "depends_on": "PreProcessing",
         "next": "Report",
         "resources": {
@@ -187,17 +211,14 @@
             "/schema/preflight_report.json"
           ],
           "batch": [
-            "/preprocessing/ExecutiveSummary.json",
-            "/preprocessing/ClientContext.json",
             "/preprocessing/Functional.json",
-            "/preprocessing/Formal.json",
-            "/preprocessing/Constraints.json"
+            "/preprocessing/Formal.json"
           ],
           "artifacts": {}
         }
       },
       {
-        "step": 2,
+        "step": 3,
         "name": "Report",
         "description": "Create summary report. Batch files are releted to user-files container (not adesso skill set)",
         "depends_on": "PreProcessing",
@@ -212,7 +233,7 @@
             "/schema/consolidation_report.json"
           ],
           "batch": [
-            "/preprocessing/ExecutiveSummary.json",
+            "/consolidation/ExecutiveSummary.json",
             "/preprocessing/ClientContext.json",
             "/preprocessing/Functional.json",
             "/preprocessing/Formal.json",
@@ -223,7 +244,7 @@
         }
       },
       {
-        "step": 3,
+        "step": 4,
         "name": "Proposal",
         "description": "Generate a structured proposal draft following the adesso proposal template: 1) Initial Situation, 2) Subject Matter of the Proposal (solution, requirements, architecture, methodology, organisation, QA, operations, open points), 3) Prices, 4) Terms and Conditions (standard text placeholders), 5) Binding Period, Annex A References/Profiles, Annex B Company Profile.",
         "depends_on": "PreProcessing",
@@ -238,7 +259,7 @@
             "/schema/consolidation_report.json"
           ],
           "batch": [
-            "/preprocessing/ExecutiveSummary.json",
+            "/consolidation/ExecutiveSummary.json",
             "/preprocessing/ClientContext.json",
             "/preprocessing/Functional.json",
             "/preprocessing/Formal.json",
@@ -247,7 +268,8 @@
             "/solution/SolutionCatalog.json",
             "/solution/SolutionProposal.md",
             "/solution/StaffingCatalog.json",
-            "/solution/ProfilerMatch.json"
+            "/solution/ProfilerMatch.json",
+            "/solution/Estimator.json"
           ],
           "artifacts": {}
         }
