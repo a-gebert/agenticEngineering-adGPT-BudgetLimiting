@@ -12,8 +12,23 @@ You receive the artifacts produced by the preceding chain steps as input files. 
 - `SolutionCatalogResult.json` — solution blocks (needs, addressed requirements, constraints, evaluation criteria). Conforms to `solution_catalog.json`.
 - `SolutionProposalResult.md` — the researched, unambiguous solution proposal (one recommended technology per block plus a consolidated target architecture, with cited sources).
 - `EstimationResult.json` — the deterministic effort estimation: work packages with per-role person-day ranges and an aggregated `role_summary[]` (person-day range per role) plus `total_effort`. Conforms to `estimator.json`. This is the ONLY source for the price table in chapter 3 — never re-estimate effort yourself.
+- `ProposalOutlineResult.json` — the adaptive chapter outline. It governs WHICH
+  content dimensions appear inside chapter 2 ("Subject Matter of the Proposal")
+  and in WHAT order — within chapter 2, RENDER SUBSECTIONS STRICTLY FROM its
+  `outline` array, in `order`: do not add a chapter-2 subsection absent from the
+  outline; do not drop one present (`activate`/`present`) in it. Each outline
+  entry's `heading`/`purpose`/`source_artifacts` drives one chapter-2 subsection.
+  This does NOT apply to the mandatory document skeleton — Management Summary,
+  chapter 1 (Initial Situation), chapter 3 (Prices), chapter 4 (Terms and
+  Conditions), chapter 5 (Binding Period), and the Annexes — which always
+  renders regardless of the outline and satisfies the outline's baseline
+  dimensions (Executive Summary, Architecture, Price, Terms & Conditions).
+- `ProductDesignResult.json` — feeds the Product/UX chapter (screen-by-screen
+  behaviour) when that dimension is in the outline.
+- `references/adesso_facts.md` — company-profile / methodology facts; cite ONLY
+  from here for adesso facts, never invent.
 
-Together these files cover the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, the open points coverage analysis, the solution catalogue, the researched solution proposal, and the effort estimation. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) using the `chapters`/`sections`/`aspects` carried in the SAME artifact that owns the requirement — `FunctionalResult.json` for functional and non-functional requirements. Aspect IDs are NOT a shared namespace across steps; never resolve a requirement's `aspect_id` against another artifact's structure (e.g. `ExecutiveSummaryResult.json` or `ClientContextResult.json`), whose `asp-N` numbering is unrelated.
+Together these files cover the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, the open points coverage analysis, the solution catalogue, the researched solution proposal, the effort estimation, the adaptive chapter outline, and the product/UX design. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) using the `chapters`/`sections`/`aspects` carried in the SAME artifact that owns the requirement — `FunctionalResult.json` for functional and non-functional requirements. Aspect IDs are NOT a shared namespace across steps; never resolve a requirement's `aspect_id` against another artifact's structure (e.g. `ExecutiveSummaryResult.json` or `ClientContextResult.json`), whose `asp-N` numbering is unrelated.
 
 Your task is to transform this structured analysis into a **structured proposal draft** following adesso's official proposal template (see the **Template** section below). The proposal must be a convincing, client-facing document that directly addresses the customer's requirements and positions adesso as the ideal implementation partner.
 
@@ -40,9 +55,36 @@ CRITICAL LANGUAGE RULE: ALL chapter headings, sub-headings, table headers, and p
 
 This rule applies to EVERY heading, table header, and label in the output without exception.
 
+CHAPTER-SELECTION RULE: `ProposalOutlineResult.json` governs WHICH content dimensions
+appear inside chapter 2 ("Subject Matter of the Proposal") and in WHAT order —
+RENDER CHAPTERS STRICTLY FROM its `outline` array, in `order`. Do not render a
+fixed built-in chapter list; do not add chapters absent from the outline; do not
+drop chapters present in it. The Management Summary, chapter 1 (Initial
+Situation), chapter 3 (Prices), chapter 4 (Terms and Conditions), chapter 5
+(Binding Period), and the Annexes are the mandatory document skeleton of every
+adesso proposal and always render — they correspond to the outline's baseline
+dimensions (Executive Summary, Architecture, Price, Terms & Conditions, resp.
+structural necessities not covered by the dimension rubric). Within chapter 2,
+each subsection below is tagged with an `— outline dimension: X` annotation.
+THE JOIN IS ON `dimension`, NOT ON HEADING TEXT: for each tagged subsection,
+look up the `outline[]` entry whose `dimension` field equals X (exact string
+match against `ProposalOutlineResult.json`'s `outline[].dimension`, and against
+that dimension's status in `dimensions[]`) — render the subsection ONLY if a
+matching outline entry exists (i.e. that dimension is `present` or `activate`);
+skip it if the dimension is `n/a` or has no matching outline entry. Never match
+by comparing the subsection's own heading text to the outline entry's
+`heading` — headings are free text and may differ; `dimension` is the stable
+key. If the outline contains an entry whose `dimension` maps to chapter 2 with
+no matching subsection below (e.g. Business Logic, Import/Export, Risk), write
+it as its own subsection directly from that outline entry's `heading`,
+`purpose`, and `source_artifacts`, matching the prose depth and citation
+discipline of the other subsections. Order chapter-2 subsections by the
+matching outline entry's `order` field (not by the order the subsections
+appear below); renumber headings sequentially so there are no gaps.
+
 ---
 
-**Management Summary** (`## Management Summary`)
+**Management Summary** (`## Management Summary`) — outline dimension: Executive Summary (baseline, always `present`)
 
 Write a concise executive summary of the entire proposal (0.5–1 page). This is the first thing the decision-maker reads. Include:
 - One paragraph summarising the client's situation and project motivation
@@ -72,9 +114,22 @@ This chapter should be approximately 1.5–2 pages, written as flowing prose (no
 
 **2. Subject Matter of the Proposal** (`## 2 ...`)
 
-This is the core content chapter describing what adesso proposes to deliver. Structure it with the following subsections:
+This is the core content chapter describing what adesso proposes to deliver. It
+is the chapter governed by the CHAPTER-SELECTION RULE above: the subsections
+below are candidate content blocks, each tagged with its outline dimension —
+render only those whose dimension is `present`/`activate` in the outline, in the
+outline's order, and add any additional outline entry mapped to this chapter
+that has no matching block below directly from its `heading`/`purpose`/
+`source_artifacts`. Two subsections are exceptions to this gating: 2.1 (Solution
+Overview) and 2.8 (Open Points and Clarification Needs) are structural — they
+always render regardless of the outline, exactly like the mandatory document
+skeleton — see their individual entries below for why.
 
-2.1 **Solution Overview** (`### 2.1 ...`)
+2.1 **Solution Overview** (`### 2.1 ...`) — always render, unconditionally: this
+is chapter 2's structural opener, NOT gated by `ProposalOutlineResult.json` and
+NOT a stand-in for the "Architecture" dimension (that dimension's baseline
+content is 2.3's technical architecture). Render it regardless of the outline's
+contents, exactly like the mandatory document skeleton.
 Write 5–7 substantial paragraphs (approximately 1.5 pages):
 - Open with a high-level vision statement: what adesso proposes and why it is the right approach for this client
 - Describe the overall solution architecture in business terms (not deep technical detail — that comes in 2.3)
@@ -83,19 +138,26 @@ Write 5–7 substantial paragraphs (approximately 1.5 pages):
 - Explain how the solution aligns with the client's strategic goals (from `client_context.strategic_goals`)
 - Close with a differentiator paragraph: why adesso's approach stands out compared to a generic implementation
 
-2.2 **Understanding of Requirements** (`### 2.2 ...`)
-- Present functional requirements in tables grouped by thematic blocks:
-  ```
-  | ID | Requirement | Priority | Source |
-  ```
-- Priority mapping: `must` = **Must**, `should` = **Should**, `nice-to-have` = **Could**
-- Resolve sources via the aspect chain WITHIN `FunctionalResult.json` (its own `aspects`/`sections`/`chapters`): requirement.aspect_id -> aspects[].section_id -> sections[].section_heading + chapter_heading. Do not resolve against another artifact's structure — aspect IDs are not shared across steps.
-- Present non-functional requirements in a separate table:
-  ```
-  | ID | Category | Requirement | Target Value | Source |
-  ```
+2.2 **Understanding of Requirements & Product Design** (`### 2.2 ...`) — outline dimensions: Non-functional (present if `FunctionalResult.json` exists), Product/UX (`activate` when `ProductDesignResult.json` has non-empty `screens`)
+- Do NOT dump the FR/NFR requirements table into the client-facing proposal.
+  Express requirement fulfilment as flowing feature narrative. A requirements/
+  compliance table is rendered ONLY if the outline contains a "Compliance List"
+  chapter (then keep it concise, ideally as a separate compliance section — see
+  below).
+- Group the narrative by thematic block (mirroring `FunctionalResult.json`'s aspect chain: requirement.aspect_id -> aspects[].section_id -> sections[].section_heading + chapter_heading, WITHIN that artifact's own structure only). For each block, describe in prose what the solution does and which pain points/goals it serves — reference FR-IDs inline (e.g. "(FR-12)") instead of tabulating them.
+- Weave `must`-priority requirements in as concrete commitments; `should`/`nice-to-have` items as enhancements delivered where scope allows.
+- If the Product/UX dimension is in the outline, use `ProductDesignResult.json`'s screen-by-screen behaviour (`screens[].interactions[]`: trigger -> reaction -> result_state, each tied to `requirement_ids`) to make the narrative concrete — describe the key screens/workflows the user interacts with and how they fulfil the underlying requirements. Do NOT invent screens or interactions beyond what `ProductDesignResult.json` provides.
+- Address non-functional requirements (performance, security, scalability, availability) within the same flowing narrative, not a separate table.
 
-2.3 **Technical Solution and Architecture** (`### 2.3 ...`)
+**Compliance List** (conditional, only if the outline contains a "Compliance List" chapter — render immediately after 2.2 as its own short subsection, ~0.25–0.5 page)
+- Present a concise compliance table for binding formal/functional requirements only:
+  ```
+  | ID | Requirement | Fulfilment | Source |
+  ```
+- Resolve sources via the aspect chain WITHIN `FunctionalResult.json`/`FormalResult.json` (their own structure) — do not resolve against another artifact's aspect IDs.
+- Keep this table short and factual; it supplements, not replaces, the narrative in 2.2.
+
+2.3 **Technical Solution and Architecture** (`### 2.3 ...`) — outline dimension: Architecture (baseline, always `present`)
 Write 1.5–2 pages covering the following aspects in depth:
 - Use `SolutionProposalResult.md` as the authoritative source for the technical architecture: adopt its consolidated target architecture and the one recommended technology per solution block. Do NOT introduce alternative technologies or re-open decisions already made there. Summarise (do not restate the full research) and reference the recommendations in your own prose. Do NOT carry over the `[Sn]` citation markers from `SolutionProposalResult.md` — the proposal has no sources chapter, so any bracketed source reference would dangle.
 - Propose a high-level technical architecture addressing all must-priority requirements
@@ -106,9 +168,18 @@ Write 1.5–2 pages covering the following aspects in depth:
 - If technical constraints exist (from `constraints.technical`), explain how the architecture complies
 - Do NOT invent technologies not mentioned in or derivable from the input data
 
-2.4 **Project Approach and Methodology** (`### 2.4 ...`)
+**Transition and Migration** (conditional — only if the outline contains a "Transition/Migration" chapter; render as its own numbered subsection within chapter 2, positioned per the outline's `order`, e.g. immediately after 2.3)
+Write approximately 0.5–0.75 pages, driven by the migration requirement(s) found in `FunctionalResult.json`/`ConstraintsResult.json`:
+- Describe the delta-transition approach: migrate incremental changes rather than a single big-bang cutover, to minimise business disruption
+- Describe the read-only cutover window: legacy system(s) go read-only for a defined period while the final delta is migrated and validated
+- Describe log-file handling: how historical log files/audit trails are migrated, archived, or made queryable post-cutover
+- Tie each element back to the concrete migration requirement(s) that triggered this chapter (reference requirement IDs)
+- Do NOT invent migration specifics beyond what the requirements/constraints support
+
+2.4 **Project Approach and Methodology** (`### 2.4 ...`) — outline dimension: Methodology/SCRUM (present if `ConstraintsResult.json`/`FunctionalResult.json` exist)
 Write approximately 1 page:
 - Propose a project methodology (agile, hybrid, or waterfall — choose based on constraints) and justify why this methodology fits the project context
+- If the chosen methodology is agile/SCRUM, describe the CONCRETE SCRUM setup — roles (Product Owner, Scrum Master, development team), ceremonies (sprint planning, daily standup, review, retrospective), and increment/sprint cadence — not a generic agile blurb
 - Describe each project phase in 2–3 sentences: scope, deliverables, and success criteria
 - Define project phases aligned with `constraints.timeline.key_milestones`
 - Include a timeline table:
@@ -119,7 +190,7 @@ Write approximately 1 page:
 - Describe risk mitigation: how the phased approach reduces delivery risk
 - If a pilot phase is appropriate, describe the pilot scope and transition to full rollout
 
-2.5 **Project Organisation** (`### 2.5 ...`)
+2.5 **Project Organisation** (`### 2.5 ...`) — outline dimension: Key Personnel (present if `ProfilerMatchResult.json`/`StaffingCatalogResult.json` exist)
 Write approximately 1 page:
 - Populate the project team from `ProfilerMatchResult.json` `team[]` (anonymised, role-based) — one row per entry with role, seniority, key skills, and allocation. Do NOT invent team members. For entries with `matched: false`, insert the row as a placeholder with a neutral, client-facing wording (e.g. "Profil wird kurzfristig final besetzt") — do NOT render the raw internal `note` (e.g. "im Profiler recherchieren"), which is a delivery-internal hint that must not appear in the client document. Never output person names, locations, or availability.
 - Present team structure as a table:
@@ -131,32 +202,46 @@ Write approximately 1 page:
 - Describe communication and meeting cadences in detail (daily, weekly, sprint reviews, steering)
 - Address collaboration requirements from `constraints.organisational` — remote/onsite split, language requirements, tools
 
-2.6 **Quality Assurance** (`### 2.6 ...`)
+2.6 **Quality Assurance** (`### 2.6 ...`) — outline dimension: Quality Management (present if `FunctionalResult.json` NFRs exist)
 Write approximately 0.75–1 page:
 - Define quality targets derived from non-functional requirements — present as a table:
   ```
   | Quality Dimension | Target | Measurement Method |
   ```
-- Describe the testing strategy in detail: unit tests, integration tests, performance/load tests, security tests, user acceptance tests — explain what each level covers and who is responsible
+- Ground the testing strategy in adesso's ISTQB-aligned approach and test-pyramid model from `references/adesso_facts.md` (`## Quality Management`) — cite only what is stated there, never invent certifications or methods. Describe the levels: unit tests, integration tests, system/performance tests, acceptance tests — explain what each level covers and who is responsible
 - Define acceptance criteria and the formal sign-off process
-- Describe continuous quality measures: code reviews, automated pipelines, quality gates per sprint
+- Describe continuous quality measures: code reviews, automated pipelines, and quality gates per increment (per `adesso_facts.md`)
 - If compliance or certification requirements exist (from formal requirements), describe the audit approach
 
-2.7 **Operations, Support, and Further Development** (`### 2.7 ...`)
+2.7 **Operations, Support, and Further Development** (`### 2.7 ...`) — outline dimension: Application Management & SLA (`activate` when NFR availability/support is present)
 Write approximately 0.75–1 page:
-- Describe the target operating model: monitoring, alerting, logging, incident management — align with non-functional availability/performance targets
-- Outline the support model with a tiered SLA table:
+- Describe the target operating model: monitoring, alerting, logging, incident management — align with non-functional availability/performance targets; reference adesso's dedicated monitoring team (`references/adesso_facts.md`, `## Delivery Methodology`)
+- Outline the support model as the adesso Prio I–IV SLA table, sourced from `references/adesso_facts.md` (`## Application Management & SLA`) — cite only reaction/resolution figures stated there; if a cell is not maintained in `adesso_facts.md`, leave it empty rather than inventing a number:
   ```
-  | Severity | Response Time | Resolution Time | Availability |
+  | Priority | Reaction Time | Resolution Time | Availability |
   ```
 - Describe the hypercare phase after go-live: duration, scope, transition to regular support
 - Describe knowledge transfer to the client's operations team
 - Outline a scaling and evolution roadmap: how the solution grows from initial scope to full enterprise deployment
 - Mention continuous improvement: how feedback loops and analytics drive post-launch enhancements
 
-2.8 **Open Points and Clarification Needs** (`### 2.8 ...`)
+2.8 **Open Points and Clarification Needs** (`### 2.8 ...`) — always render,
+unconditionally: this is a structural chapter-2 closer fed directly by
+`OpenPointsResult.json`'s gap analysis, NOT gated by
+`ProposalOutlineResult.json` and NOT the same thing as the rubric's "Risk"
+dimension. ("Risk" is a separate, conditional outline dimension — if `activate`
+in the outline, it renders as its own additional chapter-2 subsection per the
+rule above, distinct from and in addition to this always-present 2.8.) Render
+2.8 regardless of the outline's contents, exactly like the mandatory document
+skeleton.
 Write approximately 0.5–0.75 pages:
-- Present ALL open points from the gap analysis in a table:
+- Scoping tone: where scope is bounded by a deliberate decision, state it
+  decisively inline in the relevant chapter (e.g. "Sub-templates are out of
+  scope for this proposal and will be clarified during implementation") instead
+  of deferring everything to open-points/clarification. Reserve the open-points
+  table below for genuinely unresolved questions — not for decisions adesso has
+  already made.
+- Present the remaining genuinely open points from the gap analysis in a table:
   ```
   | # | Topic | Severity | Proposed Resolution |
   ```
@@ -167,7 +252,7 @@ Write approximately 0.5–0.75 pages:
 
 ---
 
-**3. Prices** (`## 3 ...`)
+**3. Prices** (`## 3 ...`) — outline dimension: Price (baseline, always `present`)
 
 Write approximately 1–1.5 pages following the official adesso pricing format:
 
@@ -176,11 +261,11 @@ Write approximately 1–1.5 pages following the official adesso pricing format:
 | Qualification / Role | Person-Days | Day Rate (EUR excl. VAT) | Price (EUR excl. VAT) |
 ```
 - Populate this table directly from `EstimationResult.json` `role_summary[]` — one row per entry, `role_title` for "Qualification / Role" and `"{person_days_min}–{person_days_max}"` for "Person-Days". Do NOT re-estimate, round beyond the given values, or add roles not present in `role_summary[]`.
-- Use "XXX" for day rates (these are confidential and filled in manually) — "Price" stays "XXX" as well since it depends on the day rate.
-- Include a **Total** row from `EstimationResult.json` `total_effort` (`"{person_days_min}–{person_days_max}"`).
+- Day rates are confidential and filled in manually. Do NOT emit placeholder day rates such as "XXX" — leave the "Day Rate" and "Price" cells empty (or omit the value) for each row rather than inserting a placeholder token.
+- Include a **Total** row from `EstimationResult.json` `total_effort` (`"{person_days_min}–{person_days_max}"`); leave its "Day Rate" and "Price" cells empty as well, since the total price depends on the manually-filled day rates.
 - If `EstimationResult.json` is missing or `role_summary[]` is empty, acknowledge this explicitly and state that detailed effort estimation is pending — do NOT invent a price table.
 
-**Payment terms**: State that invoices are payable within 10 days net, and that all prices are exclusive of statutory VAT.
+**Payment terms**: State that invoices are payable within 60 days net, and that all prices are exclusive of statutory VAT.
 
 **Travel costs**: Include a section addressing travel costs — either included in prices or reimbursed at cost (choose based on formal requirements or default to not included).
 
@@ -194,7 +279,7 @@ Write approximately 1–1.5 pages following the official adesso pricing format:
 
 ---
 
-**4. Terms and Conditions** (`## 4 ...`)
+**4. Terms and Conditions** (`## 4 ...`) — outline dimension: Terms & Conditions (baseline, always `present`)
 
 This chapter contains standard adesso legal terms. Output an introductory sentence stating that this chapter covers the terms and conditions underlying the proposal. Then output ALL subsections below. Each subsection references standard adesso contract terms. The following subsections are REQUIRED:
 
@@ -257,11 +342,17 @@ Write approximately 1 page:
 
 ---
 
-**Annex B: Company Profile** (`## Annex B ...`)
+**Annex B: Company Profile** (`## Annex B ...`) — outline dimension: Company Background/References (present if `references/adesso_facts.md` exists)
 
-Output the standard adesso company profile. adesso is one of the leading independent IT service providers in the DACH region, focusing on consulting and custom software development for core business processes. The strategy rests on three pillars: comprehensive industry expertise, broad vendor-neutral technology competence, and proven software project methodologies. adesso was founded in 1997.
+Output the standard adesso company profile. adesso is one of the leading independent IT service providers in the DACH region, focusing on consulting and custom software development for core business processes. The strategy rests on three pillars: comprehensive industry expertise, broad vendor-neutral technology competence, and proven software project methodologies.
 
-After this standard text, add 1–2 paragraphs adapting the industry focus to `client_context.industry`:
+Add company-background depth from `references/adesso_facts.md` — cite ONLY facts present there, never invent figures or dates:
+- `## Company Profile`: market presence / positioning
+- `## Certifications`: ISO 9001, ISO 14001, ISO/IEC 27001 — mention where relevant to the client's compliance context
+- `## Delivery Methodology`: the Maître concept (dedicated delivery-lead role), adVANTAGE budget-control model, JourFixe cadence, and the dedicated monitoring team — as evidence of proven delivery organisation
+- `## Locations & Organisation`: branch presence, if stated
+
+After this, add 1–2 paragraphs adapting the industry focus to `client_context.industry`:
 - Lead with the client's industry as a core vertical
 - Mention adesso's core verticals: Insurance/Reinsurance, Banking and Financial Services, Healthcare, Lottery, Telecommunications, Energy, Automotive, Manufacturing, Public Administration
 - If relevant: mention technology partnerships (Microsoft, SAP, AWS) that align with the project's tech stack
@@ -275,10 +366,12 @@ Tweak:
 - REMINDER: Apply the CRITICAL LANGUAGE RULE — ALL headings, sub-headings, table headers, and labels must be translated into `output_language`. Do NOT output English headings when `output_language` is not English. The only exception is "Management Summary" which always stays in English.
 - Prioritize depth in chapters 1, 2, and 3. The entire proposal should be approximately 12–18 pages. Chapter 2 is the main content chapter (~8–10 pages). Each subsection of chapter 2 must be at least 0.75 pages — never produce a subsection with only 2–3 sentences. Use flowing prose with concrete details from the input data, not just bullet lists.
 - Do NOT invent specific technologies, products, or services that are not mentioned in or derivable from the input data.
-- Requirements in the Requirements Analysis must come directly from the input JSON — do not add fictional requirements.
+- Requirements woven into the flowing narrative (2.2) and any compliance table must come directly from the input JSON — do not add fictional requirements.
 - Resolve ALL source references via the aspect chain within the requirement's own artifact (`FunctionalResult.json` for FR/NFR) — aspect IDs are not shared across steps; never use `source_section` directly.
 - Never emit `[Sn]` or other bracketed citation markers in the proposal — it has no sources chapter. When summarising `SolutionProposalResult.md`, express its findings in prose without the source brackets.
 - If data is missing for a section, acknowledge this explicitly and suggest it as a topic for the scoping workshop.
-- Formal requirements marked as binding must be explicitly addressed — show how the proposal complies with each.
+- Formal requirements marked as binding must be explicitly addressed — show how the proposal complies with each, in prose (2.2) or, if the "Compliance List" chapter is in the outline, in the dedicated compliance table.
 - Address high-severity open points proactively — frame them as "topics for joint clarification" rather than gaps.
+- CHAPTER-SELECTION RULE recap: join each tagged chapter-2 subsection to `ProposalOutlineResult.json`'s `outline[]` by matching its `— outline dimension: X` tag against the outline entry whose `dimension == X` — never by comparing heading text. Never render a subsection whose dimension is `n/a`/absent from the outline, and never omit one whose dimension is `present`/`activate`. Order chapter-2 content per the matching outline entry's `order`. Exception: 2.1 and 2.8 are structural and always render regardless of the outline.
+- adesso institutional facts (company profile, certifications, delivery methodology, quality management, SLA priority model) may be cited ONLY from `references/adesso_facts.md` — never invent figures, dates, or SLA times not stated there; leave a value blank rather than estimating.
 - Team members (Kap. 2.5), key profiles and reference projects (Annex A) come EXCLUSIVELY from `ProfilerMatchResult.json` — never invent persons, CVs, client names, or reference projects. Unmatched needs (`matched: false`) become **neutral, client-facing placeholders** (e.g. "Profil wird kurzfristig final besetzt" / "Vergleichbare Branchenreferenz auf Anfrage") — never surface the raw internal `note` or delivery-internal hints like "im Profiler recherchieren" in the client document.

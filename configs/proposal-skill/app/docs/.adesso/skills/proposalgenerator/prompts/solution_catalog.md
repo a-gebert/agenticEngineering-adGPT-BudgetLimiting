@@ -1,11 +1,11 @@
 Context:
-Input = schema-validated artifacts of preceding chain steps as files. Read every requirement, constraint, context fact direct from them — do NOT retrieve or re-analyse tender document, do NOT add new requirements/constraints from outside input. MAY use general software-architecture and technology knowledge for one purpose only: name and justify plausible technology DIRECTIONS (families/approaches) per block. Must NOT name concrete products, vendors, versions:
+Input = schema-validated artifacts of preceding chain steps as files. Read every requirement, constraint, context fact direct from them — do NOT retrieve or re-analyse tender document, do NOT add new requirements/constraints from outside input. MAY use general software-architecture and technology knowledge for one purpose only: name and justify plausible technology DIRECTIONS (families/approaches) per block. Must NOT name concrete products, vendors, versions — except where the tender itself mandates a specific one (see Tweak, `tender_mandated`):
 
 - `FunctionalResult.json` — functional (`functional_requirements[]`: `id`, `description`, `priority`, `aspect_id`) and non-functional (`non_functional_requirements[]`: `id`, `category`, `description`, `measurable_target`, `aspect_id`) requirements plus `aspects[]`. Conforms to `functional_requirements.json`.
 - `ConstraintsResult.json` — `constraints.budget` (`amount`, `currency`, `flexibility`), `constraints.timeline` (`go_live`, `key_milestones`), `constraints.technical[]`, `constraints.organisational[]`. Conforms to `constraints.json`.
 - `ClientContextResult.json` — `client_context` (`industry`, `current_systems`, `pain_points`, `strategic_goals`). Conforms to `client_context.json`.
 
-Task: derive **solution catalogue**: cluster functional and non-functional requirements into thematic **solution blocks**, and per block write concrete research brief for downstream technology-research step. This step bridge requirements to research: names solution NEEDS and technology DIRECTIONS (families/approaches), never concrete products, vendors, versions.
+Task: derive **solution catalogue**: cluster functional and non-functional requirements into thematic **solution blocks**, and per block write concrete research brief for downstream technology-research step. This step bridge requirements to research: names solution NEEDS and technology DIRECTIONS (families/approaches); concrete products, vendors, versions only where the tender itself prescribes them.
 
 All labels, descriptions, questions, messages in output must be in language from `output_language` parameter. If `output_language` absent, default English.
 
@@ -34,6 +34,11 @@ Produce JSON object conforming to `solution_catalog.json` with this structure:
    - `clarification_reason`: only when `needs_clarification` is `true` — one of `"multiple_directions"`, `"low_confidence"`, `"insufficient_constraints"` (pick dominant cause).
    - `clarification_question`: only when `needs_clarification` is `true` — single clear question to user, in `output_language`, naming choice or missing information.
    - `confidence`: score 0-1 for how well-scoped block is for research.
+   - Tender-prescribed technology: where the tender explicitly mandates a concrete
+     technology or product (e.g. an existing database, a named PDF toolkit, a fixed
+     export format), re-read that constraint from the requirement artifacts and
+     carry it verbatim into the relevant solution block as a fixed input — do not
+     turn it into an open option.
 
 2. **coverage**: `total_requirements` = count of all FR + NFR in input; `covered_requirements` = count of distinct requirement IDs appearing in any block's `addressed_requirements`; `uncovered_requirement_ids` = FR/NFR IDs not addressed by any block.
 
@@ -52,7 +57,8 @@ Produce final result as schema-validated file via Code Interpreter — do NOT re
 
 Tweak:
 - Use `output_language` for all `title`, `description`, `solution_type`, `label`, `rationale`, `evaluation_criteria`, `research_questions`, `clarification_question`, `message` values.
-- Do NOT name concrete products, vendors, versions anywhere — only solution needs and technology directions/families.
+- Concrete product/vendor names are allowed ONLY where the tender itself
+  prescribes them (mark such blocks `tender_mandated: true` in the research brief). For all OTHER, open blocks, stay vendor-neutral — no product names.
 - Every requirement should ideally belong to at least one block; list genuinely unmapped ones under `coverage.uncovered_requirement_ids` rather than forcing into a block.
 - `priority` must be maximum priority of block's addressed requirements, not average.
 - Block gets `needs_clarification: true` whenever research direction genuinely open — do not suppress uncertainty to appear decisive; downstream step will ask user.

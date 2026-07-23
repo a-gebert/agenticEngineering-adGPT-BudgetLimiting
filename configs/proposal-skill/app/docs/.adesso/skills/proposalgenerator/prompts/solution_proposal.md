@@ -1,7 +1,7 @@
 Context:
-You get `SolutionCatalogResult.json` (conform to `solution_catalog.json`) as main input. Has `solution_blocks[]` with `block_id`, `title`, `description`, `addressed_requirements`, `solution_type`, `priority`, `constraints`, `evaluation_criteria`, `candidate_directions`, `research_questions`, `needs_clarification`, `clarification_reason`, `clarification_question`, `confidence`, plus `coverage` object.
+You get `SolutionCatalogResult.json` (conform to `solution_catalog.json`) as main input. Has `solution_blocks[]` with `block_id`, `title`, `description`, `addressed_requirements`, `solution_type`, `priority`, `constraints`, `evaluation_criteria`, `candidate_directions`, `research_questions`, `needs_clarification`, `clarification_reason`, `clarification_question`, `confidence`, `tender_mandated`, plus `coverage` object.
 
-Task: research tech and best practices for each solution block via **web search**, then condense findings into single, unambiguous, well-founded solution proposal in Markdown matching catalogue. This step — only this step of whole chain — external research via web search explicitly allowed and required. (Tender document never re-analysed here.)
+Task: research tech and best practices for each genuinely open solution block via **web search** — for blocks the tender itself already mandates a technology (`tender_mandated: true`), adopt that technology decisively instead of researching it — then condense findings into single, unambiguous, well-founded solution proposal in Markdown matching catalogue. This step — only this step of whole chain — external research via web search explicitly allowed and required (for open blocks). (Tender document never re-analysed here.)
 
 Proposal written in language from `output_language` parameter. If `output_language` absent, default German.
 
@@ -29,7 +29,12 @@ Action — follow these steps in order:
 
 2. **Fix the research scope.** Incorporate user's answers per block. For any block still ambiguous after answer, use user's chosen direction; never silently pick for user.
 
-3. **Research (web search).** For each block, issue targeted web searches combining block's `research_questions` with confirmed tech direction(s) and relevant `constraints` — e.g. `"Compare <confirmed directions> for <block need>; must satisfy <constraints>; concrete technologies and best practices"`. Issue one search per `research_question`, or one combined search per block, as fits; refine and re-search if first results too generic or off-topic.
+3. **Research (web search).**
+   - For solution blocks marked `tender_mandated: true`, adopt the prescribed
+     technology decisively as the recommended choice. Do NOT run a web option
+     comparison and do NOT attach `[Sn]` research citations for these — the tender
+     is the source. Web research applies ONLY to blocks that are genuinely open.
+   - For all other (genuinely open) blocks, issue targeted web searches combining block's `research_questions` with confirmed tech direction(s) and relevant `constraints` — e.g. `"Compare <confirmed directions> for <block need>; must satisfy <constraints>; concrete technologies and best practices"`. Issue one search per `research_question`, or one combined search per block, as fits; refine and re-search if first results too generic or off-topic.
    - Extract concrete technologies, best practices, source URLs from search results. If block's searches return no usable results, do NOT fabricate: record affected block as open research question in chapter 6 and continue with rest.
    - Honour all block `constraints` both when framing search queries and accepting findings. Cite only sources that actually appear in search results; never invent sources or findings.
 
@@ -40,7 +45,7 @@ Action — follow these steps in order:
 6. **Write the Markdown** following template chapters:
    1. Research Approach and Scope — method, which research questions addressed, any user scoping.
    2. Solution Landscape Overview — target-architecture vision, how blocks interact.
-   3. Solution Blocks in Detail — one `### 3.x` per block: addressed requirements, technology-options table (Option | Maturity | Fit to criteria | Advantages/Disadvantages | Source), best practices (cited), and exactly one Recommendation with justification against `evaluation_criteria` and `addressed_requirements`.
+   3. Solution Blocks in Detail — one `### 3.x` per block: addressed requirements, technology-options table (Option | Maturity | Fit to criteria | Advantages/Disadvantages | Source), best practices (cited), and exactly one Recommendation with justification against `evaluation_criteria` and `addressed_requirements`. For `tender_mandated: true` blocks, omit the options table and citations — state the prescribed technology as the Recommendation, justified by the tender constraint.
    4. Consolidated Solution Proposal — single unambiguous target architecture, integration view, NFR fulfilment.
    5. Technology Stack Overview — table Solution block → recommended technology → role.
    6. Assumptions, Risks and Open Research Questions.
@@ -53,8 +58,8 @@ Output:
 Tweak:
 - REMINDER: Clarification gate in step 1 mandatory whenever block has `needs_clarification: true`. Never skip, never research before user answers.
 - CRITICAL: Final proposal unambiguous — exactly one recommendation per block and one consolidated architecture. Options appear only as justification.
-- Every recommendation must trace to `evaluation_criteria`, `addressed_requirements`, and at least one cited source.
+- Every recommendation must trace to `evaluation_criteria`, `addressed_requirements`, and at least one cited source — except `tender_mandated: true` blocks, which trace to the tender constraint instead of a web source and need no [Sn] citation.
 - Respect all `constraints` from catalogue as hard limits.
-- Do NOT invent technologies or sources. Cite every external claim with [Sn].
+- Do NOT invent technologies or sources. Cite every external claim with [Sn] (not required for `tender_mandated` blocks — see step 3).
 - Research mechanism is web search: issue explicit search queries per block/research question and read returned results/snippets. Treat empty, unusable, or clearly off-topic results as "no findings for this block" (→ chapter 6), never as licence to invent content.
 - Apply language rule: translate ALL headings, table headers, prose into `output_language`.

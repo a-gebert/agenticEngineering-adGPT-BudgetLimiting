@@ -191,15 +191,15 @@
 
 | Qualification / Role | Person-Days | Day Rate (EUR excl. VAT) | Price (EUR excl. VAT) |
 |----------------------|------------|--------------------------|----------------------|
-| [EXAMPLE] Project Lead | [EXAMPLE] 80 – 100 | XXX | [EXAMPLE] XXX |
-| [EXAMPLE] Solution Architect | [EXAMPLE] 40 – 60 | XXX | [EXAMPLE] XXX |
-| [EXAMPLE] Senior Developer | [EXAMPLE] 200 – 280 | XXX | [EXAMPLE] XXX |
-| [EXAMPLE] Frontend Developer | [EXAMPLE] 80 – 120 | XXX | [EXAMPLE] XXX |
-| [EXAMPLE] Test Manager / QA | [EXAMPLE] 60 – 80 | XXX | [EXAMPLE] XXX |
-| [EXAMPLE] UX Designer | [EXAMPLE] 20 – 30 | XXX | [EXAMPLE] XXX |
-| [EXAMPLE] Change & Training | [EXAMPLE] 30 – 40 | XXX | [EXAMPLE] XXX |
-| [EXAMPLE] Rollout & Hypercare | [EXAMPLE] 40 – 60 | XXX | [EXAMPLE] XXX |
-| **Total** | **[EXAMPLE] 530 – 740** | | **[EXAMPLE] XXX** |
+| [EXAMPLE] Project Lead | [EXAMPLE] 80 – 100 | | |
+| [EXAMPLE] Solution Architect | [EXAMPLE] 40 – 60 | | |
+| [EXAMPLE] Senior Developer | [EXAMPLE] 200 – 280 | | |
+| [EXAMPLE] Frontend Developer | [EXAMPLE] 80 – 120 | | |
+| [EXAMPLE] Test Manager / QA | [EXAMPLE] 60 – 80 | | |
+| [EXAMPLE] UX Designer | [EXAMPLE] 20 – 30 | | |
+| [EXAMPLE] Change & Training | [EXAMPLE] 30 – 40 | | |
+| [EXAMPLE] Rollout & Hypercare | [EXAMPLE] 40 – 60 | | |
+| **Total** | **[EXAMPLE] 530 – 740** | | |
 
 [EXAMPLE] The above effort estimates are indicative and based on the requirements analysis. A detailed effort assessment will be conducted as part of the scoping workshop. In accordance with the formal requirements (FORM-004), a separate presentation of licences, implementation, and annual maintenance will be provided in the detailed proposal.
 
