@@ -46,6 +46,11 @@ External web research permitted **only** in `proposal-solution-research` step, o
 
 Profiler MCP permitted **only** in `proposal-profiler-match` step, only to match colleagues/skills and comparable project experience — never for tender analysis. All Profiler output anonymised (no person names, no client names).
 
+adesso institutional facts are available ONLY via the curated reference file
+`references/adesso_facts.md`, cited by the executive-summary and proposal steps.
+This file is the sole permitted source for adesso company facts; inventing such
+facts remains forbidden.
+
 # Mandatory Pre-Execution Gate
 
 Before any tender-related content, internally verify all:
@@ -88,19 +93,21 @@ Phase 1 — PreProcessing
 Phase 2 — Solution
 5. SolutionCatalog → skill `proposal-solution-catalog` → `SolutionCatalogResult.json`
 6. SolutionProposal → skill `proposal-solution-research` → `SolutionProposalResult.md`
-7. StaffingCatalog → skill `proposal-staffing-catalog` → `StaffingCatalogResult.json`
-8. ProfilerMatch → skill `proposal-profiler-match` → `ProfilerMatchResult.json`
-9. Estimator → skill `proposal-estimator` → `EstimationResult.json`
+7. ProductDesign → skill `proposal-product-design` → `ProductDesignResult.json`
+8. StaffingCatalog → skill `proposal-staffing-catalog` → `StaffingCatalogResult.json`
+9. ProfilerMatch → skill `proposal-profiler-match` → `ProfilerMatchResult.json`
+10. Estimator → skill `proposal-estimator` → `EstimationResult.json`
 
 Phase 3 — Consolidation
-10. ExecutiveSummary → skill `proposal-executive-summary` → `ExecutiveSummaryResult.json` (runs first in Consolidation so it can incorporate proposed solution from SolutionProposal, stays available to Report and Proposal)
-11. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`
-12. Report → skill `proposal-report` → `ReportResult.md`
-13. Proposal → skill `proposal-proposal` → `ProposalResult.md`
+11. ExecutiveSummary → skill `proposal-executive-summary` → `ExecutiveSummaryResult.json` (runs first in Consolidation so it can incorporate proposed solution from SolutionProposal, stays available to Report and Proposal)
+12. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`
+13. Report → skill `proposal-report` → `ReportResult.md`
+14. ProposalOutline → skill `proposal-proposal-outline` → `ProposalOutlineResult.json`
+15. Proposal → skill `proposal-proposal` → `ProposalResult.md`
 
 Export
-14. Convert `ProposalResult.md` to proposal DOCX using adesso template selected per **Proposal Template Selection** mapping, following the exact recipe in **Proposal DOCX Conversion** below. Name output file after determined client name per **Proposal Filename** rule below (e.g. `Proposal_CloudRetail_AG.docx`).
-15. Convert `ReportResult.md` to `Report.pdf` (see **Report PDF Conversion** below).
+16. Convert `ProposalResult.md` to proposal DOCX using adesso template selected per **Proposal Template Selection** mapping, following the exact recipe in **Proposal DOCX Conversion** below. Name output file after determined client name per **Proposal Filename** rule below (e.g. `Proposal_CloudRetail_AG.docx`).
+17. Convert `ReportResult.md` to `Report.pdf` (see **Report PDF Conversion** below).
 
 Export = pure format transformation. Content of `ProposalResult.md` / `ReportResult.md` is final and immutable. Never regenerate, rewrite, summarize, reorder, extend proposal/report content during export. Only apply layout, native tables, table of contents, cover-page addressee.
 
@@ -134,11 +141,16 @@ Consolidation steps require all PreProcessing artifacts exist first.
 Solution steps run after PreProcessing, before Consolidation:
 - `proposal-solution-catalog` runs only after `FunctionalResult.json`, `ConstraintsResult.json`, `ClientContextResult.json` exist.
 - `proposal-solution-research` runs only after `SolutionCatalogResult.json` exists.
+- `proposal-product-design` runs only after `FunctionalResult.json` and
+  `SolutionProposalResult.md` exist. No web research, no tender re-read.
 - `proposal-staffing-catalog` runs only after `SolutionProposalResult.md`, `FunctionalResult.json`, `ConstraintsResult.json` exist.
 - `proposal-profiler-match` runs only after `StaffingCatalogResult.json` exists.
 - `proposal-estimator` runs only after `SolutionProposalResult.md` and `StaffingCatalogResult.json` exist. No dependency on `ProfilerMatchResult.json` (roles/effort come from `StaffingCatalogResult.json`, never Profiler match).
 - `proposal-executive-summary` runs only after `SolutionProposalResult.md` exists — runs at start of Consolidation so summary can incorporate proposed solution, not just tender ask, while staying available to Report and Proposal.
-- `proposal-proposal` additionally consumes `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ExecutiveSummaryResult.json`.
+- `proposal-proposal-outline` runs only after Report, and after all Solution +
+  earlier Consolidation artifacts exist (ExecutiveSummary, OpenPoints,
+  ProductDesign, …). Produces `ProposalOutlineResult.json`.
+- `proposal-proposal` additionally consumes `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ExecutiveSummaryResult.json`, `ProductDesignResult.json`, `ProposalOutlineResult.json`; it renders chapters strictly from the outline.
 
 Specifically:
 - `proposal-executive-summary` runs only after:
@@ -148,8 +160,10 @@ Specifically:
   - `FormalResult.json`
 - `proposal-report` runs only after:
   - `ExecutiveSummaryResult.json`, `ClientContextResult.json`, `FunctionalResult.json`, `FormalResult.json`, `ConstraintsResult.json`, `OpenPointsResult.json`
+- `proposal-proposal-outline` runs only after:
+  - `ReportResult.md` plus all Solution and earlier Consolidation artifacts: `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `ProductDesignResult.json`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ExecutiveSummaryResult.json`, `OpenPointsResult.json`
 - `proposal-proposal` runs only after:
-  - all files above plus `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`
+  - all files above plus `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `ProductDesignResult.json`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ProposalOutlineResult.json`
 
 Dependency missing: stop, continue with missing prerequisite step instead.
 
@@ -214,7 +228,7 @@ Populates only template cover page — must not alter chapter content produced b
 
 # Proposal DOCX Conversion
 
-Deterministic recipe for step 14. Goal: native Word tables + populated table of contents + adesso corporate design, content byte-for-byte unchanged.
+Deterministic recipe for step 16. Goal: native Word tables + populated table of contents + adesso corporate design, content byte-for-byte unchanged.
 
 Convert with pandoc (via `pypandoc` in Code Interpreter), not a plain/unstyled Word export:
 
@@ -249,7 +263,7 @@ If pandoc/`pypandoc` is unavailable in the sandbox, install or fall back to anot
 
 # Report PDF Conversion
 
-Step 15. Convert `ReportResult.md` to `Report.pdf` via pandoc, content unchanged, `--toc` for navigation. `Report.pdf` is an internal analysis artifact: no adesso proposal template, no cover page, no client-name filename slug.
+Step 17. Convert `ReportResult.md` to `Report.pdf` via pandoc, content unchanged, `--toc` for navigation. `Report.pdf` is an internal analysis artifact: no adesso proposal template, no cover page, no client-name filename slug.
 
 # Code Interpreter Restriction
 
