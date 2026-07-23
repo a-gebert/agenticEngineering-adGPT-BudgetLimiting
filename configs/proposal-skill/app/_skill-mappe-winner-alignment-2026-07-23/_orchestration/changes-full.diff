@@ -1,0 +1,1118 @@
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/AGENT.md b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/AGENT.md
+index 2860155..0fbc869 100644
+--- a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/AGENT.md
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/AGENT.md
+@@ -46,6 +46,11 @@ External web research permitted **only** in `proposal-solution-research` step, o
+ 
+ Profiler MCP permitted **only** in `proposal-profiler-match` step, only to match colleagues/skills and comparable project experience — never for tender analysis. All Profiler output anonymised (no person names, no client names).
+ 
++adesso institutional facts are available ONLY via the curated reference file
++`references/adesso_facts.md`, cited by the executive-summary and proposal steps.
++This file is the sole permitted source for adesso company facts; inventing such
++facts remains forbidden.
++
+ # Mandatory Pre-Execution Gate
+ 
+ Before any tender-related content, internally verify all:
+@@ -88,19 +93,21 @@ Phase 1 — PreProcessing
+ Phase 2 — Solution
+ 5. SolutionCatalog → skill `proposal-solution-catalog` → `SolutionCatalogResult.json`
+ 6. SolutionProposal → skill `proposal-solution-research` → `SolutionProposalResult.md`
+-7. StaffingCatalog → skill `proposal-staffing-catalog` → `StaffingCatalogResult.json`
+-8. ProfilerMatch → skill `proposal-profiler-match` → `ProfilerMatchResult.json`
+-9. Estimator → skill `proposal-estimator` → `EstimationResult.json`
++7. ProductDesign → skill `proposal-product-design` → `ProductDesignResult.json`
++8. StaffingCatalog → skill `proposal-staffing-catalog` → `StaffingCatalogResult.json`
++9. ProfilerMatch → skill `proposal-profiler-match` → `ProfilerMatchResult.json`
++10. Estimator → skill `proposal-estimator` → `EstimationResult.json`
+ 
+ Phase 3 — Consolidation
+-10. ExecutiveSummary → skill `proposal-executive-summary` → `ExecutiveSummaryResult.json` (runs first in Consolidation so it can incorporate proposed solution from SolutionProposal, stays available to Report and Proposal)
+-11. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`
+-12. Report → skill `proposal-report` → `ReportResult.md`
+-13. Proposal → skill `proposal-proposal` → `ProposalResult.md`
++11. ExecutiveSummary → skill `proposal-executive-summary` → `ExecutiveSummaryResult.json` (runs first in Consolidation so it can incorporate proposed solution from SolutionProposal, stays available to Report and Proposal)
++12. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`
++13. Report → skill `proposal-report` → `ReportResult.md`
++14. ProposalOutline → skill `proposal-proposal-outline` → `ProposalOutlineResult.json`
++15. Proposal → skill `proposal-proposal` → `ProposalResult.md`
+ 
+ Export
+-14. Convert `ProposalResult.md` to proposal DOCX using adesso template selected per **Proposal Template Selection** mapping, following the exact recipe in **Proposal DOCX Conversion** below. Name output file after determined client name per **Proposal Filename** rule below (e.g. `Proposal_CloudRetail_AG.docx`).
+-15. Convert `ReportResult.md` to `Report.pdf` (see **Report PDF Conversion** below).
++16. Convert `ProposalResult.md` to proposal DOCX using adesso template selected per **Proposal Template Selection** mapping, following the exact recipe in **Proposal DOCX Conversion** below. Name output file after determined client name per **Proposal Filename** rule below (e.g. `Proposal_CloudRetail_AG.docx`).
++17. Convert `ReportResult.md` to `Report.pdf` (see **Report PDF Conversion** below).
+ 
+ Export = pure format transformation. Content of `ProposalResult.md` / `ReportResult.md` is final and immutable. Never regenerate, rewrite, summarize, reorder, extend proposal/report content during export. Only apply layout, native tables, table of contents, cover-page addressee.
+ 
+@@ -134,11 +141,16 @@ Consolidation steps require all PreProcessing artifacts exist first.
+ Solution steps run after PreProcessing, before Consolidation:
+ - `proposal-solution-catalog` runs only after `FunctionalResult.json`, `ConstraintsResult.json`, `ClientContextResult.json` exist.
+ - `proposal-solution-research` runs only after `SolutionCatalogResult.json` exists.
++- `proposal-product-design` runs only after `FunctionalResult.json` and
++  `SolutionProposalResult.md` exist. No web research, no tender re-read.
+ - `proposal-staffing-catalog` runs only after `SolutionProposalResult.md`, `FunctionalResult.json`, `ConstraintsResult.json` exist.
+ - `proposal-profiler-match` runs only after `StaffingCatalogResult.json` exists.
+ - `proposal-estimator` runs only after `SolutionProposalResult.md` and `StaffingCatalogResult.json` exist. No dependency on `ProfilerMatchResult.json` (roles/effort come from `StaffingCatalogResult.json`, never Profiler match).
+ - `proposal-executive-summary` runs only after `SolutionProposalResult.md` exists — runs at start of Consolidation so summary can incorporate proposed solution, not just tender ask, while staying available to Report and Proposal.
+-- `proposal-proposal` additionally consumes `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ExecutiveSummaryResult.json`.
++- `proposal-proposal-outline` runs only after Report, and after all Solution +
++  earlier Consolidation artifacts exist (ExecutiveSummary, OpenPoints,
++  ProductDesign, …). Produces `ProposalOutlineResult.json`.
++- `proposal-proposal` additionally consumes `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ExecutiveSummaryResult.json`, `ProductDesignResult.json`, `ProposalOutlineResult.json`; it renders chapters strictly from the outline.
+ 
+ Specifically:
+ - `proposal-executive-summary` runs only after:
+@@ -148,8 +160,10 @@ Specifically:
+   - `FormalResult.json`
+ - `proposal-report` runs only after:
+   - `ExecutiveSummaryResult.json`, `ClientContextResult.json`, `FunctionalResult.json`, `FormalResult.json`, `ConstraintsResult.json`, `OpenPointsResult.json`
++- `proposal-proposal-outline` runs only after:
++  - `ReportResult.md` plus all Solution and earlier Consolidation artifacts: `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `ProductDesignResult.json`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ExecutiveSummaryResult.json`, `OpenPointsResult.json`
+ - `proposal-proposal` runs only after:
+-  - all files above plus `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`
++  - all files above plus `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `ProductDesignResult.json`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ProposalOutlineResult.json`
+ 
+ Dependency missing: stop, continue with missing prerequisite step instead.
+ 
+@@ -214,7 +228,7 @@ Populates only template cover page — must not alter chapter content produced b
+ 
+ # Proposal DOCX Conversion
+ 
+-Deterministic recipe for step 14. Goal: native Word tables + populated table of contents + adesso corporate design, content byte-for-byte unchanged.
++Deterministic recipe for step 16. Goal: native Word tables + populated table of contents + adesso corporate design, content byte-for-byte unchanged.
+ 
+ Convert with pandoc (via `pypandoc` in Code Interpreter), not a plain/unstyled Word export:
+ 
+@@ -249,7 +263,7 @@ If pandoc/`pypandoc` is unavailable in the sandbox, install or fall back to anot
+ 
+ # Report PDF Conversion
+ 
+-Step 15. Convert `ReportResult.md` to `Report.pdf` via pandoc, content unchanged, `--toc` for navigation. `Report.pdf` is an internal analysis artifact: no adesso proposal template, no cover page, no client-name filename slug.
++Step 17. Convert `ReportResult.md` to `Report.pdf` via pandoc, content unchanged, `--toc` for navigation. `Report.pdf` is an internal analysis artifact: no adesso proposal template, no cover page, no client-name filename slug.
+ 
+ # Code Interpreter Restriction
+ 
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/plan.json b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/plan.json
+index b158566..b0f0d3b 100644
+--- a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/plan.json
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/plan.json
+@@ -96,7 +96,7 @@
+         "name": "SolutionProposal",
+         "description": "Research technologies and best practices per solution block via web search (with a mandatory user clarification gate for flagged blocks) and condense them into one unambiguous solution proposal.",
+         "depends_on": "Solution",
+-        "next": "StaffingCatalog",
++        "next": "ProductDesign",
+         "resources": {
+           "prompt": "/prompts/solution_proposal.md",
+           "output": "/schema/solution_proposal_output.md",
+@@ -113,6 +113,27 @@
+       },
+       {
+         "step": 3,
++        "name": "ProductDesign",
++        "description": "Derive a screen-by-screen product/UX design (feature and interaction behaviour) from the functional requirements; every behaviour traces to a requirement. No web research.",
++        "depends_on": "Solution",
++        "next": "StaffingCatalog",
++        "resources": {
++          "prompt": "/prompts/product_design.md",
++          "output": "/schema/product_design.json",
++          "scripts": [],
++          "assets": [],
++          "references": [
++            "/schema/product_design.json"
++          ],
++          "batch": [
++            "/preprocessing/Functional.json",
++            "/solution/SolutionProposal.md"
++          ],
++          "artifacts": {}
++        }
++      },
++      {
++        "step": 4,
+         "name": "StaffingCatalog",
+         "description": "Derive the roles/skills the proposed solution needs (each with a Profiler search brief) plus reference-search briefs. Deterministic, no external knowledge, no Profiler calls.",
+         "depends_on": "Solution",
+@@ -134,7 +155,7 @@
+         }
+       },
+       {
+-        "step": 4,
++        "step": 5,
+         "name": "ProfilerMatch",
+         "description": "Match real adesso colleagues and comparable projects via the Profiler MCP against the staffing catalogue; produce anonymised, role-based team entries and anonymised references. Mandatory clarification gate when matching is ambiguous.",
+         "depends_on": "Solution",
+@@ -154,7 +175,7 @@
+         }
+       },
+       {
+-        "step": 5,
++        "step": 6,
+         "name": "Estimator",
+         "description": "Deterministic effort estimation: derive work packages from the solution proposal and estimate per-role person-days. Sole source for the proposal price table. Depends on SolutionProposal and StaffingCatalog only, never on ProfilerMatch.",
+         "depends_on": "Solution",
+@@ -222,7 +243,7 @@
+         "name": "Report",
+         "description": "Create summary report. Batch files are releted to user-files container (not adesso skill set)",
+         "depends_on": "PreProcessing",
+-        "next": "Proposal",
++        "next": "ProposalOutline",
+         "resources": {
+           "prompt": "/prompts/functional_consolidation.md",
+           "input": "/schema/functional_requirements.json",
+@@ -245,6 +266,37 @@
+       },
+       {
+         "step": 4,
++        "name": "ProposalOutline",
++        "description": "Decide the adaptive proposal chapter structure: evaluate each rubric dimension against artifact evidence (present/activate/n/a), emit an ordered outline. Runs after Report, before Proposal.",
++        "depends_on": "PreProcessing",
++        "next": "Proposal",
++        "resources": {
++          "prompt": "/prompts/proposal_outline.md",
++          "output": "/schema/proposal_outline.json",
++          "scripts": [],
++          "assets": [],
++          "references": [
++            "/schema/proposal_outline.json"
++          ],
++          "batch": [
++            "/consolidation/ExecutiveSummary.json",
++            "/consolidation/OpenPoints.json",
++            "/preprocessing/ClientContext.json",
++            "/preprocessing/Functional.json",
++            "/preprocessing/Formal.json",
++            "/preprocessing/Constraints.json",
++            "/solution/SolutionCatalog.json",
++            "/solution/SolutionProposal.md",
++            "/solution/ProductDesign.json",
++            "/solution/StaffingCatalog.json",
++            "/solution/ProfilerMatch.json",
++            "/solution/Estimator.json"
++          ],
++          "artifacts": {}
++        }
++      },
++      {
++        "step": 5,
+         "name": "Proposal",
+         "description": "Generate a structured proposal draft following the adesso proposal template: 1) Initial Situation, 2) Subject Matter of the Proposal (solution, requirements, architecture, methodology, organisation, QA, operations, open points), 3) Prices, 4) Terms and Conditions (standard text placeholders), 5) Binding Period, Annex A References/Profiles, Annex B Company Profile.",
+         "depends_on": "PreProcessing",
+@@ -267,9 +319,11 @@
+             "/consolidation/OpenPoints.json",
+             "/solution/SolutionCatalog.json",
+             "/solution/SolutionProposal.md",
++            "/solution/ProductDesign.json",
+             "/solution/StaffingCatalog.json",
+             "/solution/ProfilerMatch.json",
+-            "/solution/Estimator.json"
++            "/solution/Estimator.json",
++            "/consolidation/ProposalOutline.json"
+           ],
+           "artifacts": {}
+         }
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/executive_summary.md b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/executive_summary.md
+index 6a16b4e..f8bb2b7 100644
+--- a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/executive_summary.md
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/executive_summary.md
+@@ -11,6 +11,8 @@ Retrieval (RAG) — run Document-Search in two waves:
+ 
+ Your task: analyze document structure and semantic content, generate concise executive summary of tender **and adesso proposed response**, produce structured JSON output conforming exactly to `executive_summary.json` JSON Schema (`ExecutiveSummary` schema).
+ 
++You also get `references/adesso_facts.md` — curated adesso institutional facts. You may cite adesso facts (Maître concept, mission fit, methodology) ONLY from this file. Never invent company facts.
++
+ All labels, summaries, messages in output must be written in language set by `output_language` parameter. If `output_language` not provided, default English.
+ 
+ Role:
+@@ -29,8 +31,8 @@ Analyze retrieved passages, produce JSON object with structure:
+    - Timeline or deadlines if stated
+    - Expected deliverables or outcomes
+    Final 2 lines cover adesso response, derived from `SolutionProposalResult.md`:
+-   - One line naming adesso proposed solution direction / consolidated target architecture at high level (no technical implementation detail — that belong in `SolutionProposalResult.md` and proposal own architecture chapter)
+-   - One closing line positioning adesso as right partner for this engagement (confidence statement)
++   - One line naming adesso proposed solution direction / consolidated target architecture at high level (no technical implementation detail — that belong in `SolutionProposalResult.md` and proposal own architecture chapter). Weave in adesso's delivery differentiators from `adesso_facts.md` (e.g. Maître concept) where they support the mission fit — cite only facts present there.
++   - One closing line positioning adesso as right partner for this engagement (confidence statement), including a brief price-model rationale (fixed-price / T&M reasoning) consistent with the engagement; do not restate figures from the price table.
+    Each line convey distinct piece of info. No repeat points.
+ 
+ 2. **key_topics**: Extract 5–10 key topics or themes characterizing tender (e.g., `"Cloud Migration"`, `"IT-Sicherheit"`, `"Projektmanagement"`). Use `output_language` for topic labels.
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/product_design.md b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/product_design.md
+new file mode 100644
+index 0000000..a24fdce
+--- /dev/null
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/product_design.md
+@@ -0,0 +1,55 @@
++Context:
++Input = artifacts from prior Solution chain steps. This ProductDesign step does
++**not** re-read the tender document; it derives from prior JSON/MD artifacts:
++
++- `FunctionalResult.json` — functional + non-functional requirements (user
++  stories), each linked to an aspect via `aspect_id`. Conforms to
++  `functional_requirements.json`.
++- `SolutionProposalResult.md` — the recommended target architecture and
++  technology per solution block. Context only; do not restate tech choices.
++
++Task: produce a screen-by-screen product / UX design — the behavioural narrative
++a winning proposal's "User Interface" chapter is built from (screens, menus,
++workflow states, interaction rules). Every behaviour MUST be derived from one or
++more functional requirements.
++
++Output language = `output_language` parameter (default English).
++
++Role:
++Act as a senior product designer / business analyst. Translate user stories into
++concrete, plausible screen behaviour without inventing scope beyond the
++requirements.
++
++Emotion/Tone:
++Concrete, product-oriented, decisive. Describe behaviour ("clicking Add opens a
++menu with N options"), not implementation.
++
++Action:
++1. Group functional requirements into coherent screens/views. Each screen gets a
++   `screen_id` (scr-1, scr-2, …), `name`, `purpose`.
++2. For each screen, derive concrete `interactions`: `trigger` (user action) →
++   `reaction` (system/UI response) → `result_state`.
++3. For EVERY interaction, set `requirement_ids` to the FunctionalResult
++   requirement IDs it derives from. This array MUST be non-empty. If you cannot
++   trace an interaction to a requirement, DROP it — never invent behaviour.
++4. Compute `total_screens`.
++
++Output & Validation (Code Interpreter):
++1. Load `FunctionalResult.json` (+ `SolutionProposalResult.md` for context).
++   Compute the design in memory per the rules above.
++2. Load `product_design.json` schema, validate draft with `jsonschema`
++   (draft 2020-12). Fix violations and re-validate until clean.
++3. If a required value is genuinely absent, add an `errors` entry
++   (`code`, `message` in `output_language`, `severity`) and keep the object
++   otherwise schema-conformant.
++4. Write validated object to `ProductDesignResult.json` (UTF-8, pretty-printed),
++   upload back into context.
++
++Tweak:
++- Authoritative deliverable = `ProductDesignResult.json`, valid JSON only, no
++  markdown fences, no commentary.
++- Do NOT invent screens or interactions without a `requirement_ids` link.
++- Do NOT restate technology choices from SolutionProposal — describe behaviour.
++- Use `output_language` for all human-readable fields.
++- If there are no UI-bearing requirements, return an empty `screens` array with
++  `total_screens: 0` and note it in `errors`.
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/proposal.md b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/proposal.md
+index eaaaf7c..c9b3c8c 100644
+--- a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/proposal.md
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/proposal.md
+@@ -12,8 +12,23 @@ You receive the artifacts produced by the preceding chain steps as input files.
+ - `SolutionCatalogResult.json` — solution blocks (needs, addressed requirements, constraints, evaluation criteria). Conforms to `solution_catalog.json`.
+ - `SolutionProposalResult.md` — the researched, unambiguous solution proposal (one recommended technology per block plus a consolidated target architecture, with cited sources).
+ - `EstimationResult.json` — the deterministic effort estimation: work packages with per-role person-day ranges and an aggregated `role_summary[]` (person-day range per role) plus `total_effort`. Conforms to `estimator.json`. This is the ONLY source for the price table in chapter 3 — never re-estimate effort yourself.
+-
+-Together these files cover the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, the open points coverage analysis, the solution catalogue, the researched solution proposal, and the effort estimation. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) using the `chapters`/`sections`/`aspects` carried in the SAME artifact that owns the requirement — `FunctionalResult.json` for functional and non-functional requirements. Aspect IDs are NOT a shared namespace across steps; never resolve a requirement's `aspect_id` against another artifact's structure (e.g. `ExecutiveSummaryResult.json` or `ClientContextResult.json`), whose `asp-N` numbering is unrelated.
++- `ProposalOutlineResult.json` — the adaptive chapter outline. It governs WHICH
++  content dimensions appear inside chapter 2 ("Subject Matter of the Proposal")
++  and in WHAT order — within chapter 2, RENDER SUBSECTIONS STRICTLY FROM its
++  `outline` array, in `order`: do not add a chapter-2 subsection absent from the
++  outline; do not drop one present (`activate`/`present`) in it. Each outline
++  entry's `heading`/`purpose`/`source_artifacts` drives one chapter-2 subsection.
++  This does NOT apply to the mandatory document skeleton — Management Summary,
++  chapter 1 (Initial Situation), chapter 3 (Prices), chapter 4 (Terms and
++  Conditions), chapter 5 (Binding Period), and the Annexes — which always
++  renders regardless of the outline and satisfies the outline's baseline
++  dimensions (Executive Summary, Architecture, Price, Terms & Conditions).
++- `ProductDesignResult.json` — feeds the Product/UX chapter (screen-by-screen
++  behaviour) when that dimension is in the outline.
++- `references/adesso_facts.md` — company-profile / methodology facts; cite ONLY
++  from here for adesso facts, never invent.
++
++Together these files cover the document structure (chapters, sections, aspects), the executive summary, key topics, client context, extracted requirements (functional, non-functional, formal), project constraints, the open points coverage analysis, the solution catalogue, the researched solution proposal, the effort estimation, the adaptive chapter outline, and the product/UX design. Resolve source references via the aspect chain (`requirement.aspect_id` -> `aspects[].section_id` -> `sections[].section_heading` + `chapter_heading`) using the `chapters`/`sections`/`aspects` carried in the SAME artifact that owns the requirement — `FunctionalResult.json` for functional and non-functional requirements. Aspect IDs are NOT a shared namespace across steps; never resolve a requirement's `aspect_id` against another artifact's structure (e.g. `ExecutiveSummaryResult.json` or `ClientContextResult.json`), whose `asp-N` numbering is unrelated.
+ 
+ Your task is to transform this structured analysis into a **structured proposal draft** following adesso's official proposal template (see the **Template** section below). The proposal must be a convincing, client-facing document that directly addresses the customer's requirements and positions adesso as the ideal implementation partner.
+ 
+@@ -40,9 +55,36 @@ CRITICAL LANGUAGE RULE: ALL chapter headings, sub-headings, table headers, and p
+ 
+ This rule applies to EVERY heading, table header, and label in the output without exception.
+ 
++CHAPTER-SELECTION RULE: `ProposalOutlineResult.json` governs WHICH content dimensions
++appear inside chapter 2 ("Subject Matter of the Proposal") and in WHAT order —
++RENDER CHAPTERS STRICTLY FROM its `outline` array, in `order`. Do not render a
++fixed built-in chapter list; do not add chapters absent from the outline; do not
++drop chapters present in it. The Management Summary, chapter 1 (Initial
++Situation), chapter 3 (Prices), chapter 4 (Terms and Conditions), chapter 5
++(Binding Period), and the Annexes are the mandatory document skeleton of every
++adesso proposal and always render — they correspond to the outline's baseline
++dimensions (Executive Summary, Architecture, Price, Terms & Conditions, resp.
++structural necessities not covered by the dimension rubric). Within chapter 2,
++each subsection below is tagged with an `— outline dimension: X` annotation.
++THE JOIN IS ON `dimension`, NOT ON HEADING TEXT: for each tagged subsection,
++look up the `outline[]` entry whose `dimension` field equals X (exact string
++match against `ProposalOutlineResult.json`'s `outline[].dimension`, and against
++that dimension's status in `dimensions[]`) — render the subsection ONLY if a
++matching outline entry exists (i.e. that dimension is `present` or `activate`);
++skip it if the dimension is `n/a` or has no matching outline entry. Never match
++by comparing the subsection's own heading text to the outline entry's
++`heading` — headings are free text and may differ; `dimension` is the stable
++key. If the outline contains an entry whose `dimension` maps to chapter 2 with
++no matching subsection below (e.g. Business Logic, Import/Export, Risk), write
++it as its own subsection directly from that outline entry's `heading`,
++`purpose`, and `source_artifacts`, matching the prose depth and citation
++discipline of the other subsections. Order chapter-2 subsections by the
++matching outline entry's `order` field (not by the order the subsections
++appear below); renumber headings sequentially so there are no gaps.
++
+ ---
+ 
+-**Management Summary** (`## Management Summary`)
++**Management Summary** (`## Management Summary`) — outline dimension: Executive Summary (baseline, always `present`)
+ 
+ Write a concise executive summary of the entire proposal (0.5–1 page). This is the first thing the decision-maker reads. Include:
+ - One paragraph summarising the client's situation and project motivation
+@@ -72,9 +114,22 @@ This chapter should be approximately 1.5–2 pages, written as flowing prose (no
+ 
+ **2. Subject Matter of the Proposal** (`## 2 ...`)
+ 
+-This is the core content chapter describing what adesso proposes to deliver. Structure it with the following subsections:
+-
+-2.1 **Solution Overview** (`### 2.1 ...`)
++This is the core content chapter describing what adesso proposes to deliver. It
++is the chapter governed by the CHAPTER-SELECTION RULE above: the subsections
++below are candidate content blocks, each tagged with its outline dimension —
++render only those whose dimension is `present`/`activate` in the outline, in the
++outline's order, and add any additional outline entry mapped to this chapter
++that has no matching block below directly from its `heading`/`purpose`/
++`source_artifacts`. Two subsections are exceptions to this gating: 2.1 (Solution
++Overview) and 2.8 (Open Points and Clarification Needs) are structural — they
++always render regardless of the outline, exactly like the mandatory document
++skeleton — see their individual entries below for why.
++
++2.1 **Solution Overview** (`### 2.1 ...`) — always render, unconditionally: this
++is chapter 2's structural opener, NOT gated by `ProposalOutlineResult.json` and
++NOT a stand-in for the "Architecture" dimension (that dimension's baseline
++content is 2.3's technical architecture). Render it regardless of the outline's
++contents, exactly like the mandatory document skeleton.
+ Write 5–7 substantial paragraphs (approximately 1.5 pages):
+ - Open with a high-level vision statement: what adesso proposes and why it is the right approach for this client
+ - Describe the overall solution architecture in business terms (not deep technical detail — that comes in 2.3)
+@@ -83,19 +138,26 @@ Write 5–7 substantial paragraphs (approximately 1.5 pages):
+ - Explain how the solution aligns with the client's strategic goals (from `client_context.strategic_goals`)
+ - Close with a differentiator paragraph: why adesso's approach stands out compared to a generic implementation
+ 
+-2.2 **Understanding of Requirements** (`### 2.2 ...`)
+-- Present functional requirements in tables grouped by thematic blocks:
+-  ```
+-  | ID | Requirement | Priority | Source |
++2.2 **Understanding of Requirements & Product Design** (`### 2.2 ...`) — outline dimensions: Non-functional (present if `FunctionalResult.json` exists), Product/UX (`activate` when `ProductDesignResult.json` has non-empty `screens`)
++- Do NOT dump the FR/NFR requirements table into the client-facing proposal.
++  Express requirement fulfilment as flowing feature narrative. A requirements/
++  compliance table is rendered ONLY if the outline contains a "Compliance List"
++  chapter (then keep it concise, ideally as a separate compliance section — see
++  below).
++- Group the narrative by thematic block (mirroring `FunctionalResult.json`'s aspect chain: requirement.aspect_id -> aspects[].section_id -> sections[].section_heading + chapter_heading, WITHIN that artifact's own structure only). For each block, describe in prose what the solution does and which pain points/goals it serves — reference FR-IDs inline (e.g. "(FR-12)") instead of tabulating them.
++- Weave `must`-priority requirements in as concrete commitments; `should`/`nice-to-have` items as enhancements delivered where scope allows.
++- If the Product/UX dimension is in the outline, use `ProductDesignResult.json`'s screen-by-screen behaviour (`screens[].interactions[]`: trigger -> reaction -> result_state, each tied to `requirement_ids`) to make the narrative concrete — describe the key screens/workflows the user interacts with and how they fulfil the underlying requirements. Do NOT invent screens or interactions beyond what `ProductDesignResult.json` provides.
++- Address non-functional requirements (performance, security, scalability, availability) within the same flowing narrative, not a separate table.
++
++**Compliance List** (conditional, only if the outline contains a "Compliance List" chapter — render immediately after 2.2 as its own short subsection, ~0.25–0.5 page)
++- Present a concise compliance table for binding formal/functional requirements only:
+   ```
+-- Priority mapping: `must` = **Must**, `should` = **Should**, `nice-to-have` = **Could**
+-- Resolve sources via the aspect chain WITHIN `FunctionalResult.json` (its own `aspects`/`sections`/`chapters`): requirement.aspect_id -> aspects[].section_id -> sections[].section_heading + chapter_heading. Do not resolve against another artifact's structure — aspect IDs are not shared across steps.
+-- Present non-functional requirements in a separate table:
+-  ```
+-  | ID | Category | Requirement | Target Value | Source |
++  | ID | Requirement | Fulfilment | Source |
+   ```
++- Resolve sources via the aspect chain WITHIN `FunctionalResult.json`/`FormalResult.json` (their own structure) — do not resolve against another artifact's aspect IDs.
++- Keep this table short and factual; it supplements, not replaces, the narrative in 2.2.
+ 
+-2.3 **Technical Solution and Architecture** (`### 2.3 ...`)
++2.3 **Technical Solution and Architecture** (`### 2.3 ...`) — outline dimension: Architecture (baseline, always `present`)
+ Write 1.5–2 pages covering the following aspects in depth:
+ - Use `SolutionProposalResult.md` as the authoritative source for the technical architecture: adopt its consolidated target architecture and the one recommended technology per solution block. Do NOT introduce alternative technologies or re-open decisions already made there. Summarise (do not restate the full research) and reference the recommendations in your own prose. Do NOT carry over the `[Sn]` citation markers from `SolutionProposalResult.md` — the proposal has no sources chapter, so any bracketed source reference would dangle.
+ - Propose a high-level technical architecture addressing all must-priority requirements
+@@ -106,9 +168,18 @@ Write 1.5–2 pages covering the following aspects in depth:
+ - If technical constraints exist (from `constraints.technical`), explain how the architecture complies
+ - Do NOT invent technologies not mentioned in or derivable from the input data
+ 
+-2.4 **Project Approach and Methodology** (`### 2.4 ...`)
++**Transition and Migration** (conditional — only if the outline contains a "Transition/Migration" chapter; render as its own numbered subsection within chapter 2, positioned per the outline's `order`, e.g. immediately after 2.3)
++Write approximately 0.5–0.75 pages, driven by the migration requirement(s) found in `FunctionalResult.json`/`ConstraintsResult.json`:
++- Describe the delta-transition approach: migrate incremental changes rather than a single big-bang cutover, to minimise business disruption
++- Describe the read-only cutover window: legacy system(s) go read-only for a defined period while the final delta is migrated and validated
++- Describe log-file handling: how historical log files/audit trails are migrated, archived, or made queryable post-cutover
++- Tie each element back to the concrete migration requirement(s) that triggered this chapter (reference requirement IDs)
++- Do NOT invent migration specifics beyond what the requirements/constraints support
++
++2.4 **Project Approach and Methodology** (`### 2.4 ...`) — outline dimension: Methodology/SCRUM (present if `ConstraintsResult.json`/`FunctionalResult.json` exist)
+ Write approximately 1 page:
+ - Propose a project methodology (agile, hybrid, or waterfall — choose based on constraints) and justify why this methodology fits the project context
++- If the chosen methodology is agile/SCRUM, describe the CONCRETE SCRUM setup — roles (Product Owner, Scrum Master, development team), ceremonies (sprint planning, daily standup, review, retrospective), and increment/sprint cadence — not a generic agile blurb
+ - Describe each project phase in 2–3 sentences: scope, deliverables, and success criteria
+ - Define project phases aligned with `constraints.timeline.key_milestones`
+ - Include a timeline table:
+@@ -119,7 +190,7 @@ Write approximately 1 page:
+ - Describe risk mitigation: how the phased approach reduces delivery risk
+ - If a pilot phase is appropriate, describe the pilot scope and transition to full rollout
+ 
+-2.5 **Project Organisation** (`### 2.5 ...`)
++2.5 **Project Organisation** (`### 2.5 ...`) — outline dimension: Key Personnel (present if `ProfilerMatchResult.json`/`StaffingCatalogResult.json` exist)
+ Write approximately 1 page:
+ - Populate the project team from `ProfilerMatchResult.json` `team[]` (anonymised, role-based) — one row per entry with role, seniority, key skills, and allocation. Do NOT invent team members. For entries with `matched: false`, insert the row as a placeholder with a neutral, client-facing wording (e.g. "Profil wird kurzfristig final besetzt") — do NOT render the raw internal `note` (e.g. "im Profiler recherchieren"), which is a delivery-internal hint that must not appear in the client document. Never output person names, locations, or availability.
+ - Present team structure as a table:
+@@ -131,32 +202,46 @@ Write approximately 1 page:
+ - Describe communication and meeting cadences in detail (daily, weekly, sprint reviews, steering)
+ - Address collaboration requirements from `constraints.organisational` — remote/onsite split, language requirements, tools
+ 
+-2.6 **Quality Assurance** (`### 2.6 ...`)
++2.6 **Quality Assurance** (`### 2.6 ...`) — outline dimension: Quality Management (present if `FunctionalResult.json` NFRs exist)
+ Write approximately 0.75–1 page:
+ - Define quality targets derived from non-functional requirements — present as a table:
+   ```
+   | Quality Dimension | Target | Measurement Method |
+   ```
+-- Describe the testing strategy in detail: unit tests, integration tests, performance/load tests, security tests, user acceptance tests — explain what each level covers and who is responsible
++- Ground the testing strategy in adesso's ISTQB-aligned approach and test-pyramid model from `references/adesso_facts.md` (`## Quality Management`) — cite only what is stated there, never invent certifications or methods. Describe the levels: unit tests, integration tests, system/performance tests, acceptance tests — explain what each level covers and who is responsible
+ - Define acceptance criteria and the formal sign-off process
+-- Describe continuous quality measures: code reviews, automated pipelines, quality gates per sprint
++- Describe continuous quality measures: code reviews, automated pipelines, and quality gates per increment (per `adesso_facts.md`)
+ - If compliance or certification requirements exist (from formal requirements), describe the audit approach
+ 
+-2.7 **Operations, Support, and Further Development** (`### 2.7 ...`)
++2.7 **Operations, Support, and Further Development** (`### 2.7 ...`) — outline dimension: Application Management & SLA (`activate` when NFR availability/support is present)
+ Write approximately 0.75–1 page:
+-- Describe the target operating model: monitoring, alerting, logging, incident management — align with non-functional availability/performance targets
+-- Outline the support model with a tiered SLA table:
++- Describe the target operating model: monitoring, alerting, logging, incident management — align with non-functional availability/performance targets; reference adesso's dedicated monitoring team (`references/adesso_facts.md`, `## Delivery Methodology`)
++- Outline the support model as the adesso Prio I–IV SLA table, sourced from `references/adesso_facts.md` (`## Application Management & SLA`) — cite only reaction/resolution figures stated there; if a cell is not maintained in `adesso_facts.md`, leave it empty rather than inventing a number:
+   ```
+-  | Severity | Response Time | Resolution Time | Availability |
++  | Priority | Reaction Time | Resolution Time | Availability |
+   ```
+ - Describe the hypercare phase after go-live: duration, scope, transition to regular support
+ - Describe knowledge transfer to the client's operations team
+ - Outline a scaling and evolution roadmap: how the solution grows from initial scope to full enterprise deployment
+ - Mention continuous improvement: how feedback loops and analytics drive post-launch enhancements
+ 
+-2.8 **Open Points and Clarification Needs** (`### 2.8 ...`)
++2.8 **Open Points and Clarification Needs** (`### 2.8 ...`) — always render,
++unconditionally: this is a structural chapter-2 closer fed directly by
++`OpenPointsResult.json`'s gap analysis, NOT gated by
++`ProposalOutlineResult.json` and NOT the same thing as the rubric's "Risk"
++dimension. ("Risk" is a separate, conditional outline dimension — if `activate`
++in the outline, it renders as its own additional chapter-2 subsection per the
++rule above, distinct from and in addition to this always-present 2.8.) Render
++2.8 regardless of the outline's contents, exactly like the mandatory document
++skeleton.
+ Write approximately 0.5–0.75 pages:
+-- Present ALL open points from the gap analysis in a table:
++- Scoping tone: where scope is bounded by a deliberate decision, state it
++  decisively inline in the relevant chapter (e.g. "Sub-templates are out of
++  scope for this proposal and will be clarified during implementation") instead
++  of deferring everything to open-points/clarification. Reserve the open-points
++  table below for genuinely unresolved questions — not for decisions adesso has
++  already made.
++- Present the remaining genuinely open points from the gap analysis in a table:
+   ```
+   | # | Topic | Severity | Proposed Resolution |
+   ```
+@@ -167,7 +252,7 @@ Write approximately 0.5–0.75 pages:
+ 
+ ---
+ 
+-**3. Prices** (`## 3 ...`)
++**3. Prices** (`## 3 ...`) — outline dimension: Price (baseline, always `present`)
+ 
+ Write approximately 1–1.5 pages following the official adesso pricing format:
+ 
+@@ -176,11 +261,11 @@ Write approximately 1–1.5 pages following the official adesso pricing format:
+ | Qualification / Role | Person-Days | Day Rate (EUR excl. VAT) | Price (EUR excl. VAT) |
+ ```
+ - Populate this table directly from `EstimationResult.json` `role_summary[]` — one row per entry, `role_title` for "Qualification / Role" and `"{person_days_min}–{person_days_max}"` for "Person-Days". Do NOT re-estimate, round beyond the given values, or add roles not present in `role_summary[]`.
+-- Use "XXX" for day rates (these are confidential and filled in manually) — "Price" stays "XXX" as well since it depends on the day rate.
+-- Include a **Total** row from `EstimationResult.json` `total_effort` (`"{person_days_min}–{person_days_max}"`).
++- Day rates are confidential and filled in manually. Do NOT emit placeholder day rates such as "XXX" — leave the "Day Rate" and "Price" cells empty (or omit the value) for each row rather than inserting a placeholder token.
++- Include a **Total** row from `EstimationResult.json` `total_effort` (`"{person_days_min}–{person_days_max}"`); leave its "Day Rate" and "Price" cells empty as well, since the total price depends on the manually-filled day rates.
+ - If `EstimationResult.json` is missing or `role_summary[]` is empty, acknowledge this explicitly and state that detailed effort estimation is pending — do NOT invent a price table.
+ 
+-**Payment terms**: State that invoices are payable within 10 days net, and that all prices are exclusive of statutory VAT.
++**Payment terms**: State that invoices are payable within 60 days net, and that all prices are exclusive of statutory VAT.
+ 
+ **Travel costs**: Include a section addressing travel costs — either included in prices or reimbursed at cost (choose based on formal requirements or default to not included).
+ 
+@@ -194,7 +279,7 @@ Write approximately 1–1.5 pages following the official adesso pricing format:
+ 
+ ---
+ 
+-**4. Terms and Conditions** (`## 4 ...`)
++**4. Terms and Conditions** (`## 4 ...`) — outline dimension: Terms & Conditions (baseline, always `present`)
+ 
+ This chapter contains standard adesso legal terms. Output an introductory sentence stating that this chapter covers the terms and conditions underlying the proposal. Then output ALL subsections below. Each subsection references standard adesso contract terms. The following subsections are REQUIRED:
+ 
+@@ -257,11 +342,17 @@ Write approximately 1 page:
+ 
+ ---
+ 
+-**Annex B: Company Profile** (`## Annex B ...`)
++**Annex B: Company Profile** (`## Annex B ...`) — outline dimension: Company Background/References (present if `references/adesso_facts.md` exists)
++
++Output the standard adesso company profile. adesso is one of the leading independent IT service providers in the DACH region, focusing on consulting and custom software development for core business processes. The strategy rests on three pillars: comprehensive industry expertise, broad vendor-neutral technology competence, and proven software project methodologies.
+ 
+-Output the standard adesso company profile. adesso is one of the leading independent IT service providers in the DACH region, focusing on consulting and custom software development for core business processes. The strategy rests on three pillars: comprehensive industry expertise, broad vendor-neutral technology competence, and proven software project methodologies. adesso was founded in 1997.
++Add company-background depth from `references/adesso_facts.md` — cite ONLY facts present there, never invent figures or dates:
++- `## Company Profile`: market presence / positioning
++- `## Certifications`: ISO 9001, ISO 14001, ISO/IEC 27001 — mention where relevant to the client's compliance context
++- `## Delivery Methodology`: the Maître concept (dedicated delivery-lead role), adVANTAGE budget-control model, JourFixe cadence, and the dedicated monitoring team — as evidence of proven delivery organisation
++- `## Locations & Organisation`: branch presence, if stated
+ 
+-After this standard text, add 1–2 paragraphs adapting the industry focus to `client_context.industry`:
++After this, add 1–2 paragraphs adapting the industry focus to `client_context.industry`:
+ - Lead with the client's industry as a core vertical
+ - Mention adesso's core verticals: Insurance/Reinsurance, Banking and Financial Services, Healthcare, Lottery, Telecommunications, Energy, Automotive, Manufacturing, Public Administration
+ - If relevant: mention technology partnerships (Microsoft, SAP, AWS) that align with the project's tech stack
+@@ -275,10 +366,12 @@ Tweak:
+ - REMINDER: Apply the CRITICAL LANGUAGE RULE — ALL headings, sub-headings, table headers, and labels must be translated into `output_language`. Do NOT output English headings when `output_language` is not English. The only exception is "Management Summary" which always stays in English.
+ - Prioritize depth in chapters 1, 2, and 3. The entire proposal should be approximately 12–18 pages. Chapter 2 is the main content chapter (~8–10 pages). Each subsection of chapter 2 must be at least 0.75 pages — never produce a subsection with only 2–3 sentences. Use flowing prose with concrete details from the input data, not just bullet lists.
+ - Do NOT invent specific technologies, products, or services that are not mentioned in or derivable from the input data.
+-- Requirements in the Requirements Analysis must come directly from the input JSON — do not add fictional requirements.
++- Requirements woven into the flowing narrative (2.2) and any compliance table must come directly from the input JSON — do not add fictional requirements.
+ - Resolve ALL source references via the aspect chain within the requirement's own artifact (`FunctionalResult.json` for FR/NFR) — aspect IDs are not shared across steps; never use `source_section` directly.
+ - Never emit `[Sn]` or other bracketed citation markers in the proposal — it has no sources chapter. When summarising `SolutionProposalResult.md`, express its findings in prose without the source brackets.
+ - If data is missing for a section, acknowledge this explicitly and suggest it as a topic for the scoping workshop.
+-- Formal requirements marked as binding must be explicitly addressed — show how the proposal complies with each.
++- Formal requirements marked as binding must be explicitly addressed — show how the proposal complies with each, in prose (2.2) or, if the "Compliance List" chapter is in the outline, in the dedicated compliance table.
+ - Address high-severity open points proactively — frame them as "topics for joint clarification" rather than gaps.
++- CHAPTER-SELECTION RULE recap: join each tagged chapter-2 subsection to `ProposalOutlineResult.json`'s `outline[]` by matching its `— outline dimension: X` tag against the outline entry whose `dimension == X` — never by comparing heading text. Never render a subsection whose dimension is `n/a`/absent from the outline, and never omit one whose dimension is `present`/`activate`. Order chapter-2 content per the matching outline entry's `order`. Exception: 2.1 and 2.8 are structural and always render regardless of the outline.
++- adesso institutional facts (company profile, certifications, delivery methodology, quality management, SLA priority model) may be cited ONLY from `references/adesso_facts.md` — never invent figures, dates, or SLA times not stated there; leave a value blank rather than estimating.
+ - Team members (Kap. 2.5), key profiles and reference projects (Annex A) come EXCLUSIVELY from `ProfilerMatchResult.json` — never invent persons, CVs, client names, or reference projects. Unmatched needs (`matched: false`) become **neutral, client-facing placeholders** (e.g. "Profil wird kurzfristig final besetzt" / "Vergleichbare Branchenreferenz auf Anfrage") — never surface the raw internal `note` or delivery-internal hints like "im Profiler recherchieren" in the client document.
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/proposal_outline.md b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/proposal_outline.md
+new file mode 100644
+index 0000000..5701a44
+--- /dev/null
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/proposal_outline.md
+@@ -0,0 +1,67 @@
++Context:
++Input = ALL prior chain artifacts (PreProcessing, Solution, and the earlier
++Consolidation steps ExecutiveSummary + OpenPoints). This ProposalOutline step
++does **not** re-read the tender document; it decides the proposal's chapter
++structure from artifact evidence only. It runs after Report and before Proposal.
++
++Consumed artifacts (skip any absent, note in `errors`):
++- ClientContextResult.json, FunctionalResult.json, FormalResult.json,
++  ConstraintsResult.json, SolutionCatalogResult.json, SolutionProposalResult.md,
++  ProductDesignResult.json, StaffingCatalogResult.json, ProfilerMatchResult.json,
++  EstimationResult.json, ExecutiveSummaryResult.json, OpenPointsResult.json.
++
++Task: for each rubric dimension, decide status `present` / `activate` / `n/a`
++with rationale and (unless n/a) an artifact citation as evidence. Then emit an
++ordered `outline` of the chapters to render. Same pattern as OpenPoints
++(gap analysis) but on STRUCTURE, not requirements.
++
++Output language = `output_language` (default English).
++
++Role:
++Act as a senior bid manager deciding which chapters a winning proposal needs for
++THIS tender, justified strictly by available evidence.
++
++Emotion/Tone:
++Decisive, evidence-bound. No chapter without justification.
++
++Action:
++1. Rubric dimensions (evaluate every one):
++   Executive Summary, Architecture, Product/UX, Business Logic, Import/Export,
++   Non-functional, Methodology/SCRUM, Quality Management, Application
++   Management & SLA, Transition/Migration, Compliance List, Key Personnel,
++   Company Background/References, Price, Terms & Conditions, Risk.
++2. Baseline set — ALWAYS `present` (determinism guarantee):
++   Executive Summary, Architecture, Price, Terms & Conditions.
++3. Conditional-chapter triggers — set `activate` ONLY if evidence holds:
++   | Dimension | Activate when |
++   |---|---|
++   | Product/UX | ProductDesignResult.json has non-empty `screens` |
++   | Transition/Migration | migration requirement in Functional/Constraints |
++   | Application Management & SLA | NFR availability/support present |
++   | Risk | high-severity item in OpenPoints or Constraints |
++   | Compliance List | binding formal requirement present |
++   Other dimensions: `present` if a feeding artifact exists, else `n/a`.
++4. For every dimension set `rationale`; for non-`n/a` set `evidence` = a concrete
++   artifact citation. No evidence → do NOT activate.
++5. Build `outline`: one entry per `present`/`activate` dimension, in a sensible
++   proposal order, with `dimension`, `heading`, `purpose`, `source_artifacts`,
++   `target_length`. Each entry's `dimension` MUST be set to the EXACT rubric
++   dimension key it renders (identical string to the one used in the matching
++   `dimensions[]` decision, from the rubric list in step 1) — this is the
++   deterministic join key `proposal.md` uses to gate/order chapter-2 subsections.
++   Downstream rendering matches on `dimension`, never on free-text `heading`.
++
++Output & Validation (Code Interpreter):
++1. Load available artifacts, compute decisions in memory per the rules above.
++2. Load `proposal_outline.json` schema, validate with `jsonschema`
++   (draft 2020-12). Fix and re-validate until clean.
++3. Genuinely-absent required values → add `errors` entry, keep object conformant.
++4. Write validated object to `ProposalOutlineResult.json` (UTF-8, pretty),
++   upload back into context.
++
++Tweak:
++- Authoritative deliverable = `ProposalOutlineResult.json`, valid JSON only.
++- Baseline dimensions MUST always appear with status `present`.
++- Never `activate` a conditional chapter without an `evidence` citation.
++- `outline` contains ONLY `present`/`activate` dimensions, never `n/a`.
++- Use `output_language` for human-readable fields.
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/solution_catalog.md b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/solution_catalog.md
+index 6fdfa08..38bb2ed 100644
+--- a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/solution_catalog.md
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/solution_catalog.md
+@@ -1,11 +1,11 @@
+ Context:
+-Input = schema-validated artifacts of preceding chain steps as files. Read every requirement, constraint, context fact direct from them — do NOT retrieve or re-analyse tender document, do NOT add new requirements/constraints from outside input. MAY use general software-architecture and technology knowledge for one purpose only: name and justify plausible technology DIRECTIONS (families/approaches) per block. Must NOT name concrete products, vendors, versions:
++Input = schema-validated artifacts of preceding chain steps as files. Read every requirement, constraint, context fact direct from them — do NOT retrieve or re-analyse tender document, do NOT add new requirements/constraints from outside input. MAY use general software-architecture and technology knowledge for one purpose only: name and justify plausible technology DIRECTIONS (families/approaches) per block. Must NOT name concrete products, vendors, versions — except where the tender itself mandates a specific one (see Tweak, `tender_mandated`):
+ 
+ - `FunctionalResult.json` — functional (`functional_requirements[]`: `id`, `description`, `priority`, `aspect_id`) and non-functional (`non_functional_requirements[]`: `id`, `category`, `description`, `measurable_target`, `aspect_id`) requirements plus `aspects[]`. Conforms to `functional_requirements.json`.
+ - `ConstraintsResult.json` — `constraints.budget` (`amount`, `currency`, `flexibility`), `constraints.timeline` (`go_live`, `key_milestones`), `constraints.technical[]`, `constraints.organisational[]`. Conforms to `constraints.json`.
+ - `ClientContextResult.json` — `client_context` (`industry`, `current_systems`, `pain_points`, `strategic_goals`). Conforms to `client_context.json`.
+ 
+-Task: derive **solution catalogue**: cluster functional and non-functional requirements into thematic **solution blocks**, and per block write concrete research brief for downstream technology-research step. This step bridge requirements to research: names solution NEEDS and technology DIRECTIONS (families/approaches), never concrete products, vendors, versions.
++Task: derive **solution catalogue**: cluster functional and non-functional requirements into thematic **solution blocks**, and per block write concrete research brief for downstream technology-research step. This step bridge requirements to research: names solution NEEDS and technology DIRECTIONS (families/approaches); concrete products, vendors, versions only where the tender itself prescribes them.
+ 
+ All labels, descriptions, questions, messages in output must be in language from `output_language` parameter. If `output_language` absent, default English.
+ 
+@@ -34,6 +34,11 @@ Produce JSON object conforming to `solution_catalog.json` with this structure:
+    - `clarification_reason`: only when `needs_clarification` is `true` — one of `"multiple_directions"`, `"low_confidence"`, `"insufficient_constraints"` (pick dominant cause).
+    - `clarification_question`: only when `needs_clarification` is `true` — single clear question to user, in `output_language`, naming choice or missing information.
+    - `confidence`: score 0-1 for how well-scoped block is for research.
++   - Tender-prescribed technology: where the tender explicitly mandates a concrete
++     technology or product (e.g. an existing database, a named PDF toolkit, a fixed
++     export format), re-read that constraint from the requirement artifacts and
++     carry it verbatim into the relevant solution block as a fixed input — do not
++     turn it into an open option.
+ 
+ 2. **coverage**: `total_requirements` = count of all FR + NFR in input; `covered_requirements` = count of distinct requirement IDs appearing in any block's `addressed_requirements`; `uncovered_requirement_ids` = FR/NFR IDs not addressed by any block.
+ 
+@@ -52,7 +57,8 @@ Produce final result as schema-validated file via Code Interpreter — do NOT re
+ 
+ Tweak:
+ - Use `output_language` for all `title`, `description`, `solution_type`, `label`, `rationale`, `evaluation_criteria`, `research_questions`, `clarification_question`, `message` values.
+-- Do NOT name concrete products, vendors, versions anywhere — only solution needs and technology directions/families.
++- Concrete product/vendor names are allowed ONLY where the tender itself
++  prescribes them (mark such blocks `tender_mandated: true` in the research brief). For all OTHER, open blocks, stay vendor-neutral — no product names.
+ - Every requirement should ideally belong to at least one block; list genuinely unmapped ones under `coverage.uncovered_requirement_ids` rather than forcing into a block.
+ - `priority` must be maximum priority of block's addressed requirements, not average.
+ - Block gets `needs_clarification: true` whenever research direction genuinely open — do not suppress uncertainty to appear decisive; downstream step will ask user.
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/solution_proposal.md b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/solution_proposal.md
+index 074fd24..44d861c 100644
+--- a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/solution_proposal.md
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/solution_proposal.md
+@@ -1,7 +1,7 @@
+ Context:
+-You get `SolutionCatalogResult.json` (conform to `solution_catalog.json`) as main input. Has `solution_blocks[]` with `block_id`, `title`, `description`, `addressed_requirements`, `solution_type`, `priority`, `constraints`, `evaluation_criteria`, `candidate_directions`, `research_questions`, `needs_clarification`, `clarification_reason`, `clarification_question`, `confidence`, plus `coverage` object.
++You get `SolutionCatalogResult.json` (conform to `solution_catalog.json`) as main input. Has `solution_blocks[]` with `block_id`, `title`, `description`, `addressed_requirements`, `solution_type`, `priority`, `constraints`, `evaluation_criteria`, `candidate_directions`, `research_questions`, `needs_clarification`, `clarification_reason`, `clarification_question`, `confidence`, `tender_mandated`, plus `coverage` object.
+ 
+-Task: research tech and best practices for each solution block via **web search**, then condense findings into single, unambiguous, well-founded solution proposal in Markdown matching catalogue. This step — only this step of whole chain — external research via web search explicitly allowed and required. (Tender document never re-analysed here.)
++Task: research tech and best practices for each genuinely open solution block via **web search** — for blocks the tender itself already mandates a technology (`tender_mandated: true`), adopt that technology decisively instead of researching it — then condense findings into single, unambiguous, well-founded solution proposal in Markdown matching catalogue. This step — only this step of whole chain — external research via web search explicitly allowed and required (for open blocks). (Tender document never re-analysed here.)
+ 
+ Proposal written in language from `output_language` parameter. If `output_language` absent, default German.
+ 
+@@ -29,7 +29,12 @@ Action — follow these steps in order:
+ 
+ 2. **Fix the research scope.** Incorporate user's answers per block. For any block still ambiguous after answer, use user's chosen direction; never silently pick for user.
+ 
+-3. **Research (web search).** For each block, issue targeted web searches combining block's `research_questions` with confirmed tech direction(s) and relevant `constraints` — e.g. `"Compare <confirmed directions> for <block need>; must satisfy <constraints>; concrete technologies and best practices"`. Issue one search per `research_question`, or one combined search per block, as fits; refine and re-search if first results too generic or off-topic.
++3. **Research (web search).**
++   - For solution blocks marked `tender_mandated: true`, adopt the prescribed
++     technology decisively as the recommended choice. Do NOT run a web option
++     comparison and do NOT attach `[Sn]` research citations for these — the tender
++     is the source. Web research applies ONLY to blocks that are genuinely open.
++   - For all other (genuinely open) blocks, issue targeted web searches combining block's `research_questions` with confirmed tech direction(s) and relevant `constraints` — e.g. `"Compare <confirmed directions> for <block need>; must satisfy <constraints>; concrete technologies and best practices"`. Issue one search per `research_question`, or one combined search per block, as fits; refine and re-search if first results too generic or off-topic.
+    - Extract concrete technologies, best practices, source URLs from search results. If block's searches return no usable results, do NOT fabricate: record affected block as open research question in chapter 6 and continue with rest.
+    - Honour all block `constraints` both when framing search queries and accepting findings. Cite only sources that actually appear in search results; never invent sources or findings.
+ 
+@@ -40,7 +45,7 @@ Action — follow these steps in order:
+ 6. **Write the Markdown** following template chapters:
+    1. Research Approach and Scope — method, which research questions addressed, any user scoping.
+    2. Solution Landscape Overview — target-architecture vision, how blocks interact.
+-   3. Solution Blocks in Detail — one `### 3.x` per block: addressed requirements, technology-options table (Option | Maturity | Fit to criteria | Advantages/Disadvantages | Source), best practices (cited), and exactly one Recommendation with justification against `evaluation_criteria` and `addressed_requirements`.
++   3. Solution Blocks in Detail — one `### 3.x` per block: addressed requirements, technology-options table (Option | Maturity | Fit to criteria | Advantages/Disadvantages | Source), best practices (cited), and exactly one Recommendation with justification against `evaluation_criteria` and `addressed_requirements`. For `tender_mandated: true` blocks, omit the options table and citations — state the prescribed technology as the Recommendation, justified by the tender constraint.
+    4. Consolidated Solution Proposal — single unambiguous target architecture, integration view, NFR fulfilment.
+    5. Technology Stack Overview — table Solution block → recommended technology → role.
+    6. Assumptions, Risks and Open Research Questions.
+@@ -53,8 +58,8 @@ Output:
+ Tweak:
+ - REMINDER: Clarification gate in step 1 mandatory whenever block has `needs_clarification: true`. Never skip, never research before user answers.
+ - CRITICAL: Final proposal unambiguous — exactly one recommendation per block and one consolidated architecture. Options appear only as justification.
+-- Every recommendation must trace to `evaluation_criteria`, `addressed_requirements`, and at least one cited source.
++- Every recommendation must trace to `evaluation_criteria`, `addressed_requirements`, and at least one cited source — except `tender_mandated: true` blocks, which trace to the tender constraint instead of a web source and need no [Sn] citation.
+ - Respect all `constraints` from catalogue as hard limits.
+-- Do NOT invent technologies or sources. Cite every external claim with [Sn].
++- Do NOT invent technologies or sources. Cite every external claim with [Sn] (not required for `tender_mandated` blocks — see step 3).
+ - Research mechanism is web search: issue explicit search queries per block/research question and read returned results/snippets. Treat empty, unusable, or clearly off-topic results as "no findings for this block" (→ chapter 6), never as licence to invent content.
+ - Apply language rule: translate ALL headings, table headers, prose into `output_language`.
+\ No newline at end of file
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/references/adesso_facts.md b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/references/adesso_facts.md
+new file mode 100644
+index 0000000..ede3ad6
+--- /dev/null
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/references/adesso_facts.md
+@@ -0,0 +1,35 @@
++# adesso Institutional Facts (curated reference)
++
++> Curated, versioned source of adesso company/institutional facts for proposal
++> generation. Prompts may cite ONLY from this file for adesso facts — never invent.
++> Maintainer: keep financial figures current. Last reviewed: 2026-07-23.
++
++## Company Profile
++- Founded: 25+ years of market presence.
++- Positioning: IT service provider, industry-focused delivery.
++- <!-- MAINTAIN: revenue, EBITDA (last 4 years), employee count — fill with
++     approved figures before use; leave blank rather than estimate. -->
++
++## Certifications
++- ISO 9001 (Quality Management)
++- ISO 14001 (Environmental Management)
++- ISO/IEC 27001 (Information Security Management)
++
++## Delivery Methodology
++- Maître concept: dedicated delivery-lead role owning client outcome.
++- adVANTAGE: budget-control / agile-billing model.
++- JourFixe: recurring structured client sync.
++- Dedicated monitoring team for operations.
++
++## Quality Management
++- ISTQB-aligned test approach.
++- Test pyramid (unit / integration / system / acceptance).
++- Quality gates per increment.
++
++## Application Management & SLA
++- Priority model Prio I–IV with defined reaction/resolution targets.
++- <!-- MAINTAIN: concrete SLA reaction/resolution times per priority. -->
++
++## Locations & Organisation
++- Multiple branch offices (EU focus).
++- <!-- MAINTAIN: current branch count and org structure. -->
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/product_design.json b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/product_design.json
+new file mode 100644
+index 0000000..ceeb200
+--- /dev/null
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/product_design.json
+@@ -0,0 +1,113 @@
++{
++    "$schema": "https://json-schema.org/draft/2020-12/schema",
++    "$id": "https://example.org/schemas/product-design.schema.json",
++    "title": "ProductDesign",
++    "description": "Screen-by-screen feature and interaction design derived from functional requirements. Each screen behaviour must trace back to a functional requirement.",
++    "type": "object",
++    "additionalProperties": false,
++    "properties": {
++        "document_id": {
++            "type": "string",
++            "description": "Optional ID of the source document."
++        },
++        "screens": {
++            "type": "array",
++            "description": "The screens / views of the product, each with derived interaction behaviour.",
++            "items": {
++                "type": "object",
++                "additionalProperties": false,
++                "properties": {
++                    "screen_id": {
++                        "type": "string",
++                        "description": "Unique ID of the screen, e.g. scr-1."
++                    },
++                    "name": {
++                        "type": "string",
++                        "description": "Human-readable screen/view name."
++                    },
++                    "purpose": {
++                        "type": "string",
++                        "description": "What the user accomplishes on this screen."
++                    },
++                    "interactions": {
++                        "type": "array",
++                        "description": "Concrete interaction behaviours on this screen.",
++                        "items": {
++                            "type": "object",
++                            "additionalProperties": false,
++                            "properties": {
++                                "trigger": {
++                                    "type": "string",
++                                    "description": "User action, e.g. 'clicks Add'."
++                                },
++                                "reaction": {
++                                    "type": "string",
++                                    "description": "System/UI response, e.g. 'opens a menu with N options'."
++                                },
++                                "result_state": {
++                                    "type": "string",
++                                    "description": "Resulting state after the reaction."
++                                },
++                                "requirement_ids": {
++                                    "type": "array",
++                                    "description": "Functional requirement IDs this interaction is derived from. MUST be non-empty — no invented behaviour.",
++                                    "minItems": 1,
++                                    "items": {
++                                        "type": "string"
++                                    }
++                                }
++                            },
++                            "required": [
++                                "trigger",
++                                "reaction",
++                                "requirement_ids"
++                            ]
++                        }
++                    }
++                },
++                "required": [
++                    "screen_id",
++                    "name",
++                    "purpose",
++                    "interactions"
++                ]
++            }
++        },
++        "total_screens": {
++            "type": "integer",
++            "description": "Number of screens."
++        },
++        "errors": {
++            "type": "array",
++            "description": "Validation or processing errors.",
++            "items": {
++                "type": "object",
++                "additionalProperties": false,
++                "properties": {
++                    "code": {
++                        "type": "string"
++                    },
++                    "message": {
++                        "type": "string"
++                    },
++                    "severity": {
++                        "type": "string",
++                        "enum": [
++                            "info",
++                            "warning",
++                            "error"
++                        ]
++                    }
++                },
++                "required": [
++                    "code",
++                    "message"
++                ]
++            }
++        }
++    },
++    "required": [
++        "screens",
++        "total_screens"
++    ]
++}
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/proposal_outline.json b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/proposal_outline.json
+new file mode 100644
+index 0000000..e0f4835
+--- /dev/null
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/proposal_outline.json
+@@ -0,0 +1,162 @@
++{
++    "$schema": "https://json-schema.org/draft/2020-12/schema",
++    "$id": "https://example.org/schemas/proposal-outline.schema.json",
++    "title": "ProposalOutline",
++    "description": "Adaptive proposal chapter outline. Evaluates each standard winning-proposal dimension against artifact evidence and marks it present / activate / n/a. proposal.md renders from this outline.",
++    "type": "object",
++    "additionalProperties": false,
++    "$defs": {
++        "dimensionStatus": {
++            "type": "string",
++            "enum": [
++                "present",
++                "activate",
++                "n/a"
++            ],
++            "description": "present = baseline chapter always rendered; activate = conditional chapter enabled by evidence; n/a = not applicable for this tender."
++        }
++    },
++    "properties": {
++        "dimensions": {
++            "type": "array",
++            "description": "Every rubric dimension with its status decision and evidence.",
++            "items": {
++                "type": "object",
++                "additionalProperties": false,
++                "properties": {
++                    "dimension": {
++                        "type": "string",
++                        "enum": [
++                            "Executive Summary",
++                            "Architecture",
++                            "Product/UX",
++                            "Business Logic",
++                            "Import/Export",
++                            "Non-functional",
++                            "Methodology/SCRUM",
++                            "Quality Management",
++                            "Application Management & SLA",
++                            "Transition/Migration",
++                            "Compliance List",
++                            "Key Personnel",
++                            "Company Background/References",
++                            "Price",
++                            "Terms & Conditions",
++                            "Risk"
++                        ],
++                        "description": "Rubric dimension key (same 16-value enum as `outline[].dimension`), e.g. 'Transition/Migration'."
++                    },
++                    "status": {
++                        "$ref": "#/$defs/dimensionStatus"
++                    },
++                    "rationale": {
++                        "type": "string",
++                        "description": "Why this status was chosen."
++                    },
++                    "evidence": {
++                        "type": "string",
++                        "description": "Artifact citation supporting the decision (e.g. 'FunctionalResult req F-12: data migration'). Required unless status is 'n/a'."
++                    }
++                },
++                "required": [
++                    "dimension",
++                    "status",
++                    "rationale"
++                ]
++            }
++        },
++        "outline": {
++            "type": "array",
++            "description": "Ordered list of chapters to render (only dimensions with status present or activate).",
++            "items": {
++                "type": "object",
++                "additionalProperties": false,
++                "properties": {
++                    "order": {
++                        "type": "integer",
++                        "description": "1-based render order."
++                    },
++                    "dimension": {
++                        "type": "string",
++                        "enum": [
++                            "Executive Summary",
++                            "Architecture",
++                            "Product/UX",
++                            "Business Logic",
++                            "Import/Export",
++                            "Non-functional",
++                            "Methodology/SCRUM",
++                            "Quality Management",
++                            "Application Management & SLA",
++                            "Transition/Migration",
++                            "Compliance List",
++                            "Key Personnel",
++                            "Company Background/References",
++                            "Price",
++                            "Terms & Conditions",
++                            "Risk"
++                        ],
++                        "description": "The rubric dimension this outline entry renders (same 16-value enum, and same key, as `dimensions[].dimension` and the `— outline dimension: X` tags in proposal.md). This is the deterministic join key downstream rendering must match on, NOT `heading`."
++                    },
++                    "heading": {
++                        "type": "string",
++                        "description": "Chapter heading."
++                    },
++                    "purpose": {
++                        "type": "string",
++                        "description": "What this chapter must accomplish."
++                    },
++                    "source_artifacts": {
++                        "type": "array",
++                        "description": "Artifacts feeding this chapter.",
++                        "items": {
++                            "type": "string"
++                        }
++                    },
++                    "target_length": {
++                        "type": "string",
++                        "description": "Rough target length, e.g. 'short', 'medium', '1-2 pages'."
++                    }
++                },
++                "required": [
++                    "order",
++                    "dimension",
++                    "heading",
++                    "purpose",
++                    "source_artifacts"
++                ]
++            }
++        },
++        "errors": {
++            "type": "array",
++            "items": {
++                "type": "object",
++                "additionalProperties": false,
++                "properties": {
++                    "code": {
++                        "type": "string"
++                    },
++                    "message": {
++                        "type": "string"
++                    },
++                    "severity": {
++                        "type": "string",
++                        "enum": [
++                            "info",
++                            "warning",
++                            "error"
++                        ]
++                    }
++                },
++                "required": [
++                    "code",
++                    "message"
++                ]
++            }
++        }
++    },
++    "required": [
++        "dimensions",
++        "outline"
++    ]
++}
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/proposal_output.md b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/proposal_output.md
+index cfc1f40..6ecd836 100644
+--- a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/proposal_output.md
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/proposal_output.md
+@@ -191,15 +191,15 @@
+ 
+ | Qualification / Role | Person-Days | Day Rate (EUR excl. VAT) | Price (EUR excl. VAT) |
+ |----------------------|------------|--------------------------|----------------------|
+-| [EXAMPLE] Project Lead | [EXAMPLE] 80 – 100 | XXX | [EXAMPLE] XXX |
+-| [EXAMPLE] Solution Architect | [EXAMPLE] 40 – 60 | XXX | [EXAMPLE] XXX |
+-| [EXAMPLE] Senior Developer | [EXAMPLE] 200 – 280 | XXX | [EXAMPLE] XXX |
+-| [EXAMPLE] Frontend Developer | [EXAMPLE] 80 – 120 | XXX | [EXAMPLE] XXX |
+-| [EXAMPLE] Test Manager / QA | [EXAMPLE] 60 – 80 | XXX | [EXAMPLE] XXX |
+-| [EXAMPLE] UX Designer | [EXAMPLE] 20 – 30 | XXX | [EXAMPLE] XXX |
+-| [EXAMPLE] Change & Training | [EXAMPLE] 30 – 40 | XXX | [EXAMPLE] XXX |
+-| [EXAMPLE] Rollout & Hypercare | [EXAMPLE] 40 – 60 | XXX | [EXAMPLE] XXX |
+-| **Total** | **[EXAMPLE] 530 – 740** | | **[EXAMPLE] XXX** |
++| [EXAMPLE] Project Lead | [EXAMPLE] 80 – 100 | | |
++| [EXAMPLE] Solution Architect | [EXAMPLE] 40 – 60 | | |
++| [EXAMPLE] Senior Developer | [EXAMPLE] 200 – 280 | | |
++| [EXAMPLE] Frontend Developer | [EXAMPLE] 80 – 120 | | |
++| [EXAMPLE] Test Manager / QA | [EXAMPLE] 60 – 80 | | |
++| [EXAMPLE] UX Designer | [EXAMPLE] 20 – 30 | | |
++| [EXAMPLE] Change & Training | [EXAMPLE] 30 – 40 | | |
++| [EXAMPLE] Rollout & Hypercare | [EXAMPLE] 40 – 60 | | |
++| **Total** | **[EXAMPLE] 530 – 740** | | |
+ 
+ [EXAMPLE] The above effort estimates are indicative and based on the requirements analysis. A detailed effort assessment will be conducted as part of the scoping workshop. In accordance with the formal requirements (FORM-004), a separate presentation of licences, implementation, and annual maintenance will be provided in the detailed proposal.
+ 
+diff --git a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/solution_catalog.json b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/solution_catalog.json
+index 889147c..1ac707d 100644
+--- a/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/solution_catalog.json
++++ b/configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/solution_catalog.json
+@@ -97,6 +97,10 @@
+                         "minimum": 0,
+                         "maximum": 1,
+                         "description": "Confidence that the block is well-scoped for research (0-1)."
++                    },
++                    "tender_mandated": {
++                        "type": "boolean",
++                        "description": "True when the tender itself prescribes a concrete technology/product for this block; such blocks are adopted decisively without web option-comparison or citations."
+                     }
+                 },
+                 "required": [

@@ -1,0 +1,162 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.org/schemas/proposal-outline.schema.json",
+    "title": "ProposalOutline",
+    "description": "Adaptive proposal chapter outline. Evaluates each standard winning-proposal dimension against artifact evidence and marks it present / activate / n/a. proposal.md renders from this outline.",
+    "type": "object",
+    "additionalProperties": false,
+    "$defs": {
+        "dimensionStatus": {
+            "type": "string",
+            "enum": [
+                "present",
+                "activate",
+                "n/a"
+            ],
+            "description": "present = baseline chapter always rendered; activate = conditional chapter enabled by evidence; n/a = not applicable for this tender."
+        }
+    },
+    "properties": {
+        "dimensions": {
+            "type": "array",
+            "description": "Every rubric dimension with its status decision and evidence.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "dimension": {
+                        "type": "string",
+                        "enum": [
+                            "Executive Summary",
+                            "Architecture",
+                            "Product/UX",
+                            "Business Logic",
+                            "Import/Export",
+                            "Non-functional",
+                            "Methodology/SCRUM",
+                            "Quality Management",
+                            "Application Management & SLA",
+                            "Transition/Migration",
+                            "Compliance List",
+                            "Key Personnel",
+                            "Company Background/References",
+                            "Price",
+                            "Terms & Conditions",
+                            "Risk"
+                        ],
+                        "description": "Rubric dimension key (same 16-value enum as `outline[].dimension`), e.g. 'Transition/Migration'."
+                    },
+                    "status": {
+                        "$ref": "#/$defs/dimensionStatus"
+                    },
+                    "rationale": {
+                        "type": "string",
+                        "description": "Why this status was chosen."
+                    },
+                    "evidence": {
+                        "type": "string",
+                        "description": "Artifact citation supporting the decision (e.g. 'FunctionalResult req F-12: data migration'). Required unless status is 'n/a'."
+                    }
+                },
+                "required": [
+                    "dimension",
+                    "status",
+                    "rationale"
+                ]
+            }
+        },
+        "outline": {
+            "type": "array",
+            "description": "Ordered list of chapters to render (only dimensions with status present or activate).",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "order": {
+                        "type": "integer",
+                        "description": "1-based render order."
+                    },
+                    "dimension": {
+                        "type": "string",
+                        "enum": [
+                            "Executive Summary",
+                            "Architecture",
+                            "Product/UX",
+                            "Business Logic",
+                            "Import/Export",
+                            "Non-functional",
+                            "Methodology/SCRUM",
+                            "Quality Management",
+                            "Application Management & SLA",
+                            "Transition/Migration",
+                            "Compliance List",
+                            "Key Personnel",
+                            "Company Background/References",
+                            "Price",
+                            "Terms & Conditions",
+                            "Risk"
+                        ],
+                        "description": "The rubric dimension this outline entry renders (same 16-value enum, and same key, as `dimensions[].dimension` and the `— outline dimension: X` tags in proposal.md). This is the deterministic join key downstream rendering must match on, NOT `heading`."
+                    },
+                    "heading": {
+                        "type": "string",
+                        "description": "Chapter heading."
+                    },
+                    "purpose": {
+                        "type": "string",
+                        "description": "What this chapter must accomplish."
+                    },
+                    "source_artifacts": {
+                        "type": "array",
+                        "description": "Artifacts feeding this chapter.",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "target_length": {
+                        "type": "string",
+                        "description": "Rough target length, e.g. 'short', 'medium', '1-2 pages'."
+                    }
+                },
+                "required": [
+                    "order",
+                    "dimension",
+                    "heading",
+                    "purpose",
+                    "source_artifacts"
+                ]
+            }
+        },
+        "errors": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "type": "string",
+                        "enum": [
+                            "info",
+                            "warning",
+                            "error"
+                        ]
+                    }
+                },
+                "required": [
+                    "code",
+                    "message"
+                ]
+            }
+        }
+    },
+    "required": [
+        "dimensions",
+        "outline"
+    ]
+}

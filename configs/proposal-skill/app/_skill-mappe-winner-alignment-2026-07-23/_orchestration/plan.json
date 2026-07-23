@@ -1,0 +1,334 @@
+{
+  "name": "proposalgenerator",
+  "version": "1.0.0",
+  "type": "plan",
+  "description": "Proposal chain for aotomatic requirement anlaysis and proposal creation",
+  "chain": {
+    "PreProcessing": [
+      {
+        "step": 1,
+        "name": "ClientContext",
+        "description": "Extract client context (client name, industry, systems, pain points, strategic goals) with aspect cross-references as semantic bridge for downstream steps",
+        "next": "Functional",
+        "resources": {
+          "prompt": "/prompts/client_context.md",
+          "output": "/schema/client_context.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/reference.json"
+          ],
+          "batch": [],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 2,
+        "name": "Functional",
+        "description": "Scan file for functional analysis",
+        "next": "Formal",
+        "resources": {
+          "prompt": "/prompts/functional.md",
+          "output": "/schema/functional_requirements.json",
+          "scripts": [],
+          "assets": [],
+          "references": [],
+          "batch": [],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 3,
+        "name": "Formal",
+        "description": "Extract formal proposal requirements (delivery scope, deadlines, format constraints, submission rules, eligibility criteria) and mark them as binding or optional",
+        "next": "Constraints",
+        "resources": {
+          "prompt": "/prompts/formal.md",
+          "output": "/schema/formal_requirements.json",
+          "scripts": [],
+          "assets": [],
+          "references": [],
+          "batch": [],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 4,
+        "name": "Constraints",
+        "description": "Extract project constraints (budget, timeline, technical restrictions, organisational boundaries) with aspect cross-references",
+        "next": null,
+        "resources": {
+          "prompt": "/prompts/constraints.md",
+          "output": "/schema/constraints.json",
+          "scripts": [],
+          "assets": [],
+          "references": [],
+          "batch": [],
+          "artifacts": {}
+        }
+      }
+    ],
+    "Solution": [
+      {
+        "step": 1,
+        "name": "SolutionCatalog",
+        "description": "Derive a solution catalogue: cluster functional/non-functional requirements into thematic solution blocks with research briefs and clarification flags.",
+        "depends_on": "PreProcessing",
+        "next": "SolutionProposal",
+        "resources": {
+          "prompt": "/prompts/solution_catalog.md",
+          "output": "/schema/solution_catalog.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/solution_catalog.json"
+          ],
+          "batch": [
+            "/preprocessing/Functional.json",
+            "/preprocessing/Constraints.json",
+            "/preprocessing/ClientContext.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 2,
+        "name": "SolutionProposal",
+        "description": "Research technologies and best practices per solution block via web search (with a mandatory user clarification gate for flagged blocks) and condense them into one unambiguous solution proposal.",
+        "depends_on": "Solution",
+        "next": "ProductDesign",
+        "resources": {
+          "prompt": "/prompts/solution_proposal.md",
+          "output": "/schema/solution_proposal_output.md",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/solution_proposal_output.md"
+          ],
+          "batch": [
+            "/solution/SolutionCatalog.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 3,
+        "name": "ProductDesign",
+        "description": "Derive a screen-by-screen product/UX design (feature and interaction behaviour) from the functional requirements; every behaviour traces to a requirement. No web research.",
+        "depends_on": "Solution",
+        "next": "StaffingCatalog",
+        "resources": {
+          "prompt": "/prompts/product_design.md",
+          "output": "/schema/product_design.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/product_design.json"
+          ],
+          "batch": [
+            "/preprocessing/Functional.json",
+            "/solution/SolutionProposal.md"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 4,
+        "name": "StaffingCatalog",
+        "description": "Derive the roles/skills the proposed solution needs (each with a Profiler search brief) plus reference-search briefs. Deterministic, no external knowledge, no Profiler calls.",
+        "depends_on": "Solution",
+        "next": "ProfilerMatch",
+        "resources": {
+          "prompt": "/prompts/staffing_catalog.md",
+          "output": "/schema/staffing_catalog.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/staffing_catalog.json"
+          ],
+          "batch": [
+            "/solution/SolutionProposal.md",
+            "/preprocessing/Functional.json",
+            "/preprocessing/Constraints.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 5,
+        "name": "ProfilerMatch",
+        "description": "Match real adesso colleagues and comparable projects via the Profiler MCP against the staffing catalogue; produce anonymised, role-based team entries and anonymised references. Mandatory clarification gate when matching is ambiguous.",
+        "depends_on": "Solution",
+        "next": "Estimator",
+        "resources": {
+          "prompt": "/prompts/profiler_match.md",
+          "output": "/schema/profiler_match.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/profiler_match.json"
+          ],
+          "batch": [
+            "/solution/StaffingCatalog.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 6,
+        "name": "Estimator",
+        "description": "Deterministic effort estimation: derive work packages from the solution proposal and estimate per-role person-days. Sole source for the proposal price table. Depends on SolutionProposal and StaffingCatalog only, never on ProfilerMatch.",
+        "depends_on": "Solution",
+        "next": null,
+        "resources": {
+          "prompt": "/prompts/estimator.md",
+          "output": "/schema/estimator.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/estimator.json"
+          ],
+          "batch": [
+            "/solution/SolutionProposal.md",
+            "/solution/StaffingCatalog.json"
+          ],
+          "artifacts": {}
+        }
+      }
+    ],
+    "Mapping": [],
+    "Consolidation": [
+      {
+        "step": 1,
+        "name": "ExecutiveSummary",
+        "description": "Generate a concise executive summary of the tender AND adesso's proposed solution. Runs first in Consolidation so it can incorporate the recommended solution from SolutionProposal and remain available to Report and Proposal.",
+        "depends_on": "Solution",
+        "next": "OpenPoints",
+        "resources": {
+          "prompt": "/prompts/executive_summary.md",
+          "output": "/schema/executive_summary.json",
+          "scripts": [],
+          "assets": [],
+          "references": [],
+          "batch": [
+            "/solution/SolutionProposal.md"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 2,
+        "name": "OpenPoints",
+        "description": "Gap analysis within the requirement-bearing artifacts (Functional/Formal): identify aspects with no requirement mapped, evaluated per artifact namespace. Produces a JSON file listing uncovered aspects with severity and coverage statistics.",
+        "depends_on": "PreProcessing",
+        "next": "Report",
+        "resources": {
+          "prompt": "/prompts/open_points.md",
+          "input": "/schema/preflight_report.json",
+          "output": "/schema/open_points.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/preflight_report.json"
+          ],
+          "batch": [
+            "/preprocessing/Functional.json",
+            "/preprocessing/Formal.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 3,
+        "name": "Report",
+        "description": "Create summary report. Batch files are releted to user-files container (not adesso skill set)",
+        "depends_on": "PreProcessing",
+        "next": "ProposalOutline",
+        "resources": {
+          "prompt": "/prompts/functional_consolidation.md",
+          "input": "/schema/functional_requirements.json",
+          "output": "/schema/report_output.md",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/consolidation_report.json"
+          ],
+          "batch": [
+            "/consolidation/ExecutiveSummary.json",
+            "/preprocessing/ClientContext.json",
+            "/preprocessing/Functional.json",
+            "/preprocessing/Formal.json",
+            "/preprocessing/Constraints.json",
+            "/consolidation/OpenPoints.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 4,
+        "name": "ProposalOutline",
+        "description": "Decide the adaptive proposal chapter structure: evaluate each rubric dimension against artifact evidence (present/activate/n/a), emit an ordered outline. Runs after Report, before Proposal.",
+        "depends_on": "PreProcessing",
+        "next": "Proposal",
+        "resources": {
+          "prompt": "/prompts/proposal_outline.md",
+          "output": "/schema/proposal_outline.json",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/proposal_outline.json"
+          ],
+          "batch": [
+            "/consolidation/ExecutiveSummary.json",
+            "/consolidation/OpenPoints.json",
+            "/preprocessing/ClientContext.json",
+            "/preprocessing/Functional.json",
+            "/preprocessing/Formal.json",
+            "/preprocessing/Constraints.json",
+            "/solution/SolutionCatalog.json",
+            "/solution/SolutionProposal.md",
+            "/solution/ProductDesign.json",
+            "/solution/StaffingCatalog.json",
+            "/solution/ProfilerMatch.json",
+            "/solution/Estimator.json"
+          ],
+          "artifacts": {}
+        }
+      },
+      {
+        "step": 5,
+        "name": "Proposal",
+        "description": "Generate a structured proposal draft following the adesso proposal template: 1) Initial Situation, 2) Subject Matter of the Proposal (solution, requirements, architecture, methodology, organisation, QA, operations, open points), 3) Prices, 4) Terms and Conditions (standard text placeholders), 5) Binding Period, Annex A References/Profiles, Annex B Company Profile.",
+        "depends_on": "PreProcessing",
+        "next": null,
+        "resources": {
+          "prompt": "/prompts/proposal.md",
+          "input": "/schema/functional_requirements.json",
+          "output": "/schema/proposal_output.md",
+          "scripts": [],
+          "assets": [],
+          "references": [
+            "/schema/consolidation_report.json"
+          ],
+          "batch": [
+            "/consolidation/ExecutiveSummary.json",
+            "/preprocessing/ClientContext.json",
+            "/preprocessing/Functional.json",
+            "/preprocessing/Formal.json",
+            "/preprocessing/Constraints.json",
+            "/consolidation/OpenPoints.json",
+            "/solution/SolutionCatalog.json",
+            "/solution/SolutionProposal.md",
+            "/solution/ProductDesign.json",
+            "/solution/StaffingCatalog.json",
+            "/solution/ProfilerMatch.json",
+            "/solution/Estimator.json",
+            "/consolidation/ProposalOutline.json"
+          ],
+          "artifacts": {}
+        }
+      }
+    ],
+    "Validation": []
+  }
+}

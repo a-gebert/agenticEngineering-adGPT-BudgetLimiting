@@ -1,0 +1,13 @@
+M	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/AGENT.md
+M	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/plan.json
+M	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/executive_summary.md
+A	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/product_design.md
+M	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/proposal.md
+A	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/proposal_outline.md
+M	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/solution_catalog.md
+M	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/prompts/solution_proposal.md
+A	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/references/adesso_facts.md
+A	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/product_design.json
+A	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/proposal_outline.json
+M	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/proposal_output.md
+M	configs/proposal-skill/app/docs/.adesso/skills/proposalgenerator/schema/solution_catalog.json
