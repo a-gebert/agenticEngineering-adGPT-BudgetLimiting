@@ -26,7 +26,25 @@
                 "properties": {
                     "dimension": {
                         "type": "string",
-                        "description": "Rubric dimension key, e.g. 'Transition/Migration'."
+                        "enum": [
+                            "Executive Summary",
+                            "Architecture",
+                            "Product/UX",
+                            "Business Logic",
+                            "Import/Export",
+                            "Non-functional",
+                            "Methodology/SCRUM",
+                            "Quality Management",
+                            "Application Management & SLA",
+                            "Transition/Migration",
+                            "Compliance List",
+                            "Key Personnel",
+                            "Company Background/References",
+                            "Price",
+                            "Terms & Conditions",
+                            "Risk"
+                        ],
+                        "description": "Rubric dimension key (same 16-value enum as `outline[].dimension`), e.g. 'Transition/Migration'."
                     },
                     "status": {
                         "$ref": "#/$defs/dimensionStatus"
@@ -58,6 +76,28 @@
                         "type": "integer",
                         "description": "1-based render order."
                     },
+                    "dimension": {
+                        "type": "string",
+                        "enum": [
+                            "Executive Summary",
+                            "Architecture",
+                            "Product/UX",
+                            "Business Logic",
+                            "Import/Export",
+                            "Non-functional",
+                            "Methodology/SCRUM",
+                            "Quality Management",
+                            "Application Management & SLA",
+                            "Transition/Migration",
+                            "Compliance List",
+                            "Key Personnel",
+                            "Company Background/References",
+                            "Price",
+                            "Terms & Conditions",
+                            "Risk"
+                        ],
+                        "description": "The rubric dimension this outline entry renders (same 16-value enum, and same key, as `dimensions[].dimension` and the `— outline dimension: X` tags in proposal.md). This is the deterministic join key downstream rendering must match on, NOT `heading`."
+                    },
                     "heading": {
                         "type": "string",
                         "description": "Chapter heading."
@@ -80,6 +120,7 @@
                 },
                 "required": [
                     "order",
+                    "dimension",
                     "heading",
                     "purpose",
                     "source_artifacts"

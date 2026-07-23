@@ -65,15 +65,22 @@ Situation), chapter 3 (Prices), chapter 4 (Terms and Conditions), chapter 5
 adesso proposal and always render — they correspond to the outline's baseline
 dimensions (Executive Summary, Architecture, Price, Terms & Conditions, resp.
 structural necessities not covered by the dimension rubric). Within chapter 2,
-each subsection below is tagged with the outline dimension it corresponds to:
-render that subsection ONLY if the outline lists that dimension as `present` or
-`activate`; skip it if the dimension is `n/a` or absent from the outline. If the
-outline contains a dimension mapped to chapter 2 with no matching subsection
-below (e.g. Business Logic, Import/Export, Risk), write it as its own subsection
-directly from that outline entry's `heading`, `purpose`, and `source_artifacts`,
-matching the prose depth and citation discipline of the other subsections.
-Order chapter-2 subsections per the outline's `order` field; renumber headings
-sequentially so there are no gaps.
+each subsection below is tagged with an `— outline dimension: X` annotation.
+THE JOIN IS ON `dimension`, NOT ON HEADING TEXT: for each tagged subsection,
+look up the `outline[]` entry whose `dimension` field equals X (exact string
+match against `ProposalOutlineResult.json`'s `outline[].dimension`, and against
+that dimension's status in `dimensions[]`) — render the subsection ONLY if a
+matching outline entry exists (i.e. that dimension is `present` or `activate`);
+skip it if the dimension is `n/a` or has no matching outline entry. Never match
+by comparing the subsection's own heading text to the outline entry's
+`heading` — headings are free text and may differ; `dimension` is the stable
+key. If the outline contains an entry whose `dimension` maps to chapter 2 with
+no matching subsection below (e.g. Business Logic, Import/Export, Risk), write
+it as its own subsection directly from that outline entry's `heading`,
+`purpose`, and `source_artifacts`, matching the prose depth and citation
+discipline of the other subsections. Order chapter-2 subsections by the
+matching outline entry's `order` field (not by the order the subsections
+appear below); renumber headings sequentially so there are no gaps.
 
 ---
 
@@ -113,9 +120,16 @@ below are candidate content blocks, each tagged with its outline dimension —
 render only those whose dimension is `present`/`activate` in the outline, in the
 outline's order, and add any additional outline entry mapped to this chapter
 that has no matching block below directly from its `heading`/`purpose`/
-`source_artifacts`.
+`source_artifacts`. Two subsections are exceptions to this gating: 2.1 (Solution
+Overview) and 2.8 (Open Points and Clarification Needs) are structural — they
+always render regardless of the outline, exactly like the mandatory document
+skeleton — see their individual entries below for why.
 
-2.1 **Solution Overview** (`### 2.1 ...`)
+2.1 **Solution Overview** (`### 2.1 ...`) — always render, unconditionally: this
+is chapter 2's structural opener, NOT gated by `ProposalOutlineResult.json` and
+NOT a stand-in for the "Architecture" dimension (that dimension's baseline
+content is 2.3's technical architecture). Render it regardless of the outline's
+contents, exactly like the mandatory document skeleton.
 Write 5–7 substantial paragraphs (approximately 1.5 pages):
 - Open with a high-level vision statement: what adesso proposes and why it is the right approach for this client
 - Describe the overall solution architecture in business terms (not deep technical detail — that comes in 2.3)
@@ -211,7 +225,15 @@ Write approximately 0.75–1 page:
 - Outline a scaling and evolution roadmap: how the solution grows from initial scope to full enterprise deployment
 - Mention continuous improvement: how feedback loops and analytics drive post-launch enhancements
 
-2.8 **Open Points and Clarification Needs** (`### 2.8 ...`)
+2.8 **Open Points and Clarification Needs** (`### 2.8 ...`) — always render,
+unconditionally: this is a structural chapter-2 closer fed directly by
+`OpenPointsResult.json`'s gap analysis, NOT gated by
+`ProposalOutlineResult.json` and NOT the same thing as the rubric's "Risk"
+dimension. ("Risk" is a separate, conditional outline dimension — if `activate`
+in the outline, it renders as its own additional chapter-2 subsection per the
+rule above, distinct from and in addition to this always-present 2.8.) Render
+2.8 regardless of the outline's contents, exactly like the mandatory document
+skeleton.
 Write approximately 0.5–0.75 pages:
 - Scoping tone: where scope is bounded by a deliberate decision, state it
   decisively inline in the relevant chapter (e.g. "Sub-templates are out of
@@ -350,6 +372,6 @@ Tweak:
 - If data is missing for a section, acknowledge this explicitly and suggest it as a topic for the scoping workshop.
 - Formal requirements marked as binding must be explicitly addressed — show how the proposal complies with each, in prose (2.2) or, if the "Compliance List" chapter is in the outline, in the dedicated compliance table.
 - Address high-severity open points proactively — frame them as "topics for joint clarification" rather than gaps.
-- CHAPTER-SELECTION RULE recap: never render a chapter-2 subsection whose dimension is `n/a`/absent from `ProposalOutlineResult.json`'s outline, and never omit one whose dimension is `present`/`activate`. Order chapter-2 content per the outline's `order`.
+- CHAPTER-SELECTION RULE recap: join each tagged chapter-2 subsection to `ProposalOutlineResult.json`'s `outline[]` by matching its `— outline dimension: X` tag against the outline entry whose `dimension == X` — never by comparing heading text. Never render a subsection whose dimension is `n/a`/absent from the outline, and never omit one whose dimension is `present`/`activate`. Order chapter-2 content per the matching outline entry's `order`. Exception: 2.1 and 2.8 are structural and always render regardless of the outline.
 - adesso institutional facts (company profile, certifications, delivery methodology, quality management, SLA priority model) may be cited ONLY from `references/adesso_facts.md` — never invent figures, dates, or SLA times not stated there; leave a value blank rather than estimating.
 - Team members (Kap. 2.5), key profiles and reference projects (Annex A) come EXCLUSIVELY from `ProfilerMatchResult.json` — never invent persons, CVs, client names, or reference projects. Unmatched needs (`matched: false`) become **neutral, client-facing placeholders** (e.g. "Profil wird kurzfristig final besetzt" / "Vergleichbare Branchenreferenz auf Anfrage") — never surface the raw internal `note` or delivery-internal hints like "im Profiler recherchieren" in the client document.

@@ -44,7 +44,12 @@ Action:
 4. For every dimension set `rationale`; for non-`n/a` set `evidence` = a concrete
    artifact citation. No evidence → do NOT activate.
 5. Build `outline`: one entry per `present`/`activate` dimension, in a sensible
-   proposal order, with `heading`, `purpose`, `source_artifacts`, `target_length`.
+   proposal order, with `dimension`, `heading`, `purpose`, `source_artifacts`,
+   `target_length`. Each entry's `dimension` MUST be set to the EXACT rubric
+   dimension key it renders (identical string to the one used in the matching
+   `dimensions[]` decision, from the rubric list in step 1) — this is the
+   deterministic join key `proposal.md` uses to gate/order chapter-2 subsections.
+   Downstream rendering matches on `dimension`, never on free-text `heading`.
 
 Output & Validation (Code Interpreter):
 1. Load available artifacts, compute decisions in memory per the rules above.
