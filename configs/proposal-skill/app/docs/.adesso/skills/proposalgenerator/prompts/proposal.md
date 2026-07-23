@@ -176,11 +176,11 @@ Write approximately 1–1.5 pages following the official adesso pricing format:
 | Qualification / Role | Person-Days | Day Rate (EUR excl. VAT) | Price (EUR excl. VAT) |
 ```
 - Populate this table directly from `EstimationResult.json` `role_summary[]` — one row per entry, `role_title` for "Qualification / Role" and `"{person_days_min}–{person_days_max}"` for "Person-Days". Do NOT re-estimate, round beyond the given values, or add roles not present in `role_summary[]`.
-- Use "XXX" for day rates (these are confidential and filled in manually) — "Price" stays "XXX" as well since it depends on the day rate.
-- Include a **Total** row from `EstimationResult.json` `total_effort` (`"{person_days_min}–{person_days_max}"`).
+- Day rates are confidential and filled in manually. Do NOT emit placeholder day rates such as "XXX" — leave the "Day Rate" and "Price" cells empty (or omit the value) for each row rather than inserting a placeholder token.
+- Include a **Total** row from `EstimationResult.json` `total_effort` (`"{person_days_min}–{person_days_max}"`); leave its "Day Rate" and "Price" cells empty as well, since the total price depends on the manually-filled day rates.
 - If `EstimationResult.json` is missing or `role_summary[]` is empty, acknowledge this explicitly and state that detailed effort estimation is pending — do NOT invent a price table.
 
-**Payment terms**: State that invoices are payable within 10 days net, and that all prices are exclusive of statutory VAT.
+**Payment terms**: State that invoices are payable within 60 days net, and that all prices are exclusive of statutory VAT.
 
 **Travel costs**: Include a section addressing travel costs — either included in prices or reimbursed at cost (choose based on formal requirements or default to not included).
 
