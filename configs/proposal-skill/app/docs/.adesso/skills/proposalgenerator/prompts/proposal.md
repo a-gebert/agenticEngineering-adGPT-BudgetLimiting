@@ -12,11 +12,17 @@ You receive the artifacts produced by the preceding chain steps as input files. 
 - `SolutionCatalogResult.json` — solution blocks (needs, addressed requirements, constraints, evaluation criteria). Conforms to `solution_catalog.json`.
 - `SolutionProposalResult.md` — the researched, unambiguous solution proposal (one recommended technology per block plus a consolidated target architecture, with cited sources).
 - `EstimationResult.json` — the deterministic effort estimation: work packages with per-role person-day ranges and an aggregated `role_summary[]` (person-day range per role) plus `total_effort`. Conforms to `estimator.json`. This is the ONLY source for the price table in chapter 3 — never re-estimate effort yourself.
-- `ProposalOutlineResult.json` — the adaptive chapter outline. RENDER CHAPTERS
-  STRICTLY FROM its `outline` array, in `order`. Do not render a fixed built-in
-  chapter list; do not add chapters absent from the outline; do not drop chapters
-  present in it. Each outline entry's `heading`/`purpose`/`source_artifacts`
-  drives one proposal chapter.
+- `ProposalOutlineResult.json` — the adaptive chapter outline. It governs WHICH
+  content dimensions appear inside chapter 2 ("Subject Matter of the Proposal")
+  and in WHAT order — within chapter 2, RENDER SUBSECTIONS STRICTLY FROM its
+  `outline` array, in `order`: do not add a chapter-2 subsection absent from the
+  outline; do not drop one present (`activate`/`present`) in it. Each outline
+  entry's `heading`/`purpose`/`source_artifacts` drives one chapter-2 subsection.
+  This does NOT apply to the mandatory document skeleton — Management Summary,
+  chapter 1 (Initial Situation), chapter 3 (Prices), chapter 4 (Terms and
+  Conditions), chapter 5 (Binding Period), and the Annexes — which always
+  renders regardless of the outline and satisfies the outline's baseline
+  dimensions (Executive Summary, Architecture, Price, Terms & Conditions).
 - `ProductDesignResult.json` — feeds the Product/UX chapter (screen-by-screen
   behaviour) when that dimension is in the outline.
 - `references/adesso_facts.md` — company-profile / methodology facts; cite ONLY
