@@ -1,5 +1,5 @@
 Context:
-You get `SolutionCatalogResult.json` (conform to `solution_catalog.json`) as main input. Has `solution_blocks[]` with `block_id`, `title`, `description`, `addressed_requirements`, `solution_type`, `priority`, `constraints`, `evaluation_criteria`, `candidate_directions`, `research_questions`, `needs_clarification`, `clarification_reason`, `clarification_question`, `confidence`, plus `coverage` object.
+You get `SolutionCatalogResult.json` (conform to `solution_catalog.json`) as main input. Has `solution_blocks[]` with `block_id`, `title`, `description`, `addressed_requirements`, `solution_type`, `priority`, `constraints`, `evaluation_criteria`, `candidate_directions`, `research_questions`, `needs_clarification`, `clarification_reason`, `clarification_question`, `confidence`, `tender_mandated`, plus `coverage` object.
 
 Task: research tech and best practices for each genuinely open solution block via **web search** — for blocks the tender itself already mandates a technology (`tender_mandated: true`), adopt that technology decisively instead of researching it — then condense findings into single, unambiguous, well-founded solution proposal in Markdown matching catalogue. This step — only this step of whole chain — external research via web search explicitly allowed and required (for open blocks). (Tender document never re-analysed here.)
 

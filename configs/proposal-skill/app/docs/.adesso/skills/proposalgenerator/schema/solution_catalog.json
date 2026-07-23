@@ -97,6 +97,10 @@
                         "minimum": 0,
                         "maximum": 1,
                         "description": "Confidence that the block is well-scoped for research (0-1)."
+                    },
+                    "tender_mandated": {
+                        "type": "boolean",
+                        "description": "True when the tender itself prescribes a concrete technology/product for this block; such blocks are adopted decisively without web option-comparison or citations."
                     }
                 },
                 "required": [
