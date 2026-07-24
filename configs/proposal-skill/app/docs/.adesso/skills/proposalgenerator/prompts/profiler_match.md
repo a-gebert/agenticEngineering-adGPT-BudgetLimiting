@@ -19,6 +19,7 @@ Action — follow steps in order:
    - Present single consolidated set of questions to user, naming affected role(s)/brief(s) and concrete choice or missing info.
    - STOP and WAIT for user's answer. Do NOT query Profiler before user responds.
    If nothing needs clarification, skip gate.
+   - Gate G3 — Eligibility (see AGENT.md): if a binding `Eligibility`-category requirement exists (references, named customers, test/POC installation — check whether the run provided such a formal requirement), the proposal MUST evidence it. If the Profiler is likely to return no usable references (or does), ASK the user which real reference installations / customers / test installation adesso may cite, since a binding eligibility demand cannot be satisfied by a placeholder alone. Headless fallback: proceed with the `matched: false` placeholder (step 5) AND record that a binding eligibility requirement is not yet substantiated, so it surfaces as an open point.
 
 2. **Match team.** For each `roles[]` entry, invoke Profiler MCP with its `profiler_query` (skills, and location/availability if present). Select best-fitting profile. Use `location`/`availability` ONLY to filter — never carry into output.
 

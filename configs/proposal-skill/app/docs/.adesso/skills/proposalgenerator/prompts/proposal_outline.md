@@ -39,8 +39,21 @@ Action:
    | Transition/Migration | migration requirement in Functional/Constraints |
    | Application Management & SLA | NFR availability/support present |
    | Risk | high-severity item in OpenPoints or Constraints |
-   | Compliance List | binding formal requirement present |
+   | Compliance List | binding formal requirement present, OR a `Submission`-category formal requirement mandates filling a requirement/annex list |
+   | Key Personnel | StaffingCatalogResult.json / ProfilerMatchResult.json present |
+   | Company Background/References | an `Eligibility`-category formal requirement is present (references, customer proof, test installation), OR `references/adesso_facts.md` exists |
    Other dimensions: `present` if a feeding artifact exists, else `n/a`.
+3b. FORMAL-COVERAGE COMPLETENESS (mandatory): every BINDING entry in
+   `FormalResult.json` `formal_requirements` (`binding: true`) MUST be covered by
+   at least one `present`/`activate` outline chapter. Map by category:
+   `Legal` -> Terms & Conditions (and Non-functional for security/compliance);
+   `Eligibility` -> Company Background/References (references, customer proof,
+   test installation); `Submission` -> Compliance List (fill the mandated
+   requirement/annex list); `Scope` -> Architecture / the relevant solution
+   dimension. If a binding formal requirement has no home chapter, `activate` the
+   mapped dimension so it is covered. Record any binding formal requirement you
+   still cannot place in `errors`. A winning bid answers every binding formal
+   demand — silently dropping one is a defect.
 4. For every dimension set `rationale`; for non-`n/a` set `evidence` = a concrete
    artifact citation. No evidence → do NOT activate.
 5. Build `outline`: one entry per `present`/`activate` dimension, in a sensible
@@ -56,8 +69,17 @@ Output & Validation (Code Interpreter):
 2. Load `proposal_outline.json` schema, validate with `jsonschema`
    (draft 2020-12). Fix and re-validate until clean.
 3. Genuinely-absent required values → add `errors` entry, keep object conformant.
-4. Write validated object to `ProposalOutlineResult.json` (UTF-8, pretty),
-   upload back into context.
+4. SANITIZE ENCODING before writing: every human-readable string
+   (`heading`, `purpose`, `rationale`, `evidence`, …) must contain German
+   umlauts (ä ö ü ß Ä Ö Ü) as literal, correct UTF-8 characters — NEVER as a
+   control character. Strip ALL C0 control characters (U+0000–U+001F except
+   `\t`, `\n`, `\r`), especially U+0008 BACKSPACE, from every string, e.g.
+   `re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', s)`. If a stripped backspace had
+   replaced an umlaut, restore the intended umlaut. The final JSON must contain
+   zero `\b`/`` escapes and zero raw control bytes.
+5. Write validated, sanitized object to `ProposalOutlineResult.json`
+   (`json.dump(obj, f, ensure_ascii=False, indent=2)` — UTF-8, pretty, umlauts
+   kept literal), upload back into context.
 
 Tweak:
 - Authoritative deliverable = `ProposalOutlineResult.json`, valid JSON only.

@@ -23,8 +23,9 @@ Action — follow these steps in order:
 
 1. **Clarification gate (mandatory Human-in-the-Loop).** Collect every block with `needs_clarification: true`. If at least one:
    - Present single, consolidated set of questions to user. For each block, show `title`, `candidate_directions` (label + rationale), `clarification_question`.
-   - Also offer global scoping option (e.g. "Should research be limited to particular technology stack, such as Azure only?").
+   - Also offer global scoping option (e.g. "Should research be limited to particular technology stack, such as Azure only?"). Fold in any platform/stack constraint the user gave (gate G1 in AGENT.md) and seed from `ClientContextResult.json` `current_systems`.
    - STOP and WAIT for user's answer. Do NOT start research before user responded.
+   - HEADLESS FALLBACK: if no user is available to answer (non-interactive run) or the user defers, do NOT abandon or postpone research. For each ambiguous block pick the highest-`confidence` `candidate_direction` as the working assumption, record it explicitly (chapter 6 + a note in the recommendation), and PROCEED with research on that basis. Never emit "research will be done in a later step" — this IS the research step; there is no later one.
    If no block needs clarification, skip gate.
 
 2. **Fix the research scope.** Incorporate user's answers per block. For any block still ambiguous after answer, use user's chosen direction; never silently pick for user.
@@ -38,7 +39,7 @@ Action — follow these steps in order:
    - Extract concrete technologies, best practices, source URLs from search results. If block's searches return no usable results, do NOT fabricate: record affected block as open research question in chapter 6 and continue with rest.
    - Honour all block `constraints` both when framing search queries and accepting findings. Cite only sources that actually appear in search results; never invent sources or findings.
 
-4. **Converge.** For each block, pick EXACTLY ONE recommended technology/approach. Show compared options only to justify choice — never leave choice open. Verify each recommendation complies with block's `constraints`; recommendation that violates hard constraint not allowed.
+4. **Converge — to a CONCRETE, NAMED technology, not just a pattern.** For each block, pick EXACTLY ONE recommendation and name the actual product/framework/library (and version where relevant) — e.g. "Angular 17 SPA", ".NET 8 / ASP.NET Core", "MS SQL Server + Filestream", a specific workflow engine, a specific PDF/rendering library — NOT merely an architecture category like "a service-oriented ETL layer" or "a server-side reporting engine". The pattern is the rationale; the named product is the recommendation. Show compared options only to justify the choice — never leave the choice open. Verify each recommendation complies with the block's `constraints`; a recommendation that violates a hard constraint is not allowed. If, after research, a block genuinely cannot be pinned to a named product (e.g. no usable findings), state the concrete shortlist and the recommended default, and log it in chapter 6 — do not leave only an abstract pattern.
 
 5. **Consolidate.** Integrate all per-block recommendations into ONE coherent target architecture (chapter 4). Show how parts integrate and how non-functional targets met.
 

@@ -3,7 +3,7 @@ You receive the artifacts produced by the preceding chain steps as input files. 
 
 - `ExecutiveSummaryResult.json` — executive summary, key topics, and document structure (chapters, sections, aspects). Conforms to `executive_summary.json`.
 - `ClientContextResult.json` — client context (client name, industry, current systems, pain points, strategic goals) with aspect cross-references. Conforms to `client_context.json`.
-- `FunctionalResult.json` — functional and non-functional requirement analysis. Conforms to `functional_requirements.json`.
+- `FunctionalResult.json` — functional and non-functional requirement analysis. Conforms to `functional_requirements.json`. Each requirement carries an INTERNAL `id` (`FR-NNN`/`NFR-NNN`, never client-facing) and, when the tender labelled the requirement, an optional `client_ref` (the tender's own identifier — the only requirement identifier allowed in client-facing output).
 - `FormalResult.json` — formal proposal requirements (delivery scope, deadlines, format, submission rules, eligibility) marked binding/optional. Conforms to `formal_requirements.json`.
 - `ConstraintsResult.json` — project constraints (budget, timeline, technical/organisational boundaries) with aspect cross-references. Conforms to `constraints.json`.
 - `OpenPointsResult.json` — gap analysis: aspects with no requirement mapped, with severity and coverage statistics. Conforms to `open_points.json`.
@@ -78,9 +78,22 @@ key. If the outline contains an entry whose `dimension` maps to chapter 2 with
 no matching subsection below (e.g. Business Logic, Import/Export, Risk), write
 it as its own subsection directly from that outline entry's `heading`,
 `purpose`, and `source_artifacts`, matching the prose depth and citation
-discipline of the other subsections. Order chapter-2 subsections by the
-matching outline entry's `order` field (not by the order the subsections
-appear below); renumber headings sequentially so there are no gaps.
+discipline of the other subsections.
+
+CHAPTER-2 NUMBERING (deterministic, gapless, unique — follow EXACTLY):
+1. Determine the ordered list of chapter-2 subsections to render:
+   FIRST the structural opener 2.1 (Solution Overview); THEN every
+   `present`/`activate` outline entry that maps to chapter 2, sorted ascending
+   by its `order` field; LAST the structural closer (Open Points).
+2. Assign subsection numbers by POSITION in that final ordered list, counting
+   `2.1, 2.2, 2.3, …` with NO gaps. The number is the running counter — it is
+   NEVER the value of the outline entry's `order` field (an entry with
+   `order: 16` does NOT become "2.16"). Example: 12 subsections total → they are
+   numbered exactly 2.1 through 2.12, and Open Points is 2.12.
+3. Each number appears EXACTLY ONCE. Never emit the same number twice (no
+   duplicate "2.8"); never skip a number (no jump from 2.13 to 2.16). Before
+   emitting, verify the chapter-2 numbers form the unbroken sequence
+   2.1, 2.2, …, 2.N with no repeats and no gaps.
 
 ---
 
@@ -120,10 +133,17 @@ below are candidate content blocks, each tagged with its outline dimension —
 render only those whose dimension is `present`/`activate` in the outline, in the
 outline's order, and add any additional outline entry mapped to this chapter
 that has no matching block below directly from its `heading`/`purpose`/
-`source_artifacts`. Two subsections are exceptions to this gating: 2.1 (Solution
-Overview) and 2.8 (Open Points and Clarification Needs) are structural — they
-always render regardless of the outline, exactly like the mandatory document
-skeleton — see their individual entries below for why.
+`source_artifacts`. Two subsections are exceptions to this gating: Solution
+Overview and Open Points and Clarification Needs are structural — they always
+render regardless of the outline, exactly like the mandatory document skeleton;
+Solution Overview is ALWAYS the FIRST chapter-2 subsection and Open Points is
+ALWAYS the LAST — see their individual entries below for why.
+
+IMPORTANT: the `### 2.x` numbers shown on the candidate blocks below are
+ILLUSTRATIVE SLOT LABELS ONLY, not the number to emit. The actual subsection
+number is assigned strictly by position per the CHAPTER-2 NUMBERING rule above
+(running counter 2.1, 2.2, …, gapless, unique). Ignore the literal digit after
+`2.` in the block titles below when numbering your output.
 
 2.1 **Solution Overview** (`### 2.1 ...`) — always render, unconditionally: this
 is chapter 2's structural opener, NOT gated by `ProposalOutlineResult.json` and
@@ -144,25 +164,28 @@ Write 5–7 substantial paragraphs (approximately 1.5 pages):
   compliance table is rendered ONLY if the outline contains a "Compliance List"
   chapter (then keep it concise, ideally as a separate compliance section — see
   below).
-- Group the narrative by thematic block (mirroring `FunctionalResult.json`'s aspect chain: requirement.aspect_id -> aspects[].section_id -> sections[].section_heading + chapter_heading, WITHIN that artifact's own structure only). For each block, describe in prose what the solution does and which pain points/goals it serves — reference FR-IDs inline (e.g. "(FR-12)") instead of tabulating them.
+- Group the narrative by thematic block (mirroring `FunctionalResult.json`'s aspect chain: requirement.aspect_id -> aspects[].section_id -> sections[].section_heading + chapter_heading, WITHIN that artifact's own structure only). For each block, describe in prose what the solution does and which pain points/goals it serves. Describe each requirement by its CONTENT, in plain language the client recognises from their own tender. Do NOT print internal `FR-NNN`/`NFR-NNN` codes in the client-facing prose — those are adesso-internal analysis handles the reader has no key for. If you must point to a specific requirement, use its `client_ref` (the tender's own identifier) when present; otherwise name it by its content/topic, never by the internal code.
 - Weave `must`-priority requirements in as concrete commitments; `should`/`nice-to-have` items as enhancements delivered where scope allows.
-- If the Product/UX dimension is in the outline, use `ProductDesignResult.json`'s screen-by-screen behaviour (`screens[].interactions[]`: trigger -> reaction -> result_state, each tied to `requirement_ids`) to make the narrative concrete — describe the key screens/workflows the user interacts with and how they fulfil the underlying requirements. Do NOT invent screens or interactions beyond what `ProductDesignResult.json` provides.
+- If the Product/UX dimension is in the outline, use `ProductDesignResult.json`'s screen-by-screen behaviour (`screens[].interactions[]`: trigger -> reaction -> result_state, each tied to `requirement_ids`) to make the narrative concrete — describe the key screens/workflows the user interacts with and how they fulfil the underlying requirements. Use `requirement_ids` only internally, to verify each screen maps to a real requirement; describe those requirements by content, and do NOT print the internal `FR-NNN`/`NFR-NNN` codes in the prose. Do NOT invent screens or interactions beyond what `ProductDesignResult.json` provides.
 - Address non-functional requirements (performance, security, scalability, availability) within the same flowing narrative, not a separate table.
 
 **Compliance List** (conditional, only if the outline contains a "Compliance List" chapter — render immediately after 2.2 as its own short subsection, ~0.25–0.5 page)
 - Present a concise compliance table for binding formal/functional requirements only:
   ```
-  | ID | Requirement | Fulfilment | Source |
+  | Ref. | Requirement | Fulfilment | Source |
   ```
+- The "Ref." column MUST use the requirement's `client_ref` (the tender's own identifier, which the reader recognises). NEVER put the internal `FR-NNN`/`NFR-NNN` code in this column — the client has no key for it. If a requirement has no `client_ref`, leave "Ref." blank and identify the row by its requirement text alone.
+- The "Source" column is the tender-side pointer (`source_page`, and section heading if useful) so the client can locate the requirement in their own document.
 - Resolve sources via the aspect chain WITHIN `FunctionalResult.json`/`FormalResult.json` (their own structure) — do not resolve against another artifact's aspect IDs.
 - Keep this table short and factual; it supplements, not replaces, the narrative in 2.2.
+- If `FormalResult.json` has a `Submission`-category formal requirement mandating that a supplied requirement/annex list be filled (e.g. "fill the last two columns of the Excel annex"), explicitly state that adesso has completed that mandated list and that this compliance section reflects/accompanies it — the tender's own list is the binding artifact, this table mirrors it.
 
 2.3 **Technical Solution and Architecture** (`### 2.3 ...`) — outline dimension: Architecture (baseline, always `present`)
 Write 1.5–2 pages covering the following aspects in depth:
 - Use `SolutionProposalResult.md` as the authoritative source for the technical architecture: adopt its consolidated target architecture and the one recommended technology per solution block. Do NOT introduce alternative technologies or re-open decisions already made there. Summarise (do not restate the full research) and reference the recommendations in your own prose. Do NOT carry over the `[Sn]` citation markers from `SolutionProposalResult.md` — the proposal has no sources chapter, so any bracketed source reference would dangle.
 - Propose a high-level technical architecture addressing all must-priority requirements
 - If the client specified technology preferences, align accordingly
-- Describe each key technical building block in its own paragraph: what it does, which requirements it addresses (reference FR-IDs), and how it fits into the overall architecture
+- Describe each key technical building block in its own paragraph: what it does, which requirements it addresses (name them by content, or by `client_ref` when present — never by the internal `FR-NNN` code), and how it fits into the overall architecture
 - Describe integration with existing systems (from `client_context.current_systems`) — explain the integration approach, interfaces, and data flows
 - Address non-functional requirements (performance, security, scalability, availability) with concrete architectural decisions that fulfil them
 - If technical constraints exist (from `constraints.technical`), explain how the architecture complies
@@ -173,7 +196,7 @@ Write approximately 0.5–0.75 pages, driven by the migration requirement(s) fou
 - Describe the delta-transition approach: migrate incremental changes rather than a single big-bang cutover, to minimise business disruption
 - Describe the read-only cutover window: legacy system(s) go read-only for a defined period while the final delta is migrated and validated
 - Describe log-file handling: how historical log files/audit trails are migrated, archived, or made queryable post-cutover
-- Tie each element back to the concrete migration requirement(s) that triggered this chapter (reference requirement IDs)
+- Tie each element back to the concrete migration requirement(s) that triggered this chapter — reference them by content (or by `client_ref` when present), never by the internal `FR-NNN`/`NFR-NNN` code
 - Do NOT invent migration specifics beyond what the requirements/constraints support
 
 2.4 **Project Approach and Methodology** (`### 2.4 ...`) — outline dimension: Methodology/SCRUM (present if `ConstraintsResult.json`/`FunctionalResult.json` exist)
@@ -254,7 +277,9 @@ Write approximately 0.5–0.75 pages:
 
 **3. Prices** (`## 3 ...`) — outline dimension: Price (baseline, always `present`)
 
-Write approximately 1–1.5 pages following the official adesso pricing format:
+Write approximately 1–1.5 pages following the official adesso pricing format.
+
+**Honour the tender's own pricing-submission format FIRST.** If `FormalResult.json` has a `Submission`-category (or pricing) formal requirement mandating a specific pricing artifact — e.g. "fill the attached pricing matrix / requirement list (last two columns)" — then the client expects the price in THAT format. In the proposal, state that adesso submits pricing in the mandated form and reference that attachment (e.g. "Preise gemäß beigefügter Pricing-Matrix, Anlage <name>") rather than substituting a different self-invented table as the primary price statement. The role-based table below then serves as an in-document summary, not a replacement for the mandated submission format.
 
 **Main price table** — use the official adesso format with role-based pricing:
 ```
@@ -338,6 +363,7 @@ Write approximately 1 page:
   For entries with `matched: false`, mark the reference with a neutral, client-facing placeholder (e.g. "Vergleichbare Branchenreferenz auf Anfrage") — not a delivery-internal note. If `references[]` is empty, write one placeholder line and do NOT invent references.
 - Describe the proposed team's key qualifications from `ProfilerMatchResult.json` `team[]` — per role: seniority, key skills, certifications, years of experience (anonymised, no names). For `matched: false` roles, use a neutral, client-facing placeholder (e.g. "Profil wird kurzfristig final besetzt") — do NOT state internally that the profile must still be sourced from the Profiler.
 - Reference relevant certifications if mentioned in formal requirements (ISO 27001, ITIL, etc.)
+- If `FormalResult.json` has an `Eligibility`-category formal requirement (reference installations, customer proof, test/POC installation), address it EXPLICITLY here: state which reference installations and customers evidence eligibility (anonymised where required) and confirm adesso's readiness to provide the mandated test/POC installation. Do not silently omit a binding eligibility demand — if concrete reference data is unavailable (e.g. Profiler returned no match), state that suitable references and a test installation will be provided on request, so the binding requirement is still visibly answered.
 - Close with: *Detailed CVs to be provided as separate attachment.*
 
 ---
@@ -363,8 +389,20 @@ After this, add 1–2 paragraphs adapting the industry focus to `client_context.
 Tweak:
 - CRITICAL: The layout template `proposal_output.md` (see the **Template** section) contains an EXAMPLE using the fictional client "CloudRetail" and a POS modernisation scenario. Every piece of text marked with `[EXAMPLE]` and every HTML comment (`<!-- ... -->`) is a PLACEHOLDER. You MUST replace ALL example content with real data derived from the input Result files. Do NOT copy, paraphrase, or reproduce any example text — treat the example only as a structural template showing the expected format, depth, and tone.
 - Output ONLY the Markdown content. No JSON wrapping, no code fences around the entire output, no explanatory text before or after. Do NOT include `[EXAMPLE]` markers or HTML comments in your output.
+- CHARACTER ENCODING (mandatory): write every German special character — ä ö ü ß Ä Ö Ü and any accented letter — as its literal, correct UTF-8 character (e.g. "Lösung", "für", "Qualität", "tätig"), spelled out in full. NEVER emit control characters (byte 0x08 BACKSPACE, or any C0 control char 0x00–0x1F other than newline/tab) and never substitute an umlaut with a control char, a digit, or a wrong letter. The output must contain ZERO control characters. If you cannot render an umlaut, use its plain digraph (ae/oe/ue/ss) — never a control byte.
+- CLIENT-FACING IDENTIFIERS (mandatory): the proposal reader only knows their OWN tender. Internal analysis codes — `FR-NNN`, `NFR-NNN`, `asp-N`, `SB-NN`, `WP-NN`, `R-NN`, `[Sn]` — are adesso-internal handles the reader has NO key for; they must NEVER appear anywhere in the client-facing output (prose, tables, or headings). Refer to requirements and solution elements by their CONTENT, in the client's own vocabulary. The ONLY identifier you may print is a requirement's `client_ref` (the tender's own identifier), and only where citing a specific requirement genuinely helps the reader (e.g. the Compliance List "Ref." column). Use the internal codes solely for your own traceability/coverage checks while drafting.
 - REMINDER: Apply the CRITICAL LANGUAGE RULE — ALL headings, sub-headings, table headers, and labels must be translated into `output_language`. Do NOT output English headings when `output_language` is not English. The only exception is "Management Summary" which always stays in English.
-- Prioritize depth in chapters 1, 2, and 3. The entire proposal should be approximately 12–18 pages. Chapter 2 is the main content chapter (~8–10 pages). Each subsection of chapter 2 must be at least 0.75 pages — never produce a subsection with only 2–3 sentences. Use flowing prose with concrete details from the input data, not just bullet lists.
+- LENGTH IS DRIVEN BY CONTENT, NOT A FIXED BUDGET. Cover every concrete element the source artifacts hold in full — do not truncate to hit a page count, and do not pad thin inputs to look longer. A real winning proposal for a UI-rich tender runs 30–50+ pages; chapter 2 alone often 15–25 pages when the product design has many screens. Treat "~12–18 pages" only as a FLOOR for a minimal tender — scale up whenever the artifacts carry more. Each chapter-2 subsection must be at least 0.75 pages and expand to whatever length full transcription of its source artifact requires. Use flowing prose with concrete details, not just bullet lists.
+- GRANULARITY — one subsection per concrete element (this is how depth is achieved):
+  - Product/UX: give EACH screen in `ProductDesignResult.json` `screens[]` its OWN sub-subsection (e.g. 2.2.1, 2.2.2, …), each walking its concrete interactions (trigger -> reaction -> result_state) and behaviour. A winning proposal dedicates a titled subsection to each screen (start page/login, list display, add/edit, compare, workflow create, workflow use, export, validation/error prevention, onboarding, …). Do not merge multiple screens into one paragraph.
+  - Business Logic: split into its own sub-subsections where evidence exists — administration (users/roles/rights), templates (incl. datasheet vs diagram templates, placeholders, sub-templates), data handling, data storage.
+  - Non-functional: split into sub-subsections — support & documentation, security & compliance, CI/CD pipeline & release, scalability & performance, supplier/eligibility requirements — each grounded in the artifacts.
+- MANDATORY CONTENT TRANSCRIPTION (this is the single most important quality rule — the intermediate artifacts are rich; the proposal MUST carry that richness through, not flatten it to generic filler): for each chapter-2 subsection you MUST walk its `source_artifacts` and describe EVERY concrete element they contain, by name, in prose:
+  - Product/UX: describe EACH screen in `ProductDesignResult.json` `screens[]` individually — its purpose and its concrete `interactions[]` (trigger -> reaction -> result_state). Use the tied `requirement_ids` ONLY internally, to confirm coverage — describe the requirements by content, do NOT print the internal `FR-NNN`/`NFR-NNN` codes. Naming a category ("Dashboard, Detailansicht, Vergleichsansicht") WITHOUT walking each screen and its interactions is INCOMPLETE and violates this prompt.
+  - Architecture / Business Logic / Import-Export: describe EACH relevant solution block in `SolutionCatalogResult.json` `solution_blocks[]` (its need, addressed requirements, key constraints, evaluation criteria) and EACH architecture decision + the recommended technology per block from `SolutionProposalResult.md`; carry over the consolidated target-architecture components by name and the concrete tech-stack/role mapping. Do not collapse four solution blocks into one vague sentence.
+  - Risk: render the concrete named risks, assumptions, and open performance points from `SolutionProposalResult.md`/`OpenPointsResult.json` — never boilerplate like "Risiken werden transparent gemacht" without listing the actual items.
+  - Key Personnel / References: carry the per-role `required_skills` from `StaffingCatalogResult.json` and each reference brief's concrete detail from `ProfilerMatchResult.json` (subject to the anonymisation and `matched:false` placeholder rules).
+  SELF-CHECK before finishing: for every subsection, confirm that each concrete item present in its `source_artifacts` is reflected in the prose. A subsection that mentions fewer concrete items than its source artifact holds is a defect — expand it.
 - Do NOT invent specific technologies, products, or services that are not mentioned in or derivable from the input data.
 - Requirements woven into the flowing narrative (2.2) and any compliance table must come directly from the input JSON — do not add fictional requirements.
 - Resolve ALL source references via the aspect chain within the requirement's own artifact (`FunctionalResult.json` for FR/NFR) — aspect IDs are not shared across steps; never use `source_section` directly.
@@ -372,6 +410,6 @@ Tweak:
 - If data is missing for a section, acknowledge this explicitly and suggest it as a topic for the scoping workshop.
 - Formal requirements marked as binding must be explicitly addressed — show how the proposal complies with each, in prose (2.2) or, if the "Compliance List" chapter is in the outline, in the dedicated compliance table.
 - Address high-severity open points proactively — frame them as "topics for joint clarification" rather than gaps.
-- CHAPTER-SELECTION RULE recap: join each tagged chapter-2 subsection to `ProposalOutlineResult.json`'s `outline[]` by matching its `— outline dimension: X` tag against the outline entry whose `dimension == X` — never by comparing heading text. Never render a subsection whose dimension is `n/a`/absent from the outline, and never omit one whose dimension is `present`/`activate`. Order chapter-2 content per the matching outline entry's `order`. Exception: 2.1 and 2.8 are structural and always render regardless of the outline.
+- CHAPTER-SELECTION RULE recap: join each tagged chapter-2 subsection to `ProposalOutlineResult.json`'s `outline[]` by matching its `— outline dimension: X` tag against the outline entry whose `dimension == X` — never by comparing heading text. Never render a subsection whose dimension is `n/a`/absent from the outline, and never omit one whose dimension is `present`/`activate`. Order chapter-2 content per the matching outline entry's `order`, then number the subsections by position per the CHAPTER-2 NUMBERING rule (running counter 2.1..2.N, gapless, unique — NOT the `order` value). Exception: Solution Overview (always first) and Open Points (always last) are structural and always render regardless of the outline.
 - adesso institutional facts (company profile, certifications, delivery methodology, quality management, SLA priority model) may be cited ONLY from `references/adesso_facts.md` — never invent figures, dates, or SLA times not stated there; leave a value blank rather than estimating.
 - Team members (Kap. 2.5), key profiles and reference projects (Annex A) come EXCLUSIVELY from `ProfilerMatchResult.json` — never invent persons, CVs, client names, or reference projects. Unmatched needs (`matched: false`) become **neutral, client-facing placeholders** (e.g. "Profil wird kurzfristig final besetzt" / "Vergleichbare Branchenreferenz auf Anfrage") — never surface the raw internal `note` or delivery-internal hints like "im Profiler recherchieren" in the client document.

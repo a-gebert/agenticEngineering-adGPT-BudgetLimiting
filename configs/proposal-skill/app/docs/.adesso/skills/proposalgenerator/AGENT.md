@@ -111,6 +111,8 @@ Export
 
 Export = pure format transformation. Content of `ProposalResult.md` / `ReportResult.md` is final and immutable. Never regenerate, rewrite, summarize, reorder, extend proposal/report content during export. Only apply layout, native tables, table of contents, cover-page addressee.
 
+Single exception — encoding hygiene: before export you MUST run the mandatory character-sanitization pass in **Output Encoding Hygiene** below. It removes only illegal C0 control characters (never printable content), so it does not violate content-immutability; it repairs corruption, it does not rewrite the proposal.
+
 Final deliverables
 - `ProposalResult.md`
 - proposal DOCX, named per **Proposal Filename** rule (`Proposal_<ClientName>.docx`)
@@ -226,13 +228,35 @@ When applying selected adesso template, set client/addressee on template cover p
 
 Populates only template cover page — must not alter chapter content produced by `proposal-proposal` in `ProposalResult.md`.
 
+# Output Encoding Hygiene
+
+Mandatory pre-export pass, run in Code Interpreter on BOTH `ProposalResult.md`
+and `ReportResult.md` immediately before their respective conversions. Upstream
+content steps have been observed to corrupt German umlauts into U+0008 BACKSPACE
+control bytes (and JSON `\b` escapes); this pass guarantees clean deliverables
+regardless.
+
+For each markdown file:
+1. Read it as UTF-8.
+2. Strip every C0 control character except tab/newline/carriage-return:
+   `import re; text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', text)`.
+3. Write it back as UTF-8 (the cleaned file is also the final `.md` deliverable).
+4. Assert the result contains no `0x08` byte before proceeding to conversion.
+
+This removes only illegal control characters — it never alters printable
+proposal/report content, so content-immutability still holds. Do NOT attempt to
+"guess back" umlauts here; the fix for the corruption itself lives in the
+`proposal` and `proposal_outline` steps (emit literal UTF-8 umlauts, never
+control chars). This pass is the safety net.
+
 # Proposal DOCX Conversion
 
 Deterministic recipe for step 16. Goal: native Word tables + populated table of contents + adesso corporate design, content byte-for-byte unchanged.
 
 Convert with pandoc (via `pypandoc` in Code Interpreter), not a plain/unstyled Word export:
 
-- **Source**: the existing `ProposalResult.md` verbatim. Do not edit, re-emit, or re-generate its content first.
+- **Source**: the existing `ProposalResult.md`, after the mandatory **Output Encoding Hygiene** pass (control-char strip only). Do not otherwise edit, re-emit, or re-generate its content.
+- **Heading numbering (avoid double numbering)**: `ProposalResult.md` carries manual chapter numbers in its heading TEXT (e.g. `## 1 Ausgangssituation`, `### 2.1 …`). The adesso reference template's heading styles (`Überschrift1`–`9`) ALSO apply automatic Word list-numbering (`numPr`). If both are active the DOCX shows doubled numbers ("1 1 Ausgangssituation"). Because the manual numbers in the markdown are authoritative, you MUST DISABLE the template's automatic heading numbering after conversion: for every heading style in the output document, remove its `numPr` (and clear any direct-paragraph `numPr` on heading paragraphs) via `python-docx`/lxml, so ONLY the manual markdown numbers remain. Verify no heading shows a duplicated number afterwards.
 - **Reference document** (`--reference-doc=<template>`): the adesso template resolved via **Proposal Template Selection** (full path per **Template location**). Supplies cover page, headers/footers, fonts, heading/paragraph/table styles.
 - **Table of contents** (`--toc`, e.g. `--toc-depth=3`): builds and populates the TOC from Markdown headings. Heading levels in `ProposalResult.md` drive TOC entries — keep them intact.
 - **Native tables**: Markdown pipe tables convert to real Word tables automatically. Ensure the reader input format enables table parsing (e.g. `from='gfm'` or `markdown+pipe_tables`). Never rasterize or flatten tables to text.
@@ -242,7 +266,19 @@ Convert with pandoc (via `pypandoc` in Code Interpreter), not a plain/unstyled W
 Minimal shape (illustrative, adapt paths/filenames from the rules above):
 
 ```python
-import pypandoc
+import re, pypandoc
+from docx import Document
+from docx.oxml.ns import qn
+
+# 1. Encoding hygiene: strip illegal C0 control chars (e.g. corrupted umlauts -> 0x08)
+with open("ProposalResult.md", encoding="utf-8") as f:
+    md = f.read()
+md = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', md)
+assert '\x08' not in md
+with open("ProposalResult.md", "w", encoding="utf-8") as f:
+    f.write(md)
+
+# 2. Convert with adesso reference template + populated TOC + native tables
 pypandoc.convert_file(
     "ProposalResult.md",
     to="docx",
@@ -254,7 +290,25 @@ pypandoc.convert_file(
         "--toc-depth=3",
     ],
 )
-# then: fill cover-page addressee with client_name via python-docx
+
+# 3. Disable template auto-numbering on heading styles (manual md numbers are authoritative)
+doc = Document("Proposal_<slug>.docx")
+for style in doc.styles:
+    el = style.element
+    ppr = el.find(qn('w:pPr'))
+    if ppr is not None:
+        for numpr in ppr.findall(qn('w:numPr')):
+            ppr.remove(numpr)                       # strip style-level numbering
+for p in doc.paragraphs:                            # strip any direct heading numbering
+    name = (p.style.name or '') if p.style else ''
+    if 'eading' in name or 'berschrift' in name:    # "Heading N" / "Überschrift N"
+        ppr = p._p.find(qn('w:pPr'))
+        if ppr is not None:
+            for numpr in ppr.findall(qn('w:numPr')):
+                ppr.remove(numpr)
+doc.save("Proposal_<slug>.docx")
+
+# 4. then: fill cover-page addressee with client_name via python-docx
 ```
 
 TOC note for user hand-off: after opening in Word, the TOC can be refreshed via right-click → "Update field". Layout fine-tuning (line breaks, column widths) stays a manual Word step. State this hint when delivering the DOCX.
@@ -263,7 +317,7 @@ If pandoc/`pypandoc` is unavailable in the sandbox, install or fall back to anot
 
 # Report PDF Conversion
 
-Step 17. Convert `ReportResult.md` to `Report.pdf` via pandoc, content unchanged, `--toc` for navigation. `Report.pdf` is an internal analysis artifact: no adesso proposal template, no cover page, no client-name filename slug.
+Step 17. Convert `ReportResult.md` to `Report.pdf` via pandoc, content unchanged, `--toc` for navigation. Run the **Output Encoding Hygiene** control-char strip on `ReportResult.md` first (same as the proposal). `Report.pdf` is an internal analysis artifact: no adesso proposal template, no cover page, no client-name filename slug.
 
 # Code Interpreter Restriction
 
@@ -302,11 +356,60 @@ Don't ask for confirmation if next workflow step already determined.
 
 Don't ask whether to use workflow. Must use workflow.
 
-Exception — mandatory clarification gate: in `proposal-solution-research` step, when solution catalogue flags blocks with `needs_clarification: true`, you MUST ask user which technology directions to research (and offer to scope research) BEFORE any web search, and wait for answer. This is the one point where asking is required, not discouraged.
+# Clarification Gates (mandatory Human-in-the-Loop)
 
-Same applies to `proposal-profiler-match` step: when Profiler matching ambiguous (over-broad query, conflicting location/availability, ambiguous reference domain), you MUST ask user before querying Profiler and wait for answer.
+A winning proposal needs decisions the tender does NOT contain — the client's IT
+environment, commercial terms, and adesso-internal assets. These live at the
+boundary to the outside world, not inside the tender text. The following gates
+are the ONE place where asking is required, not discouraged.
 
-Convergence rule: final solution proposal must present exactly one recommended technology per solution block and one consolidated target architecture — never leave open technology choice for client.
+Batching: collect every gate question whose inputs already exist and ask them in
+ONE consolidated block as early as possible (ideally a single intake right after
+PreProcessing, then a second only if a later artifact reveals a new one) — do
+NOT stop the chain once per step. Present concise, decision-ready questions.
+
+Headless fallback (critical): if no user is available to answer (non-interactive
+run) OR the user explicitly defers, you MUST NOT stall or postpone the work to a
+non-existent "next step". Instead pick the highest-confidence default, PROCEED,
+and record the assumption verbatim in that step's `errors`/assumptions and in the
+proposal's open-points chapter. A logged assumption beats an empty deliverable.
+
+Gates:
+- **G1 Platform / stack constraints** — BEFORE `proposal-solution-catalog` /
+  `proposal-solution-research`. Ask: mandated platform or technology stack
+  (e.g. Microsoft-only, specific cloud, on-prem), existing infrastructure to
+  reuse, and any banned technologies. Seed the guess from
+  `ClientContextResult.json` `current_systems`. This scopes all research.
+- **G2 Commercial terms** — BEFORE `proposal-estimator`. Ask: engagement/budget
+  type (fixed price vs. Time & Material), day-rate basis, and who bears
+  third-party license/tooling costs. Drives the price chapter and template
+  selection.
+- **G3 Eligibility & references** — BEFORE `proposal-profiler-match` (and needed
+  by the proposal's references/eligibility chapter). Ask: which real reference
+  installations, named/anonymised customers, and test/POC installation adesso
+  may cite — REQUIRED whenever `FormalResult.json` has a binding `Eligibility`
+  requirement, especially if the Profiler returns no matches.
+- **G4 Scope granularity** — BEFORE `proposal-product-design`. Ask: how many
+  screens/flows to design in depth, and confirm whether the tender's detailed
+  requirement annex (e.g. an Excel User-Story list) is in scope and has been
+  retrieved — a shallow product design (few screens) yields a shallow proposal.
+- **G5 Estimation basis** — BEFORE `proposal-estimator`. Ask: the work-breakdown
+  / sizing basis (per solution block or work package) and any effort assumptions,
+  so the estimate is more than a flat lump sum.
+
+Existing gates (keep): in `proposal-solution-research`, when the catalogue flags
+blocks with `needs_clarification: true`, ask which technology directions to
+research (and offer to scope research) BEFORE any web search. In
+`proposal-profiler-match`, when matching is ambiguous, ask before querying.
+
+Convergence rule: the final solution proposal must present exactly one
+recommended technology per solution block and one consolidated target
+architecture — never leave an open technology choice for the client. Converge to
+a CONCRETE, NAMED technology/product (and version where relevant), not merely an
+architecture pattern: e.g. name the framework, database, workflow engine and
+rendering library, not just "a service-oriented ETL layer" or "a server-side
+reporting engine". The architecture pattern is the rationale; the named product
+is the recommendation.
 
 # Determinism Rule
 

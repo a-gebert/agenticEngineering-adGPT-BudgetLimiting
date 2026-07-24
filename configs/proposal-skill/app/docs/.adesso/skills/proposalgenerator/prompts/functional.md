@@ -35,7 +35,8 @@ Analyze retrieved passages, produce JSON object with this structure:
 5. **contains_non_functional_requirements**: `true` if document contains any non-functional requirements, else `false`.
 
 6. **functional_requirements**: Extract all functional requirements. Functional requirement describes **what system should do** — capability, behavior, function. For each:
-   - `id`: unique identifier format `"FR-001"`, `"FR-002"`, etc.
+   - `id`: unique INTERNAL identifier format `"FR-001"`, `"FR-002"`, etc. — assigned by you for internal traceability; the tender author does not know this code, so it is NOT client-facing.
+   - `client_ref`: the tender's OWN native identifier for this requirement, exactly as printed in the source document (e.g. a User-Story ID, requirement number, or section/table reference such as `"US-14"`, `"Req 3.2.1"`). Copy verbatim from the retrieved passage. Omit the field if the document gives the requirement no native identifier — never invent one.
    - `description`: requirement statement in two sentence and example (if any) in `output_language`.
    - `priority`: classify via MoSCoW — `"must"`, `"should"`, or `"nice-to-have"`. Use explicit cues from document (e.g., "muss", "soll", "kann", "must", "shall", "should", "could"). No explicit cue → default `"should"`.
    - `source_section`: section heading where requirement found
@@ -44,7 +45,8 @@ Analyze retrieved passages, produce JSON object with this structure:
    - `aspect_id`: reference to corresponding aspect in `aspects` array (e.g., `"asp-3"`). Every functional requirement linked to exactly one aspect.
 
 7. **non_functional_requirements**: Extract all non-functional requirements. These describe **how system should perform** — quality attributes like performance, security, availability, usability, scalability, maintainability. For each:
-   - `id`: unique identifier format `"NFR-001"`, `"NFR-002"`, etc.
+   - `id`: unique INTERNAL identifier format `"NFR-001"`, `"NFR-002"`, etc. — assigned by you for internal traceability; NOT client-facing.
+   - `client_ref`: the tender's OWN native identifier for this requirement, exactly as printed in the source document. Copy verbatim; omit if the document gives no native identifier — never invent one.
    - `category`: quality attribute category (e.g., `"Performance"`, `"Security"`, `"Availability"`, `"Usability"`, `"Scalability"`, `"Maintainability"`, `"Compliance"`)
    - `description`:  requirement statement in two sentence and example (if any) in `output_language`.
    - `measurable_target`: quantifiable target if stated (e.g., `"99.9% uptime"`, `"< 2s response time"`). No measurable target → write `"not specified"`.
@@ -75,7 +77,8 @@ Produce final result as schema-validated file via Code Interpreter — do NOT re
 Tweak:
 - Use `output_language` for all `label`, `description`, `message` values.
 - Keep `label` exactly one concise sentence — no lists, no multi-sentence descriptions.
-- Consistent ID formats: `ch-N` for chapters, `sec-N-M` for sections, `asp-N` for aspects, `FR-NNN` for functional requirements, `NFR-NNN` for non-functional requirements.
+- Consistent ID formats: `ch-N` for chapters, `sec-N-M` for sections, `asp-N` for aspects, `FR-NNN` for functional requirements, `NFR-NNN` for non-functional requirements. These `id` codes are INTERNAL analysis handles only — never assume the tender author or proposal reader knows them.
+- `client_ref` is distinct from `id`: it is the requirement's identifier AS PRINTED IN THE TENDER (User-Story ID, requirement/table number, section reference). Capture it whenever the document labels the requirement, so downstream client-facing artifacts can cite an identifier the reader actually recognises. Leave it out when the tender provides none — do not derive it from `id`.
 - Do not invent requirements not supported by actual document content.
 - Sentence contains both functional and non-functional aspect → create separate entries in respective arrays.
 - Identify headings from structure surfaced by outline queries (e.g. numbered headings, titles, table-of-contents entries in retrieved passages). Higher levels chapters, lower levels sections.

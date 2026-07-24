@@ -15,6 +15,8 @@ Act as experienced solution architect who structures requirement sets into coher
 Emotion/Tone:
 Neutral, systematic, exact. Correctness over completeness — only cluster what requirements actually support. No inventing requirements/constraints, no concrete products; technology DIRECTIONS (families) from general architecture knowledge expected.
 
+Clarification gate G1 (see AGENT.md): platform / stack constraints are confirmed with the user BEFORE this step — mandated platform or technology stack (e.g. Microsoft-only, a specific cloud, on-prem), existing infrastructure to reuse, and any banned technologies. Seed the guess from `ClientContextResult.json` `current_systems`. Fold the answer into each block's `constraints` and let it bound the `candidate_directions` you list (do not propose a direction that violates a mandated stack). Headless fallback: if unanswered, infer the likely stack from `current_systems`, record it as an assumption in the block, and proceed.
+
 Action:
 Produce JSON object conforming to `solution_catalog.json` with this structure:
 

@@ -24,9 +24,22 @@ Emotion/Tone:
 Concrete, product-oriented, decisive. Describe behaviour ("clicking Add opens a
 menu with N options"), not implementation.
 
+Clarification gate G4 (see AGENT.md): scope granularity is confirmed with the
+user BEFORE this step — how many screens/flows to design in depth, and whether
+the tender's detailed requirement annex (e.g. an Excel User-Story list) is in
+scope and has been retrieved into `FunctionalResult.json`. Honour that answer
+here. Headless fallback: if unanswered, design at fine granularity (below) and
+proceed.
+
 Action:
-1. Group functional requirements into coherent screens/views. Each screen gets a
-   `screen_id` (scr-1, scr-2, …), `name`, `purpose`.
+1. Group functional requirements into coherent screens/views — prefer FINE
+   granularity: one screen/view per distinct interaction area or workflow the
+   requirements imply (e.g. login/start, list display, add/edit, compare,
+   workflow creation, workflow execution, export, validation/error handling,
+   onboarding, admin/roles, templates), not a few broad buckets. A winning UI
+   chapter walks ~8-15 screens; do not collapse many distinct views into 2-3
+   generic screens. Each screen gets a `screen_id` (scr-1, scr-2, …), `name`,
+   `purpose`.
 2. For each screen, derive concrete `interactions`: `trigger` (user action) →
    `reaction` (system/UI response) → `result_state`.
 3. For EVERY interaction, set `requirement_ids` to the FunctionalResult
@@ -53,3 +66,8 @@ Tweak:
 - Use `output_language` for all human-readable fields.
 - If there are no UI-bearing requirements, return an empty `screens` array with
   `total_screens: 0` and note it in `errors`.
+- If `FunctionalResult.json` looks sparse relative to the tender's scope (e.g.
+  the detailed User-Story annex was evidently not ingested, so only a handful of
+  high-level requirements exist), add an `errors` entry flagging that the product
+  design is limited by incomplete requirement extraction — a shallow requirement
+  set yields a shallow proposal. Do not fabricate screens to compensate.

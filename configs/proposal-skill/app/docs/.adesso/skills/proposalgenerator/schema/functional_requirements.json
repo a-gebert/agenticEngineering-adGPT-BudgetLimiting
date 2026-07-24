@@ -123,7 +123,11 @@
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": "Unique identifier for the requirement (e.g. FR-001)."
+                        "description": "Internal analysis identifier for the requirement (e.g. FR-001). NOT client-facing — assigned by this step, unknown to the tender author."
+                    },
+                    "client_ref": {
+                        "type": "string",
+                        "description": "The tender's OWN native identifier for this requirement as printed in the source document (e.g. a User-Story ID, requirement number, or section/table reference like 'US-14', 'Req 3.2.1'). Copy verbatim if the document labels the requirement; omit if the tender gives no native identifier."
                     },
                     "description": {
                         "type": "string",
@@ -163,7 +167,11 @@
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": "Unique identifier for the requirement (e.g. NFR-001)."
+                        "description": "Internal analysis identifier for the requirement (e.g. NFR-001). NOT client-facing — assigned by this step, unknown to the tender author."
+                    },
+                    "client_ref": {
+                        "type": "string",
+                        "description": "The tender's OWN native identifier for this requirement as printed in the source document (e.g. a User-Story ID, requirement number, or section/table reference). Copy verbatim if the document labels the requirement; omit if the tender gives no native identifier."
                     },
                     "category": {
                         "type": "string",
