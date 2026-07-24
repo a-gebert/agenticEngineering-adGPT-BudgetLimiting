@@ -99,17 +99,19 @@ Phase 2 — Solution
 10. Estimator → skill `proposal-estimator` → `EstimationResult.json`
 
 Phase 3 — Consolidation
-11. ExecutiveSummary → skill `proposal-executive-summary` → `ExecutiveSummaryResult.json` (runs first in Consolidation so it can incorporate proposed solution from SolutionProposal, stays available to Report and Proposal)
-12. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`
-13. Report → skill `proposal-report` → `ReportResult.md`
-14. ProposalOutline → skill `proposal-proposal-outline` → `ProposalOutlineResult.json`
-15. Proposal → skill `proposal-proposal` → `ProposalResult.md`
+11. ExecutiveSummary → skill `proposal-executive-summary` → `ExecutiveSummaryResult.json` (runs first in Consolidation so it can incorporate proposed solution from SolutionProposal, stays available to Proposal and the later Report)
+12. ProposalOutline → skill `proposal-proposal-outline` → `ProposalOutlineResult.json`
+13. Proposal → skill `proposal-proposal` → `ProposalResult.md`
 
-Export
-16. Convert `ProposalResult.md` to proposal DOCX using adesso template selected per **Proposal Template Selection** mapping, following the exact recipe in **Proposal DOCX Conversion** below. Name output file after determined client name per **Proposal Filename** rule below (e.g. `Proposal_CloudRetail_AG.docx`).
+Phase 4 — Proposal Export
+14. ProposalDocx → skill `proposal-docx-export` (runs in the Code Interpreter) → proposal DOCX named per **Proposal Filename** rule (e.g. `Proposal_CloudRetail_AG.docx`). The skill executes the full conversion recipe in the Code Interpreter (body conversion + merge into a copy of the template preserving cover page and TOC, native tables, chapter page breaks, cover-page addressee) and selects the template per **Proposal Template Selection**; the orchestrator only runs the **Output Encoding Hygiene** pass first and supplies filename (**Proposal Filename**) and cover addressee (**Proposal Cover Page**).
+
+Phase 5 — Report (runs AFTER the proposal DOCX, by priority; internal analysis artifacts only)
+15. OpenPoints → skill `proposal-open-points` → `OpenPointsResult.json`
+16. Report → skill `proposal-report` → `ReportResult.md`
 17. Convert `ReportResult.md` to `Report.pdf` (see **Report PDF Conversion** below).
 
-Export = pure format transformation. Content of `ProposalResult.md` / `ReportResult.md` is final and immutable. Never regenerate, rewrite, summarize, reorder, extend proposal/report content during export. Only apply layout, native tables, table of contents, cover-page addressee.
+The conversion steps (14 proposal DOCX, 17 Report PDF) = pure format transformation. Content of `ProposalResult.md` / `ReportResult.md` is final and immutable. Never regenerate, rewrite, summarize, reorder, extend proposal/report content during export. Only apply layout, native tables, table of contents, cover-page addressee.
 
 Single exception — encoding hygiene: before export you MUST run the mandatory character-sanitization pass in **Output Encoding Hygiene** below. It removes only illegal C0 control characters (never printable content), so it does not violate content-immutability; it repairs corruption, it does not rewrite the proposal.
 
@@ -138,7 +140,7 @@ Must not:
 
 # Dependency Rule
 
-Consolidation steps require all PreProcessing artifacts exist first.
+Consolidation steps require all PreProcessing artifacts exist first. OpenPoints and Report moved to Phase 5 (post-export): they run AFTER the proposal DOCX and feed no proposal content.
 
 Solution steps run after PreProcessing, before Consolidation:
 - `proposal-solution-catalog` runs only after `FunctionalResult.json`, `ConstraintsResult.json`, `ClientContextResult.json` exist.
@@ -148,24 +150,24 @@ Solution steps run after PreProcessing, before Consolidation:
 - `proposal-staffing-catalog` runs only after `SolutionProposalResult.md`, `FunctionalResult.json`, `ConstraintsResult.json` exist.
 - `proposal-profiler-match` runs only after `StaffingCatalogResult.json` exists.
 - `proposal-estimator` runs only after `SolutionProposalResult.md` and `StaffingCatalogResult.json` exist. No dependency on `ProfilerMatchResult.json` (roles/effort come from `StaffingCatalogResult.json`, never Profiler match).
-- `proposal-executive-summary` runs only after `SolutionProposalResult.md` exists — runs at start of Consolidation so summary can incorporate proposed solution, not just tender ask, while staying available to Report and Proposal.
-- `proposal-proposal-outline` runs only after Report, and after all Solution +
-  earlier Consolidation artifacts exist (ExecutiveSummary, OpenPoints,
-  ProductDesign, …). Produces `ProposalOutlineResult.json`.
+- `proposal-executive-summary` runs only after `SolutionProposalResult.md` exists — runs at start of Consolidation so summary can incorporate proposed solution, not just tender ask, while staying available to Proposal and the later Report.
+- `proposal-proposal-outline` runs only after all Solution + `ExecutiveSummaryResult.json`
+  artifacts exist (ExecutiveSummary, ProductDesign, …) — NOT after OpenPoints or
+  Report, which now run post-export in Phase 5. Produces `ProposalOutlineResult.json`.
 - `proposal-proposal` additionally consumes `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ExecutiveSummaryResult.json`, `ProductDesignResult.json`, `ProposalOutlineResult.json`; it renders chapters strictly from the outline.
 
 Specifically:
 - `proposal-executive-summary` runs only after:
   - `SolutionProposalResult.md` (see Solution steps); needs no other Consolidation artifact, runs first in Consolidation
-- `proposal-open-points` runs only after:
+- `proposal-proposal-outline` runs only after (Phase 3, before export):
+  - all Solution and earlier Consolidation artifacts: `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `ProductDesignResult.json`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ExecutiveSummaryResult.json`. It no longer consumes `OpenPointsResult.json` or `ReportResult.md` (both are Phase 5, post-export).
+- `proposal-proposal` runs only after (Phase 3, before export):
+  - `ExecutiveSummaryResult.json`, `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `ProductDesignResult.json`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ProposalOutlineResult.json`. It does NOT consume `OpenPointsResult.json` or `ReportResult.md`.
+- `proposal-open-points` runs only after (Phase 5, after proposal DOCX export):
   - `FunctionalResult.json`
   - `FormalResult.json`
-- `proposal-report` runs only after:
+- `proposal-report` runs only after (Phase 5, after OpenPoints):
   - `ExecutiveSummaryResult.json`, `ClientContextResult.json`, `FunctionalResult.json`, `FormalResult.json`, `ConstraintsResult.json`, `OpenPointsResult.json`
-- `proposal-proposal-outline` runs only after:
-  - `ReportResult.md` plus all Solution and earlier Consolidation artifacts: `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `ProductDesignResult.json`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ExecutiveSummaryResult.json`, `OpenPointsResult.json`
-- `proposal-proposal` runs only after:
-  - all files above plus `SolutionCatalogResult.json`, `SolutionProposalResult.md`, `ProductDesignResult.json`, `StaffingCatalogResult.json`, `ProfilerMatchResult.json`, `EstimationResult.json`, `ProposalOutlineResult.json`
 
 Dependency missing: stop, continue with missing prerequisite step instead.
 
@@ -180,26 +182,13 @@ Never return self-authored proposal or report text as substitute for those files
 
 # Proposal Template Selection
 
-Proposal DOCX (named per **Proposal Filename** rule) must be generated by loading matching adesso corporate-design template from Code Interpreter image and applying it (layout, cover page, headers/footers, style definitions) to content of `ProposalResult.md`. Do not generate as plain, unstyled Word export.
+Template selection is owned by the skill `proposal-docx-export` (body: `prompts/docx_export.md`), which applies the criteria and resolves the template from the Code Interpreter image at `/opt/assets/templates/docx/service_proposals/`. Summary of the rules the skill enforces (see the skill for the full table):
 
-Templates located at `/opt/assets/templates/docx/service_proposals/` on Code Interpreter sandbox (verified working path). Resolve full path by joining this directory with the template filename from the table below. If that directory is absent, fall back to searching `/opt/assets/` for the template filename before failing.
+1. Engagement primarily training/workshops (from `ExecutiveSummaryResult.json` `key_topics` + `SolutionCatalogResult.json`) → `Angebotsvorlage_Schulungen und Workshops.docx`.
+2. Else if `ConstraintsResult.json` → `budget.type == "fixed"` → `Angebotsvorlage_Dienstleistung zum Festpreis.docx`.
+3. Else → `Angebotsvorlage_Dienstleistung.docx` (default; also on ambiguous classification — do not ask the user).
 
-Template files (directory above + filename):
-
-| Template file | Angebotstyp / Szenario | Auswahlkriterium |
-|---|---|---|
-| `Angebotsvorlage_Dienstleistung.docx` | Standard-Dienstleistung (Time & Material) | **Default.** Use when no other criterion clearly applies, or when `ConstraintsResult.json` → `budget.type` is not `"fixed"`. |
-| `Angebotsvorlage_Dienstleistung zum Festpreis.docx` | Festpreis-Angebot | `ConstraintsResult.json` → `budget.type == "fixed"` AND engagement not primarily training/workshop offering. |
-| `Angebotsvorlage_Schulungen und Workshops.docx` | Trainings- und Workshop-Angebot | Tender subject matter primarily training/enablement/workshops — derived from `key_topics` (`ExecutiveSummaryResult.json`) and solution blocks in `SolutionCatalogResult.json` — not software implementation project. |
-
-Selection order:
-1. Engagement primarily training/workshops → use `Angebotsvorlage_Schulungen und Workshops.docx`.
-2. Else if `budget.type == "fixed"` → use `Angebotsvorlage_Dienstleistung zum Festpreis.docx`.
-3. Else → use `Angebotsvorlage_Dienstleistung.docx` (default).
-
-Classification ambiguous: don't ask user — apply default (`Angebotsvorlage_Dienstleistung.docx`), proceed.
-
-Template selection applies only to proposal DOCX export. `Report.pdf` = internal analysis artifact, still exported without adesso proposal template.
+The orchestrator does not choose the template itself. This applies to the proposal DOCX only; `Report.pdf` (step 17) is an internal artifact exported without any adesso proposal template.
 
 # Proposal Filename
 
@@ -251,69 +240,9 @@ control chars). This pass is the safety net.
 
 # Proposal DOCX Conversion
 
-Deterministic recipe for step 16. Goal: native Word tables + populated table of contents + adesso corporate design, content byte-for-byte unchanged.
+Step 14 is performed by the skill `proposal-docx-export` (body: `prompts/docx_export.md`), executed IN THE CODE INTERPRETER. The skill owns the full deterministic recipe: pandoc body conversion with the selected template as reference-doc, MERGE into a copy of the template to preserve the cover page and native Word TOC field (a plain `--reference-doc` conversion discards the template body — the "content gets deleted" symptom), disable template auto heading-numbering (manual markdown numbers are authoritative), native pipe tables, page breaks before top-level chapters, cover-page addressee fill — content of `ProposalResult.md` byte-for-byte unchanged, with a `docxcompose`→lxml merge fallback. It also chooses the template per **Proposal Template Selection** (the adesso templates live in the Code Interpreter image under `/opt/assets/templates/docx/service_proposals/`).
 
-Convert with pandoc (via `pypandoc` in Code Interpreter), not a plain/unstyled Word export:
-
-- **Source**: the existing `ProposalResult.md`, after the mandatory **Output Encoding Hygiene** pass (control-char strip only). Do not otherwise edit, re-emit, or re-generate its content.
-- **Heading numbering (avoid double numbering)**: `ProposalResult.md` carries manual chapter numbers in its heading TEXT (e.g. `## 1 Ausgangssituation`, `### 2.1 …`). The adesso reference template's heading styles (`Überschrift1`–`9`) ALSO apply automatic Word list-numbering (`numPr`). If both are active the DOCX shows doubled numbers ("1 1 Ausgangssituation"). Because the manual numbers in the markdown are authoritative, you MUST DISABLE the template's automatic heading numbering after conversion: for every heading style in the output document, remove its `numPr` (and clear any direct-paragraph `numPr` on heading paragraphs) via `python-docx`/lxml, so ONLY the manual markdown numbers remain. Verify no heading shows a duplicated number afterwards.
-- **Reference document** (`--reference-doc=<template>`): the adesso template resolved via **Proposal Template Selection** (full path per **Template location**). Supplies cover page, headers/footers, fonts, heading/paragraph/table styles.
-- **Table of contents** (`--toc`, e.g. `--toc-depth=3`): builds and populates the TOC from Markdown headings. Heading levels in `ProposalResult.md` drive TOC entries — keep them intact.
-- **Native tables**: Markdown pipe tables convert to real Word tables automatically. Ensure the reader input format enables table parsing (e.g. `from='gfm'` or `markdown+pipe_tables`). Never rasterize or flatten tables to text.
-- **Output filename**: per **Proposal Filename** rule.
-- **Cover-page addressee**: after conversion, set the client/recipient placeholder to `client_name` per **Proposal Cover Page** (post-process with `python-docx` if the reference-doc cover page is not filled by pandoc alone).
-
-Minimal shape (illustrative, adapt paths/filenames from the rules above):
-
-```python
-import re, pypandoc
-from docx import Document
-from docx.oxml.ns import qn
-
-# 1. Encoding hygiene: strip illegal C0 control chars (e.g. corrupted umlauts -> 0x08)
-with open("ProposalResult.md", encoding="utf-8") as f:
-    md = f.read()
-md = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', md)
-assert '\x08' not in md
-with open("ProposalResult.md", "w", encoding="utf-8") as f:
-    f.write(md)
-
-# 2. Convert with adesso reference template + populated TOC + native tables
-pypandoc.convert_file(
-    "ProposalResult.md",
-    to="docx",
-    outputfile="Proposal_<slug>.docx",
-    format="gfm",                      # parse Markdown pipe tables
-    extra_args=[
-        "--reference-doc=/opt/assets/templates/docx/service_proposals/<selected_template>.docx",
-        "--toc",
-        "--toc-depth=3",
-    ],
-)
-
-# 3. Disable template auto-numbering on heading styles (manual md numbers are authoritative)
-doc = Document("Proposal_<slug>.docx")
-for style in doc.styles:
-    el = style.element
-    ppr = el.find(qn('w:pPr'))
-    if ppr is not None:
-        for numpr in ppr.findall(qn('w:numPr')):
-            ppr.remove(numpr)                       # strip style-level numbering
-for p in doc.paragraphs:                            # strip any direct heading numbering
-    name = (p.style.name or '') if p.style else ''
-    if 'eading' in name or 'berschrift' in name:    # "Heading N" / "Überschrift N"
-        ppr = p._p.find(qn('w:pPr'))
-        if ppr is not None:
-            for numpr in ppr.findall(qn('w:numPr')):
-                ppr.remove(numpr)
-doc.save("Proposal_<slug>.docx")
-
-# 4. then: fill cover-page addressee with client_name via python-docx
-```
-
-TOC note for user hand-off: after opening in Word, the TOC can be refreshed via right-click → "Update field". Layout fine-tuning (line breaks, column widths) stays a manual Word step. State this hint when delivering the DOCX.
-
-If pandoc/`pypandoc` is unavailable in the sandbox, install or fall back to another pandoc-backed conversion — never substitute a hand-built or content-regenerated document.
+The orchestrator does NOT re-implement the recipe or pick the template. It only: runs the mandatory **Output Encoding Hygiene** pass on `ProposalResult.md`, then invokes the skill, supplying the output filename per **Proposal Filename** and the cover addressee per **Proposal Cover Page**.
 
 # Report PDF Conversion
 
@@ -324,7 +253,7 @@ Step 17. Convert `ReportResult.md` to `Report.pdf` via pandoc, content unchanged
 Code Interpreter usable only for:
 - validation done within skills,
 - loading adesso template file selected via Proposal Template Selection mapping to apply corporate design to proposal DOCX,
-- export of `ProposalResult.md` to proposal DOCX (named per Proposal Filename rule) via the pandoc recipe in **Proposal DOCX Conversion** (`--reference-doc`, `--toc`, native tables) plus cover-page addressee fill,
+- export of `ProposalResult.md` to proposal DOCX (named per Proposal Filename rule) via the skill `proposal-docx-export` (see **Proposal DOCX Conversion**): pandoc `--reference-doc` body conversion, merge into a copy of the template to preserve cover page + Word TOC field, native tables, chapter page breaks, plus cover-page addressee fill,
 - export of `ReportResult.md` to `Report.pdf`.
 
 During export, Code Interpreter transforms format only. It must not alter, regenerate, summarize, or extend the content of `ProposalResult.md` / `ReportResult.md`.
